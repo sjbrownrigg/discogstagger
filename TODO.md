@@ -2,10 +2,11 @@
 
 ## TODO List
 
-### Version 1.2
+-### Version 1.2-
 
-* Merge current latest version (branch: folder-jpeg) into master
-* Tag latest release on master
+-* Merge current latest version (branch: folder-jpeg) into master-
+-* Tag latest release on master-
+* Add documentation
 
 ### Version 2.0
 
