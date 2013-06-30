@@ -3,11 +3,9 @@ import re
 
 import discogs_client as discogs
 
+from album import Album, Disc, Track
+
 logger = logging.getLogger(__name__)
-
-class TrackContainer(object):
-
-    pass
 
 class DiscogsAlbum(object):
     """ Wraps the discogs-client-api script, abstracting the minimal set of
@@ -28,22 +26,34 @@ class DiscogsAlbum(object):
         [ 03 ] Blunted Dummies - House For All (Eddie Richard's Mix)
         [ 04 ] Blunted Dummies - House For All (J. Acquaviva's Mix)
         [ 05 ] Blunted Dummies - House For All (Ruby Fruit Jungle Mix) """
-# remove all not needed parameters (these should be not handled in here)
-    def __init__(self, releaseid, split_artists, split_genres_and_styles):
 
+    def __init__(self, releaseid):
         discogs.user_agent = "discogstagger +http://github.com/jesseward"
         self.release = discogs.Release(releaseid)
 
-        self.split_artists = split_artists
-        self.split_genres_and_styles = split_genres_and_styles
+    def map(self):
+        """ map the retrieved information to the tagger specific objects """
 
-        self.discs = {}
-        logger.info("Fetching %s - %s (%s)" % (self.artist, self.title,
-                    releaseid))
+        album = Album(self.release._id, self.release.title, self.artists)
 
-    def __str__(self):
+        album.sort_artist = self.sort_artist(self.release.artists)
+        album.url = self.url
+        album.catnumbers = [catno for name, catno in self.labels_and_numbers]
+        album.labels = [name for name, catno in self.labels_and_numbers]
+        album.images = self.images
+        album.year = self.year
+        album.genres = self.release.data["genres"]
+        album.styles = self.release.data["styles"]
+        album.year = self.release.data["country"]
+        if "notes" in self.release.data:
+            album.notes = self.release.data["notes"]
+        album.disctotal = self.disctotal
+        album.is_compilation = self.is_compilation
 
-        return "<%s - %s>" % (self.artist, self.title)
+        self.discs_and_tracks
+
+        return album
+
 
     @property
     def album_info(self):
@@ -69,28 +79,16 @@ class DiscogsAlbum(object):
         return r
 
     @property
-    def releaseid(self):
-        """ retuns the discogs release id """
-
-        return self.release._id
-
-    @property
     def url(self):
         """ returns the discogs url of this release """
 
         return "http://www.discogs.com/release/%s" % self.release._id
 
     @property
-    def catno(self):
-        """ Returns the release catalog number """
-
-        return self.release.data["labels"][0]["catno"]
-
-    @property
-    def label(self):
-        """ Returns the release Label name """
-
-        return self.clean_name(self.release.data["labels"][0]["name"])
+    def labels_and_numbers(self):
+        """ Returns all available catalog numbers"""
+        for label in self.release.data["labels"]:
+            yield self.clean_duplicate_handling(label["name"]), label["catno"]
 
     @property
     def images(self):
@@ -100,12 +98,6 @@ class DiscogsAlbum(object):
             return [x["uri"] for x in self.release.data["images"]]
         except KeyError:
             pass
-
-    @property
-    def title(self):
-        """ return the album release name from discogs API """
-
-        return self.release.title
 
     @property
     def year(self):
@@ -118,6 +110,10 @@ class DiscogsAlbum(object):
             return "1900"
 
     @property
+    def disctotal(self):
+        return int(self.release.data["formats"][0]["qty"])
+
+    @property
     def master_id(self):
         """ returns the master release id """
 
@@ -126,70 +122,30 @@ class DiscogsAlbum(object):
         except KeyError:
             return None
 
-    @property
-    def genre(self):
-        """ obtain the album genre """
-
-        return self.release.data["genres"][0]
-
-    @property
-    def genres(self):
-        """ obtain the album genre """
-
-        rel_genres = self.split_genres_and_styles.join(self.release.data["genres"])
-        return rel_genres
-
-    @property
-    def style(self):
-        """ obtain the album styles """
-
-        return self.release.data["styles"][0]
-
-    @property
-    def styles(self):
-        """ obtain the album styles in one field """
-
-        rel_styles = self.split_genres_and_styles.join(self.release.data["styles"])
-        return rel_styles
-
     def _gen_artist(self, artist_data):
-        """ yields a list of normalized release artists name properties """
-
+        """ yields a list of artists name properties """
         for x in artist_data:
             yield x.name
 
     @property
-    def country(self):
-        """ Obtain the country - a not so easy field, because it could mean
-            the label country, the recording country, or.... """
-
-        return self.release.data["country"]
-
-    @property
     def artists(self):
-        """ obtain the album artists """
-        return self._gen_artist(self.release.artists)
+        """ obtain the album artists (normalized using clean_name). """
+        artists = []
+        for name in self._gen_artist(self.release.artists):
+            artists.append(self.clean_name(name))
 
-    @property
-    def artist(self):
-        """ obtain the album artist """
+        return artists
 
-        rel_artist = self.split_artists.join(self._gen_artist(self.release.artists))
-        return self.clean_name(rel_artist)
+    def sort_artist(self, artist_data):
+        """ Obtain a clean sort artist """
+        return self.clean_duplicate_handling(artist_data[0].name)
 
-    @property
-    def sort_artist(self):
-        """ obtain the album artist """
-
-        return self.release.artists[0].name
-
-    @property
-    def note(self):
-        """ obtain the note """
-        value = False
-        if "notes" in self.release.data:
-            value = self.release.data["notes"]
-        return value
+#    @property
+#    def artist(self):
+#        """ obtain the album artist """
+#
+#        rel_artist = self.split_artists.join(self._gen_artist(self.release.artists))
+#        return self.clean_name(rel_artist)
 
     def disc_and_track_no(self, position):
         """ obtain the disc and tracknumber from given position """
@@ -202,10 +158,6 @@ class DiscogsAlbum(object):
         discnumber = position[:idx]
 
         return {'tracknumber': tracknumber, 'discnumber': discnumber}
-
-    @property
-    def disctotal(self):
-        return int(self.release.data["formats"][0]["qty"])
 
     def tracktotal_on_disc(self, discnumber):
         logger.info("discs: %s" % self.discs)
@@ -236,8 +188,8 @@ class DiscogsAlbum(object):
 # try to refactor it
             try:
                 sort_artist = self.clean_name(t["artists"][0].name)
-                artist = self.split_artists.join(self._gen_artist(t["artists"]))
-                artist = self.clean_name(artist)
+                artist = self._gen_artist(t["artists"])
+#                artist = self.clean_name(artist)
             except IndexError:
                 artist = self.artist
                 sort_artist = self.sort_artist
@@ -273,8 +225,61 @@ class DiscogsAlbum(object):
 
         return track_list
 
-    @staticmethod
-    def clean_name(clean_target):
+    @property
+    def discs_and_tracks(self):
+        """ provides the tracklist of the given release id """
+
+        disc_list = []
+        track_list = []
+        discsubtitle = None
+        disc = Disc(1)
+        for i, t in enumerate((x for x in self.release.tracklist
+                              if x["type"] == "Track")):
+# this is pretty much the same as the artist stuff in the album,
+# try to refactor it
+            try:
+                sort_artist = self.clean_name(t["artists"][0].name)
+                artist = self._gen_artist(t["artists"])
+#                artist = self.clean_name(artist)
+            except IndexError:
+                artist = self.artist
+                sort_artist = self.sort_artist
+
+            track = Track(i + 1, artist, t["title"])
+
+            # on multiple discs there do appears a subtitle as the first "track"
+            # on the cd in discogs, this seems to be wrong, but we would like to
+            # handle it anyway
+            if t["title"] and not t["position"] and not t["duration"]:
+                discsubtitle = t["title"]
+                continue
+
+            track.position = i + 1
+
+            if self.disctotal > 1:
+                pos = self.disc_and_track_no(t["position"])
+                track.tracknumber = int(pos["tracknumber"])
+                track.discnumber = int(pos["discnumber"])
+            else:
+                track.tracknumber = int(t["position"])
+                track.discnumber = 1
+#            self.discs[int(track.discnumber)] = int(track.tracknumber)
+
+            if discsubtitle:
+                track.discsubtitle = discsubtitle
+
+            track.sortartist = sort_artist
+            track.artist = artist
+
+            track_list.append(track)
+
+        return track_list
+
+    def clean_duplicate_handling(self, clean_target):
+        """ remove discogs duplicate handling eg : John (1) """
+        return re.sub("\s\(\d+\)", "", clean_target)
+
+    def clean_name(self, clean_target):
         """ Cleans up the format of the artist or label name provided by
             Discogs.
             Examples:
@@ -287,8 +292,7 @@ class DiscogsAlbum(object):
             "(.*),\sThe$": "The",
         }
 
-        # remove discogs duplicate handling eg : John (1)
-        clean_target = re.sub("\s\(\d+\)", "", clean_target)
+        clean_target = self.clean_duplicate_handling(clean_target)
 
         for regex in groups:
             if re.search(r"%s" % regex, clean_target):
