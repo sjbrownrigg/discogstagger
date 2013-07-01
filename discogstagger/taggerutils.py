@@ -50,7 +50,8 @@ class TaggerUtils(object):
 
     def __init__(self, sourcedir, destdir, use_lower, ogsrelid, split_artists, 
             split_genres_and_styles, copy_other_files):
-        self.group_name = "jW"
+# default values should be specified earlier in the chain (eg. in the configuration option handler)
+# transfer the options via a hashmap to be able to specify additional options easier
         self.dir_format = "%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%-%GROUP%"
         self.m3u_format = "00-%ALBARTIST%-%ALBTITLE%.m3u"
         self.nfo_format = "00-%ALBARTIST%-%ALBTITLE%.nfo"
@@ -63,6 +64,7 @@ class TaggerUtils(object):
 
         self.sourcedir = sourcedir
         self.destdir = destdir
+
         result = self._get_target_list()
         self.files_to_tag = result["target_list"]
         if self.copy_other_files:
@@ -76,7 +78,12 @@ class TaggerUtils(object):
             self.tag_map = False
 
     def _value_from_tag_format(self, format, trackno=1, position=1, filetype=".mp3"):
-        """ Fill in the used variables using the track information """
+        """ Fill in the used variables using the track information 
+            Transform all variables and use them in the given format string, make this 
+            slightly more flexible to be able to add variables easier
+
+            Transfer this via a map.
+        """
 
         logger.debug("parameters given: format: %s" % format)
         logger.debug("parameters given: trackno: %d" % trackno)
@@ -110,7 +117,9 @@ class TaggerUtils(object):
         return format
 
     def _value_from_tag(self, format, trackno=1, position=1, filetype=".mp3"):
-        """ Generates the filename tagging map """
+        """ Generates the filename tagging map 
+            avoid usage of file extension here already, could lead to problems
+        """
 
         format = self._value_from_tag_format(format, trackno, position, filetype)
 
@@ -316,7 +325,10 @@ def create_m3u(tag_map, folder_names, dest_dir_name, m3u_filename):
 
 
 def get_images(images, dest_dir_name, images_format, first_image_name):
-    """ Download and store any available images """
+    """ Download and store any available images 
+        we need http access here as well (see discogsalbum), and therefore the
+        user-agent, we should be able to put this into a common object, ....
+    """
 
     if images:
         for i, image in enumerate(images, 0):

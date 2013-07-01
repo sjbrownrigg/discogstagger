@@ -15,6 +15,7 @@ from discogstagger.taggerutils import (
     create_nfo,
     create_m3u,
     get_images)
+from discogstagger.tagger_config import TaggerConfig
 
 import os, errno
 
@@ -25,27 +26,6 @@ def mkdir_p(path):
         if exc.errno == errno.EEXIST and os.path.isdir(path):
             pass
         else: raise
-
-def release_config(dirname, filename):
-    my_tags = {}
-    if os.path.exists(os.path.join(dirname, filename)):
-        with open(os.path.join(dirname, filename)) as tagFile:
-            for line in tagFile:
-                name, var = line.partition("=")[::2]
-                my_tags[name.strip()] =  var
-    return my_tags
-
-def config_value(section, name, config, rel_tags):
-    val = config.get(section, name)
-    if name in rel_tags:
-        val = rel_tags[name]
-    return val
-
-def config_boolean_value(section, name, config, rel_tags):
-    val = config.getboolean(section, name)
-    if name in rel_tags:
-        val = rel_tags[name]
-    return val
 
 p = OptionParser()
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
@@ -63,8 +43,9 @@ p.set_defaults(conffile="/etc/discogstagger/discogs_tagger.conf")
 if not options.sdir or not os.path.exists(options.sdir):
     p.error("Please specify a valid source directory ('-s')")
 
-config = ConfigParser.ConfigParser()
-config.read(options.conffile)
+tagger_config = TaggerConfig()
+tagger_config.read(options.conffile)
+config = tagger_config.config
 
 logging.basicConfig(level=config.getint("logging", "level"))
 logger = logging.getLogger(__name__)
@@ -76,13 +57,10 @@ dir_format_batch = "dir"
 dir_format = None
 
 # read tags from batch file if available
-release_tags = release_config(options.sdir, id_file)
+tagger_config.read(os.path.join(options.sdir, id_file))
 
-if id_tag in release_tags:
-    releaseid = release_tags[id_tag].strip()
-
-if dir_format_batch in release_tags:
-    dir_format = release_tags[dir_format_batch].strip()
+if config.get("source", id_tag):
+    releaseid = config.get("source", id_tag).strip()
 
 if options.releaseid:
     releaseid = options.releaseid
@@ -105,28 +83,31 @@ embed_coverart = config.getboolean("details", "embed_coverart")
 use_lower_filenames = config.getboolean("details", "use_lower_filenames")
 use_folder_jpg = config.getboolean("details", "use_folder_jpg")
 copy_other_files = config.getboolean("details", "copy_other_files")
+
 nfo_format = config.get("file-formatting", "nfo")
 m3u_format = config.get("file-formatting", "m3u")
 
+user_agent = config.get("common", "user-agent")
+
 # config options "overwritable" through release-tags
-keep_tags = config_value("details", "keep_tags", config, release_tags)
-dir_format = config_value("file-formatting", "dir", config, release_tags)
-song_format = config_value("file-formatting", "song", config, release_tags)
-va_song_format = config_value("file-formatting", "va_song", config, release_tags)
-images_format = config_value("file-formatting", "images", config, release_tags)
-disc_folder_name = config_value("file-formatting", "discs", config, release_tags)
-group_name = config_value("details", "group", config, release_tags)
+keep_tags = config.get("details", "keep_tags")
+
+dir_format = config.get("file-formatting", "dir")
+song_format = config.get("file-formatting", "song")
+va_song_format = config.get("file-formatting", "va_song")
+images_format = config.get("file-formatting", "images")
+disc_folder_name = config.get("file-formatting", "discs")
 
 enocder_tag = None
-encoder_tag = config_value("tags", "encoder", config, release_tags)
+encoder_tag = config.get("tags", "encoder")
 
-use_style = config_boolean_value("details", "use_style", config, release_tags)
-split_discs_folder = config_boolean_value("details", "split_discs_folder", config, release_tags)
-split_discs = config_boolean_value("details", "split_discs", config, release_tags)
+use_style = config.getboolean("details", "use_style")
+split_discs_folder = config.getboolean("details", "split_discs_folder")
+split_discs = config.getboolean("details", "split_discs")
 if split_discs:
-    split_discs_extension = config_value("details", "split_discs_extension", config, release_tags).strip('"')
-split_artists = config_value("details", "split_artists", config, release_tags).strip('"')
-split_genres_and_styles = config.get("details", "split_genres_and_styles", config, release_tags).strip('"')
+    split_discs_extension = config.get("details", "split_discs_extension").strip('"')
+split_artists = config.get("details", "split_artists").strip('"')
+split_genres_and_styles = config.get("details", "split_genres_and_styles").strip('"')
 
 release = TaggerUtils(options.sdir, destdir, use_lower_filenames, releaseid, 
     split_artists, split_genres_and_styles, copy_other_files)
@@ -150,7 +131,7 @@ if not release.tag_map:
     sys.exit()
 
 #
-# start tagging actions.
+# start tagging actions. --> put this out of here into its own object
 #
 artist = split_artists.join(release.album.artists)
 artist = release.album.clean_name(artist)

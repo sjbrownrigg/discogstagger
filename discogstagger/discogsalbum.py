@@ -1,6 +1,8 @@
 import logging
 import re
 
+import inspect
+
 import discogs_client as discogs
 
 from album import Album, Disc, Track
@@ -34,7 +36,8 @@ class DiscogsAlbum(object):
     def map(self):
         """ map the retrieved information to the tagger specific objects """
 
-        album = Album(self.release._id, self.release.title, self.artists)
+        album = Album(self.release._id, self.release.title, ["Various"])
+            #self.artists(self.release.artists))
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
@@ -50,11 +53,12 @@ class DiscogsAlbum(object):
         album.disctotal = self.disctotal
         album.is_compilation = self.is_compilation
 
-        self.discs_and_tracks
+        album.discs = self.discs_and_tracks
 
         return album
 
 
+## should be refactored to taggerutils or somewhere, use a template based approach then
     @property
     def album_info(self):
         """ Dumps the release data to a formatted text string. Formatted for
@@ -127,12 +131,12 @@ class DiscogsAlbum(object):
         for x in artist_data:
             yield x.name
 
-    @property
-    def artists(self):
+    def artists(self, artist_data):
         """ obtain the album artists (normalized using clean_name). """
         artists = []
-        for name in self._gen_artist(self.release.artists):
-            artists.append(self.clean_name(name))
+        for x in artist_data:
+#            logger.debug("%s " % inspect.getmembers(x))
+            artists.append(self.clean_name(x.name))
 
         return artists
 
@@ -140,18 +144,18 @@ class DiscogsAlbum(object):
         """ Obtain a clean sort artist """
         return self.clean_duplicate_handling(artist_data[0].name)
 
-#    @property
-#    def artist(self):
-#        """ obtain the album artist """
-#
-#        rel_artist = self.split_artists.join(self._gen_artist(self.release.artists))
-#        return self.clean_name(rel_artist)
-
     def disc_and_track_no(self, position):
-        """ obtain the disc and tracknumber from given position """
+        """ obtain the disc and tracknumber from given position 
+            problem right now, discogs uses - and/or . as a separator, furthermore discogs uses
+            A1 for vinyl based releases, we should implement this as well
+        """
         idx = position.find("-")
         if idx == -1:
             idx = position.find(".")
+# need to find a nice regular expression for this
+#        if idx == -1:
+#            idx = position.find("A")
+#            discnumber = 1
         if idx == -1:
             idx = 0
         tracknumber = position[idx + 1:]
@@ -177,55 +181,6 @@ class DiscogsAlbum(object):
         return False
 
     @property
-    def tracks(self):
-        """ provides the tracklist of the given release id """
-
-        track_list = []
-        discsubtitle = None
-        for i, t in enumerate((x for x in self.release.tracklist
-                              if x["type"] == "Track")):
-# this is pretty much the same as the artist stuff in the album,
-# try to refactor it
-            try:
-                sort_artist = self.clean_name(t["artists"][0].name)
-                artist = self._gen_artist(t["artists"])
-#                artist = self.clean_name(artist)
-            except IndexError:
-                artist = self.artist
-                sort_artist = self.sort_artist
-
-            track = TrackContainer()
-
-            # on multiple discs there do appears a subtitle as the first "track"
-            # on the cd in discogs, this seems to be wrong, but we would like to
-            # handle it anyway
-            if t["title"] and not t["position"] and not t["duration"]:
-                discsubtitle = t["title"]
-                continue
-
-            track.position = i + 1
-
-            if self.disctotal > 1:
-                pos = self.disc_and_track_no(t["position"])
-                track.tracknumber = int(pos["tracknumber"])
-                track.discnumber = int(pos["discnumber"])
-            else:
-                track.tracknumber = int(t["position"])
-                track.discnumber = 1
-            self.discs[int(track.discnumber)] = int(track.tracknumber)
-
-            if discsubtitle:
-                track.discsubtitle = discsubtitle
-
-            track.sortartist = sort_artist
-            track.artist = artist
-
-            track.title = t["title"]
-            track_list.append(track)
-
-        return track_list
-
-    @property
     def discs_and_tracks(self):
         """ provides the tracklist of the given release id """
 
@@ -233,37 +188,29 @@ class DiscogsAlbum(object):
         track_list = []
         discsubtitle = None
         disc = Disc(1)
-        for i, t in enumerate((x for x in self.release.tracklist
-                              if x["type"] == "Track")):
-# this is pretty much the same as the artist stuff in the album,
-# try to refactor it
-            try:
-                sort_artist = self.clean_name(t["artists"][0].name)
-                artist = self._gen_artist(t["artists"])
-#                artist = self.clean_name(artist)
-            except IndexError:
-                artist = self.artist
-                sort_artist = self.sort_artist
 
-            track = Track(i + 1, artist, t["title"])
+        for i, t in enumerate(x for x in self.release.tracklist):
 
-            # on multiple discs there do appears a subtitle as the first "track"
-            # on the cd in discogs, this seems to be wrong, but we would like to
-            # handle it anyway
-            if t["title"] and not t["position"] and not t["duration"]:
+            # this seems to be an index track, set the discsubtitle
+            if t["type"] != "Track":
+                # we are not storing the subtitle on the disc, since it can happen,
+                # that the discsubtitleis just for the following tracks
                 discsubtitle = t["title"]
                 continue
 
+            sort_artist = self.sort_artist(t["artists"])
+
+#            logger.debug("trackartists: %s" % t["artists"])
+#            artist = self.artists(t["artists"])
+            artist = "HTTP needed"
+
+            track = Track(i + 1, artist, t["title"])
+
             track.position = i + 1
 
-            if self.disctotal > 1:
-                pos = self.disc_and_track_no(t["position"])
-                track.tracknumber = int(pos["tracknumber"])
-                track.discnumber = int(pos["discnumber"])
-            else:
-                track.tracknumber = int(t["position"])
-                track.discnumber = 1
-#            self.discs[int(track.discnumber)] = int(track.tracknumber)
+            pos = self.disc_and_track_no(t["position"])
+            track.tracknumber = int(pos["tracknumber"])
+            track.discnumber = int(pos["discnumber"])
 
             if discsubtitle:
                 track.discsubtitle = discsubtitle
@@ -271,9 +218,20 @@ class DiscogsAlbum(object):
             track.sortartist = sort_artist
             track.artist = artist
 
-            track_list.append(track)
+#            logger.debug("track.discnumber: %s" % track.discnumber)
+#            logger.debug("disc.discnumber: %s" % disc.discnumber)
 
-        return track_list
+
+            if track.discnumber != disc.discnumber:
+#                logger.debug("switching disc")
+                disc_list.append(disc)
+                discsubtitle = None
+                disc = Disc(track.discnumber)
+
+            disc.tracks.append(track)
+
+        disc_list.append(disc)
+        return disc_list
 
     def clean_duplicate_handling(self, clean_target):
         """ remove discogs duplicate handling eg : John (1) """

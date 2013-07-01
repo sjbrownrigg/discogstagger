@@ -1,0 +1,906 @@
+{
+  "resp": {
+    "status": true,
+    "release": {
+      "status": "Accepted",
+      "styles": [
+        "Europop",
+        "Pop Rock",
+        "Euro House",
+        "Pop Rap"
+      ],
+      "series": [],
+      "released_formatted": "2001",
+      "labels": [
+        {
+          "id": 203082,
+          "resource_url": "http://api.discogs.com/labels/203082",
+          "catno": "560 938-2",
+          "name": "Polystar (3)",
+          "entity_type": "1"
+        }
+      ],
+      "community": {
+        "status": "Accepted",
+        "rating": {
+          "count": 1,
+          "average": 3.0
+        },
+        "have": 8,
+        "contributors": [
+          {
+            "username": "Chamleon",
+            "resource_url": "http://api.discogs.com/users/Chamleon"
+          },
+          {
+            "username": "r_e_t_r_o",
+            "resource_url": "http://api.discogs.com/users/r_e_t_r_o"
+          },
+          {
+            "username": "inexpressible",
+            "resource_url": "http://api.discogs.com/users/inexpressible"
+          },
+          {
+            "username": "abfahrer",
+            "resource_url": "http://api.discogs.com/users/abfahrer"
+          },
+          {
+            "username": "Mistoffeles",
+            "resource_url": "http://api.discogs.com/users/Mistoffeles"
+          },
+          {
+            "username": "okeydokey",
+            "resource_url": "http://api.discogs.com/users/okeydokey"
+          }
+        ],
+        "want": 0,
+        "submitter": {
+          "username": "Chamleon",
+          "resource_url": "http://api.discogs.com/users/Chamleon"
+        },
+        "data_quality": "Needs Vote"
+      },
+      "released": "2001",
+      "year": 2001,
+      "images": [
+        {
+          "uri": "http://api.discogs.com/image/R-1448190-1220476110.jpeg",
+          "height": 592,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-1448190-1220476110.jpeg",
+          "type": "primary",
+          "uri150": "http://api.discogs.com/image/R-150-1448190-1220476110.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-1448190-1220476116.jpeg",
+          "height": 592,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-1448190-1220476116.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-1448190-1220476116.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-1448190-1220476122.jpeg",
+          "height": 582,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-1448190-1220476122.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-1448190-1220476122.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-1448190-1220476130.jpeg",
+          "height": 585,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-1448190-1220476130.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-1448190-1220476130.jpeg"
+        }
+      ],
+      "id": 1448190,
+      "genres": [
+        "Electronic",
+        "Hip Hop",
+        "Pop",
+        "Rock"
+      ],
+      "thumb": "http://api.discogs.com/image/R-150-1448190-1220476110.jpeg",
+      "extraartists": [],
+      "title": "Megahits 2001 Die Erste",
+      "country": "Germany",
+      "companies": [],
+      "uri": "http://www.discogs.com/Various-Megahits-2001-Die-Erste/release/1448190",
+      "artists": [
+        {
+          "join": "",
+          "name": "Various",
+          "anv": "",
+          "tracks": "",
+          "role": "",
+          "resource_url": "http://api.discogs.com/artists/194",
+          "id": 194
+        }
+      ],
+      "formats": [
+        {
+          "descriptions": [
+            "Compilation",
+            "Copy Protected"
+          ],
+          "name": "CD",
+          "qty": "2"
+        }
+      ],
+      "resource_url": "http://api.discogs.com/releases/1448190",
+      "tracklist": [
+        {
+          "duration": "3:28",
+          "position": "1-01",
+          "title": "La Passion (Radio Cut)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Gigi D'Agostino",
+              "anv": "L. Di Agostino",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/15228",
+              "id": 15228
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "Gigi D'Agostino",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/15228",
+              "id": 15228
+            }
+          ]
+        },
+        {
+          "duration": "3:35",
+          "position": "1-02",
+          "title": "Go Back (Radio Edit)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Frank Johnes",
+              "anv": "Frank Jones",
+              "tracks": "",
+              "role": "Music By",
+              "resource_url": "http://api.discogs.com/artists/408317",
+              "id": 408317
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "Jeanette Biedermann",
+              "anv": "Jeanette",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/346187",
+              "id": 346187
+            }
+          ]
+        },
+        {
+          "duration": "3:43",
+          "position": "1-03",
+          "title": "Absolutely Everybody (Radio Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Vanessa Amorosi",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/77861",
+              "id": 77861
+            }
+          ]
+        },
+        {
+          "duration": "3:19",
+          "position": "1-04",
+          "title": "Who Let The Dogs Out",
+          "artists": [
+            {
+              "join": "",
+              "name": "Baha Men",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/18060",
+              "id": 18060
+            }
+          ]
+        },
+        {
+          "duration": "3:05",
+          "position": "1-05",
+          "title": "Country Grammar (Hot S**t) (New Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Nelly",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/51368",
+              "id": 51368
+            }
+          ]
+        },
+        {
+          "duration": "3:43",
+          "position": "1-06",
+          "title": "Angel (Metro Mix - Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Lionel Richie",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/69722",
+              "id": 69722
+            }
+          ]
+        },
+        {
+          "duration": "3:44",
+          "position": "1-07",
+          "title": "Lady (Hear Me Tonight) (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Modjo",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/9383",
+              "id": 9383
+            }
+          ]
+        },
+        {
+          "duration": "3:38",
+          "position": "1-08",
+          "title": "Pop Muzik (Radio/Video Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "M 2000",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/641800",
+              "id": 641800
+            }
+          ]
+        },
+        {
+          "duration": "4:02",
+          "position": "1-09",
+          "title": "Sky (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Sonique",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/35679",
+              "id": 35679
+            }
+          ]
+        },
+        {
+          "duration": "3:31",
+          "position": "1-10",
+          "title": "Proximus With Adiemus (Club-Video Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Mauro Picotto",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/5775",
+              "id": 5775
+            }
+          ]
+        },
+        {
+          "duration": "3:41",
+          "position": "1-11",
+          "title": "Bass, Beats & Melody (Video Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Brooklyn Bounce",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/20151",
+              "id": 20151
+            }
+          ]
+        },
+        {
+          "duration": "3:50",
+          "position": "1-12",
+          "title": "We Are Alive (Radio Mix Full On Vocal)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Paul Van Dyk",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/1049",
+              "id": 1049
+            }
+          ]
+        },
+        {
+          "duration": "3:49",
+          "position": "1-13",
+          "title": "Silence (Airscape Remix Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Delerium",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/2077",
+              "id": 2077
+            }
+          ]
+        },
+        {
+          "duration": "3:09",
+          "position": "1-14",
+          "title": "Bum Bum (M.T.J. Oh! Oh! Radio Cut)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "M.T.J.",
+              "anv": "",
+              "tracks": "",
+              "role": "Remix",
+              "resource_url": "http://api.discogs.com/artists/67154",
+              "id": 67154
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "Mabel",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/82381",
+              "id": 82381
+            }
+          ]
+        },
+        {
+          "duration": "4:17",
+          "position": "1-15",
+          "title": "Feel The Beat (Radio Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Darude",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/6433",
+              "id": 6433
+            }
+          ]
+        },
+        {
+          "duration": "3:53",
+          "position": "1-16",
+          "title": "Stormanimal (Radio Mix)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Storm",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/867",
+              "id": 867
+            }
+          ]
+        },
+        {
+          "duration": "3:35",
+          "position": "1-17",
+          "title": "Monstersound (Radio Mix)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Balloon",
+              "anv": "DJ Balloon",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/20149",
+              "id": 20149
+            }
+          ]
+        },
+        {
+          "duration": "3:12",
+          "position": "1-18",
+          "title": "Uprocking Beats (JS16 Radio Mix)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "JS16",
+              "anv": "",
+              "tracks": "",
+              "role": "Remix",
+              "resource_url": "http://api.discogs.com/artists/35833",
+              "id": 35833
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "Bomfunk MC's",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/10828",
+              "id": 10828
+            }
+          ]
+        },
+        {
+          "duration": "3:33",
+          "position": "1-19",
+          "title": "Zeig Mir Dein Gesicht (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Berger (3)",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/696106",
+              "id": 696106
+            }
+          ]
+        },
+        {
+          "duration": "3:20",
+          "position": "1-20",
+          "title": "Last Resort (Album Version Explizit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Papa Roach",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/175368",
+              "id": 175368
+            }
+          ]
+        },
+        {
+          "duration": "3:56",
+          "position": "2-01",
+          "title": "Ich Will, Dass Du Mich Liebst (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Die 3. Generation",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/360682",
+              "id": 360682
+            }
+          ]
+        },
+        {
+          "duration": "3:41",
+          "position": "2-02",
+          "title": "Owner Of My Heart (Boogieman Radio Mix)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Boogieman",
+              "anv": "",
+              "tracks": "",
+              "role": "Remix",
+              "resource_url": "http://api.discogs.com/artists/50717",
+              "id": 50717
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "Sasha (5)",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/164150",
+              "id": 164150
+            }
+          ]
+        },
+        {
+          "duration": "4:16",
+          "position": "2-03",
+          "title": "Manchmal Haben Frauen",
+          "artists": [
+            {
+              "join": "",
+              "name": "Die Ärzte",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/45317",
+              "id": 45317
+            }
+          ]
+        },
+        {
+          "duration": "3:48",
+          "position": "2-04",
+          "title": "Kleine Helden (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Laith Al-Deen",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/341824",
+              "id": 341824
+            }
+          ]
+        },
+        {
+          "duration": "3:30",
+          "position": "2-05",
+          "title": "Love How You Love Me (Original Radio Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Melanie Thornton",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/62722",
+              "id": 62722
+            }
+          ]
+        },
+        {
+          "duration": "3:23",
+          "position": "2-06",
+          "title": "Walking Away",
+          "artists": [
+            {
+              "join": "",
+              "name": "Craig David",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/12626",
+              "id": 12626
+            }
+          ]
+        },
+        {
+          "duration": "3:49",
+          "position": "2-07",
+          "title": "Dieser Brief (Deutsch/Englische Version)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Keith Sweat",
+              "anv": "",
+              "tracks": "",
+              "role": "Featuring",
+              "resource_url": "http://api.discogs.com/artists/41767",
+              "id": 41767
+            }
+          ],
+          "artists": [
+            {
+              "join": "Feat.",
+              "name": "Ayman (2)",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/312645",
+              "id": 312645
+            },
+            {
+              "join": "",
+              "name": "Keith Sweat",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/41767",
+              "id": 41767
+            }
+          ]
+        },
+        {
+          "duration": "3:53",
+          "position": "2-08",
+          "title": "Gone With The Sin (Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "HIM (2)",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/95251",
+              "id": 95251
+            }
+          ]
+        },
+        {
+          "duration": "3:59",
+          "position": "2-09",
+          "title": "Find My Baby (Album Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Moby",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/1031",
+              "id": 1031
+            }
+          ]
+        },
+        {
+          "duration": "3:48",
+          "position": "2-10",
+          "title": "Battaillon D'Amour",
+          "artists": [
+            {
+              "join": "",
+              "name": "Joachim Witt",
+              "anv": "Witt",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/69482",
+              "id": 69482
+            }
+          ]
+        },
+        {
+          "duration": "3:39",
+          "position": "2-11",
+          "title": "Walking Back Home",
+          "artists": [
+            {
+              "join": "",
+              "name": "Commercial Breakup",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/9379",
+              "id": 9379
+            }
+          ]
+        },
+        {
+          "duration": "4:05",
+          "position": "2-12",
+          "title": "Velvet (Radio Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "a-ha",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/37757",
+              "id": 37757
+            }
+          ]
+        },
+        {
+          "duration": "3:51",
+          "position": "2-13",
+          "title": "Holler (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Spice Girls",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/47109",
+              "id": 47109
+            }
+          ]
+        },
+        {
+          "duration": "4:42",
+          "position": "2-14",
+          "title": "This I Promise For You (Album Version)",
+          "artists": [
+            {
+              "join": "",
+              "name": "*NSYNC",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/69433",
+              "id": 69433
+            }
+          ]
+        },
+        {
+          "duration": "3:44",
+          "position": "2-15",
+          "title": "My Heart Beats Like A Drum (Dam Dam Dam) (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "ATC",
+              "anv": "A.T.C.",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/91582",
+              "id": 91582
+            }
+          ]
+        },
+        {
+          "duration": "3:28",
+          "position": "2-16",
+          "title": "Never Gonna Give You Up (Sharam Jey Vocal Short Cut)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Sharam Jey",
+              "anv": "",
+              "tracks": "",
+              "role": "Remix",
+              "resource_url": "http://api.discogs.com/artists/8982",
+              "id": 8982
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "Spike",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/7506",
+              "id": 7506
+            }
+          ]
+        },
+        {
+          "duration": "3:13",
+          "position": "2-17",
+          "title": "Tonight (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Underdog Project, The",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/85426",
+              "id": 85426
+            }
+          ]
+        },
+        {
+          "duration": "3:59",
+          "position": "2-18",
+          "title": "All Good? (Radio Edit)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Chaka Khan",
+              "anv": "",
+              "tracks": "",
+              "role": "Featuring",
+              "resource_url": "http://api.discogs.com/artists/17035",
+              "id": 17035
+            }
+          ],
+          "artists": [
+            {
+              "join": "Feat.",
+              "name": "De La Soul",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/4091",
+              "id": 4091
+            },
+            {
+              "join": "",
+              "name": "Chaka Khan",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/17035",
+              "id": 17035
+            }
+          ]
+        },
+        {
+          "duration": "4:05",
+          "position": "2-19",
+          "title": "Sorry (Radio Version)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Eißfeldt",
+              "anv": "Eißfeldt 65",
+              "tracks": "",
+              "role": "Featuring",
+              "resource_url": "http://api.discogs.com/artists/83520",
+              "id": 83520
+            }
+          ],
+          "artists": [
+            {
+              "join": "Feat.",
+              "name": "D-Flame",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/63840",
+              "id": 63840
+            },
+            {
+              "join": "",
+              "name": "Eißfeldt",
+              "anv": "Eißfeldt 65",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/83520",
+              "id": 83520
+            }
+          ]
+        },
+        {
+          "duration": "3:51",
+          "position": "2-20",
+          "title": "I Just Wanna Love U (Give It 2 Me) (Radio Edit)",
+          "artists": [
+            {
+              "join": "",
+              "name": "Jay-Z",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/21742",
+              "id": 21742
+            }
+          ]
+        }
+      ],
+      "data_quality": "Needs Vote"
+    },
+    "version": "2.0"
+  }
+}

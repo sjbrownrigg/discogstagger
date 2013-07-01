@@ -25,7 +25,7 @@ class Disc(BaseObject):
 
     def __init__(self, discnumber):
         self.discnumber = discnumber
-        self.tracks = {}
+        self.tracks = []
 
 class Album(BaseObject):
     """ An album contains one or more discs and has a title, an artist
@@ -36,4 +36,5 @@ class Album(BaseObject):
         self.id = identifier
         self.artists = artists
         self.title = title
-        self.discs = {}
+        self.discs = []
+        self.fileformat = "flac"
