@@ -23,16 +23,16 @@ def find_files(basepath, name):
 
 def copy_file(name):
 		logger.debug("copy file: %s" % name)
-		logger.debug("target: %s" % os.path.join(os.path.dirname(name), "%s.bak" % os.path.basename(name)))
-		shutil.copyfile(name, os.path.join(os.path.dirname(name), "%s.bak" % os.path.basename(name)))
+		logger.debug("target: %s" % os.path.join(os.path.dirname(name), "%s.orig" % os.path.basename(name)))
+		shutil.copyfile(name, os.path.join(os.path.dirname(name), "%s.orig" % os.path.basename(name)))
 
 def parse_file(name):
 		logger.debug("parsing file: %s" % name)
 		for line in fileinput.input(name, inplace=True):
 				if "#Automatic migration from migrate_id_files" in line:
-						return	
+						return
 				if "discogs_id=" in line:
-						line = line.replace("discogs_id=", "#Automatic migration from migrate_id_files\n[source]\nsource=discogs\ndiscogs_id=")
+						line = line.replace("discogs_id=", "#Automatic migration from migrate_id_files\n[source]\nid=")
 						sys.stdout.write(line)
 
 p = OptionParser()

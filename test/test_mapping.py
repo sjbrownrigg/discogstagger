@@ -12,9 +12,9 @@ logger.debug("parentdir: %s" % parentdir)
 from discogstagger.discogsalbum import DiscogsAlbum
 
 class DummyResponse:
-    def __init__(self, releaseid):
+    def __init__(self, releaseid, type, id):
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        json_file_name =  "%s/release.json" % releaseid
+        json_file_name =  "%s/%s_%s.json" % (releaseid, type, id)
         json_file_path = os.path.join(__location__, json_file_name)
         json_file = open(json_file_path, "r")
 
@@ -27,7 +27,7 @@ def test_map():
     discogs_album = DiscogsAlbum(ogsrelid)
     # mock response, so that the unit tests do not ask for the http connection
     # every time
-    discogs_album.release._cached_response = DummyResponse(ogsrelid)
+    discogs_album.release._cached_response = DummyResponse(ogsrelid, "release", ogsrelid)
 
     album = discogs_album.map()
 
@@ -72,7 +72,7 @@ def test_map():
     logger.debug("track.title %s" % track.title)
 
 # seems to be not working without internet connection
-#    assert track.title == "La Passion (Radio Cut)"
+    assert track.title == "La Passion (Radio Cut)"
 
 
     assert false
