@@ -17,6 +17,7 @@ class Track(BaseObject):
         self.tracknumber = tracknumber
         self.title = title
         self.artists = artists
+        self.discsubtitle = None
 
 class Disc(BaseObject):
     """ An album has one or more discs, each disc has a number and

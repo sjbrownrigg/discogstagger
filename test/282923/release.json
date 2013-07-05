@@ -1,0 +1,425 @@
+{
+  "resp": {
+    "status": true,
+    "release": {
+      "status": "Accepted",
+      "styles": [
+        "Synth-pop"
+      ],
+      "series": [],
+      "released_formatted": "2003",
+      "labels": [
+        {
+          "id": 1866,
+          "resource_url": "http://api.discogs.com/labels/1866",
+          "catno": "COL 513783 2",
+          "name": "Columbia",
+          "entity_type": "1"
+        }
+      ],
+      "community": {
+        "status": "Accepted",
+        "rating": {
+          "count": 14,
+          "average": 4.21
+        },
+        "have": 47,
+        "contributors": [
+          {
+            "username": "systemfehler",
+            "resource_url": "http://api.discogs.com/users/systemfehler"
+          },
+          {
+            "username": "Bili-Rubin",
+            "resource_url": "http://api.discogs.com/users/Bili-Rubin"
+          },
+          {
+            "username": "elexxii",
+            "resource_url": "http://api.discogs.com/users/elexxii"
+          },
+          {
+            "username": "yersi",
+            "resource_url": "http://api.discogs.com/users/yersi"
+          },
+          {
+            "username": "olivia171",
+            "resource_url": "http://api.discogs.com/users/olivia171"
+          },
+          {
+            "username": "Truemmergemuet",
+            "resource_url": "http://api.discogs.com/users/Truemmergemuet"
+          }
+        ],
+        "want": 10,
+        "submitter": {
+          "username": "systemfehler",
+          "resource_url": "http://api.discogs.com/users/systemfehler"
+        },
+        "data_quality": "Correct"
+      },
+      "released": "2003",
+      "master_url": "http://api.discogs.com/masters/91348",
+      "year": 2003,
+      "images": [
+        {
+          "uri": "http://api.discogs.com/image/R-282923-1163352048.jpeg",
+          "height": 588,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-282923-1163352048.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-282923-1163352048.jpeg"
+        }
+      ],
+      "id": 282923,
+      "genres": [
+        "Electronic"
+      ],
+      "thumb": "http://api.discogs.com/image/R-150-282923-1163352048.jpeg",
+      "extraartists": [
+        {
+          "join": "",
+          "name": "NEXT",
+          "anv": "",
+          "tracks": "",
+          "role": "Artwork By",
+          "resource_url": "http://api.discogs.com/artists/57457",
+          "id": 57457
+        },
+        {
+          "join": "",
+          "name": "B. Deutung",
+          "anv": "B.Deutung",
+          "tracks": "",
+          "role": "Cello",
+          "resource_url": "http://api.discogs.com/artists/399909",
+          "id": 399909
+        },
+        {
+          "join": "",
+          "name": "Robert Wilcocks",
+          "anv": "",
+          "tracks": "",
+          "role": "Guitar, Synthesizer",
+          "resource_url": "http://api.discogs.com/artists/452313",
+          "id": 452313
+        },
+        {
+          "join": "",
+          "name": "Ernst Horn",
+          "anv": "Horn",
+          "tracks": "",
+          "role": "Keyboards",
+          "resource_url": "http://api.discogs.com/artists/27416",
+          "id": 27416
+        },
+        {
+          "join": "",
+          "name": "Alexander Veljanov",
+          "anv": "Veljanov",
+          "tracks": "1-3, 1-5, 2-2, 2-4, 2-7, 2-13",
+          "role": "Lyrics By",
+          "resource_url": "http://api.discogs.com/artists/61880",
+          "id": 61880
+        },
+        {
+          "join": "",
+          "name": "Alexander Veljanov",
+          "anv": "Veljanov",
+          "tracks": "2-1, 2-3, 2-5, 2-6",
+          "role": "Lyrics By, Music By",
+          "resource_url": "http://api.discogs.com/artists/61880",
+          "id": 61880
+        },
+        {
+          "join": "",
+          "name": "Ernst Horn",
+          "anv": "Horn",
+          "tracks": "1-1, 1-2, 1-4 to 1-9, 2-8 to 2-12",
+          "role": "Lyrics By, Music By",
+          "resource_url": "http://api.discogs.com/artists/27416",
+          "id": 27416
+        },
+        {
+          "join": "",
+          "name": "Christoph Stickel",
+          "anv": "",
+          "tracks": "",
+          "role": "Mastered By",
+          "resource_url": "http://api.discogs.com/artists/363139",
+          "id": 363139
+        },
+        {
+          "join": "",
+          "name": "Ernst Horn",
+          "anv": "Horn",
+          "tracks": "1-3, 2-1, 2-2, 2-4, 2-6, 2-7, 2-13",
+          "role": "Music By",
+          "resource_url": "http://api.discogs.com/artists/27416",
+          "id": 27416
+        },
+        {
+          "join": "",
+          "name": "Bianca Frohard",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography",
+          "resource_url": "http://api.discogs.com/artists/0",
+          "id": 0
+        },
+        {
+          "join": "",
+          "name": "Dea Pirlich",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography",
+          "resource_url": "http://api.discogs.com/artists/0",
+          "id": 0
+        },
+        {
+          "join": "",
+          "name": "Flying Style",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography",
+          "resource_url": "http://api.discogs.com/artists/0",
+          "id": 0
+        },
+        {
+          "join": "",
+          "name": "Andy Fuchs",
+          "anv": "Andi Fuchs",
+          "tracks": "",
+          "role": "Recorded By",
+          "resource_url": "http://api.discogs.com/artists/508081",
+          "id": 508081
+        },
+        {
+          "join": "",
+          "name": "Ernst Horn",
+          "anv": "",
+          "tracks": "",
+          "role": "Recorded By, Mixed By",
+          "resource_url": "http://api.discogs.com/artists/27416",
+          "id": 27416
+        },
+        {
+          "join": "",
+          "name": "Ivee Leon",
+          "anv": "",
+          "tracks": "",
+          "role": "Violin, Backing Vocals",
+          "resource_url": "http://api.discogs.com/artists/479819",
+          "id": 479819
+        },
+        {
+          "join": "",
+          "name": "Sharifa",
+          "anv": "",
+          "tracks": "",
+          "role": "Violin, Backing Vocals",
+          "resource_url": "http://api.discogs.com/artists/42749",
+          "id": 42749
+        },
+        {
+          "join": "",
+          "name": "Alexander Veljanov",
+          "anv": "",
+          "tracks": "",
+          "role": "Vocals",
+          "resource_url": "http://api.discogs.com/artists/61880",
+          "id": 61880
+        }
+      ],
+      "title": "Live In Concert 2002",
+      "country": "Germany",
+      "notes": "White Lies - Tour, recorded in Potsdam at Lindenpark on November 29, 2002, except Stupid recorded in Berlin at SFB Sendesaal on March 29, 2002 and The Game (Acoustic) recorded in Berlin at Passionskirche on December 19, 2001.\r\nComes in a slipcase with 16-page booklet.\n",
+      "identifiers": [
+        {
+          "type": "Barcode",
+          "value": "5099751378327"
+        },
+        {
+          "type": "Rights Society",
+          "value": "SACEM/BIEM"
+        },
+        {
+          "type": "Label Code",
+          "value": "00162"
+        },
+        {
+          "type": "Matrix / Runout",
+          "description": "CD 1",
+          "value": "S5137832000-0102 13 A0"
+        },
+        {
+          "type": "Matrix / Runout",
+          "description": "CD 2",
+          "value": "S5137832000-0202 14 A3"
+        },
+        {
+          "type": "Other",
+          "description": "Mastering SID code, CD 1",
+          "value": "IFPI L553"
+        },
+        {
+          "type": "Other",
+          "description": "Mastering SID code, CD 2",
+          "value": "IFPI L554"
+        },
+        {
+          "type": "Other",
+          "description": "Mould SID code, CD 1",
+          "value": "IFPI 94V6"
+        },
+        {
+          "type": "Other",
+          "description": "Mould SID code, CD 2",
+          "value": "IFPI 94W4"
+        }
+      ],
+      "companies": [],
+      "uri": "http://www.discogs.com/Deine-Lakaien-Live-In-Concert-2002/release/282923",
+      "artists": [
+        {
+          "join": "",
+          "name": "Deine Lakaien",
+          "anv": "",
+          "tracks": "",
+          "role": "",
+          "resource_url": "http://api.discogs.com/artists/45013",
+          "id": 45013
+        }
+      ],
+      "formats": [
+        {
+          "descriptions": [
+            "Album"
+          ],
+          "name": "CD",
+          "qty": "2"
+        }
+      ],
+      "resource_url": "http://api.discogs.com/releases/282923",
+      "master_id": 91348,
+      "tracklist": [
+        {
+          "duration": "8:04",
+          "position": "1-1",
+          "title": "Colour-Ize"
+        },
+        {
+          "duration": "5:37",
+          "position": "1-2",
+          "title": "Generators"
+        },
+        {
+          "duration": "4:26",
+          "position": "1-3",
+          "title": "Kiss The Future"
+        },
+        {
+          "duration": "6:32",
+          "position": "1-4",
+          "title": "In The Chains Of"
+        },
+        {
+          "duration": "3:47",
+          "position": "1-5",
+          "title": "Where You Are"
+        },
+        {
+          "duration": "4:53",
+          "position": "1-6",
+          "title": "Return"
+        },
+        {
+          "duration": "6:08",
+          "position": "1-7",
+          "title": "Wunderbar"
+        },
+        {
+          "duration": "7:45",
+          "position": "1-8",
+          "title": "The Mirror Men"
+        },
+        {
+          "duration": "7:19",
+          "position": "1-9",
+          "title": "Love Me To The End"
+        },
+        {
+          "duration": "5:43",
+          "position": "2-1",
+          "title": "Silence In Your Eyes"
+        },
+        {
+          "duration": "5:44",
+          "position": "2-2",
+          "title": "Manastir Baroue"
+        },
+        {
+          "duration": "4:56",
+          "position": "2-3",
+          "title": "Kiss"
+        },
+        {
+          "duration": "5:41",
+          "position": "2-4",
+          "title": "Don't Wake Me Up"
+        },
+        {
+          "duration": "6:06",
+          "position": "2-5",
+          "title": "Overpaid"
+        },
+        {
+          "duration": "5:47",
+          "position": "2-6",
+          "title": "Cupid's Disease"
+        },
+        {
+          "duration": "4:56",
+          "position": "2-7",
+          "title": "Rain Dance"
+        },
+        {
+          "duration": "4:48",
+          "position": "2-8",
+          "title": "Dark Star"
+        },
+        {
+          "duration": "3:48",
+          "position": "2-9",
+          "title": "May Be"
+        },
+        {
+          "duration": "6:26",
+          "position": "2-10",
+          "title": "Reincarnation / Life Is (A Sexually Transmitted Disease)"
+        },
+        {
+          "duration": "5:50",
+          "position": "2-11",
+          "title": "Sometimes"
+        },
+        {
+          "duration": "",
+          "position": "",
+          "title": "Bonustracks"
+        },
+        {
+          "duration": "4:51",
+          "position": "2-12",
+          "title": "Stupid"
+        },
+        {
+          "duration": "4:10",
+          "position": "2-13",
+          "title": "The Game (Acoustic)"
+        }
+      ],
+      "data_quality": "Correct"
+    },
+    "version": "2.0"
+  }
+}

@@ -1,0 +1,1375 @@
+{
+  "resp": {
+    "status": true,
+    "release": {
+      "status": "Accepted",
+      "styles": [
+        "Downtempo",
+        "Synth-pop"
+      ],
+      "videos": [
+        {
+          "duration": 336,
+          "description": "George Michael - Outside",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=gwZAYdHcDtU",
+          "title": "George Michael - Outside"
+        }
+      ],
+      "series": [],
+      "released_formatted": "1998",
+      "labels": [
+        {
+          "id": 1005,
+          "resource_url": "http://api.discogs.com/labels/1005",
+          "catno": "E2K 69635",
+          "name": "Epic",
+          "entity_type": "1"
+        }
+      ],
+      "community": {
+        "status": "Accepted",
+        "rating": {
+          "count": 33,
+          "average": 4.36
+        },
+        "have": 118,
+        "contributors": [
+          {
+            "username": "radius",
+            "resource_url": "http://api.discogs.com/users/radius"
+          },
+          {
+            "username": "ledjfab",
+            "resource_url": "http://api.discogs.com/users/ledjfab"
+          },
+          {
+            "username": "brixtonmc",
+            "resource_url": "http://api.discogs.com/users/brixtonmc"
+          },
+          {
+            "username": "vanity6",
+            "resource_url": "http://api.discogs.com/users/vanity6"
+          },
+          {
+            "username": "Vinyl_For_Sale_By_Radius",
+            "resource_url": "http://api.discogs.com/users/Vinyl_For_Sale_By_Radius"
+          },
+          {
+            "username": "uzumaki",
+            "resource_url": "http://api.discogs.com/users/uzumaki"
+          },
+          {
+            "username": "jape",
+            "resource_url": "http://api.discogs.com/users/jape"
+          },
+          {
+            "username": "Kepe",
+            "resource_url": "http://api.discogs.com/users/Kepe"
+          },
+          {
+            "username": "deMonne",
+            "resource_url": "http://api.discogs.com/users/deMonne"
+          },
+          {
+            "username": "earlyadoptr",
+            "resource_url": "http://api.discogs.com/users/earlyadoptr"
+          },
+          {
+            "username": "pantman",
+            "resource_url": "http://api.discogs.com/users/pantman"
+          },
+          {
+            "username": "tommy.b",
+            "resource_url": "http://api.discogs.com/users/tommy.b"
+          },
+          {
+            "username": "luvzadiscogs1",
+            "resource_url": "http://api.discogs.com/users/luvzadiscogs1"
+          },
+          {
+            "username": "JTWolfe",
+            "resource_url": "http://api.discogs.com/users/JTWolfe"
+          },
+          {
+            "username": "evdg",
+            "resource_url": "http://api.discogs.com/users/evdg"
+          }
+        ],
+        "want": 7,
+        "submitter": {
+          "username": "radius",
+          "resource_url": "http://api.discogs.com/users/radius"
+        },
+        "data_quality": "Correct"
+      },
+      "released": "1998",
+      "master_url": "http://api.discogs.com/masters/98699",
+      "year": 1998,
+      "images": [
+        {
+          "uri": "http://api.discogs.com/image/R-288308-1333554422.jpeg",
+          "height": 467,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-288308-1333554422.jpeg",
+          "type": "primary",
+          "uri150": "http://api.discogs.com/image/R-150-288308-1333554422.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-288308-1333554428.jpeg",
+          "height": 466,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-288308-1333554428.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-288308-1333554428.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-288308-1333554431.jpeg",
+          "height": 600,
+          "width": 597,
+          "resource_url": "http://api.discogs.com/image/R-288308-1333554431.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-288308-1333554431.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-288308-1333554436.jpeg",
+          "height": 600,
+          "width": 597,
+          "resource_url": "http://api.discogs.com/image/R-288308-1333554436.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-288308-1333554436.jpeg"
+        }
+      ],
+      "id": 288308,
+      "genres": [
+        "Electronic",
+        "Pop"
+      ],
+      "thumb": "http://api.discogs.com/image/R-150-288308-1333554422.jpeg",
+      "extraartists": [
+        {
+          "join": "",
+          "name": "George Michael",
+          "anv": "",
+          "tracks": "",
+          "role": "Design",
+          "resource_url": "http://api.discogs.com/artists/32990",
+          "id": 32990
+        },
+        {
+          "join": "",
+          "name": "Greg Jakobek",
+          "anv": "",
+          "tracks": "",
+          "role": "Design",
+          "resource_url": "http://api.discogs.com/artists/1814828",
+          "id": 1814828
+        },
+        {
+          "join": "",
+          "name": "Andy Stephens Mangement Ltd.",
+          "anv": "",
+          "tracks": "",
+          "role": "Other [Management]",
+          "resource_url": "http://api.discogs.com/artists/0",
+          "id": 0
+        },
+        {
+          "join": "",
+          "name": "Brian Aris",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By  [Cover]",
+          "resource_url": "http://api.discogs.com/artists/2169398",
+          "id": 2169398
+        },
+        {
+          "join": "",
+          "name": "Andrew MacPherson (3)",
+          "anv": "Andrew McPherson",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/2236091",
+          "id": 2236091
+        },
+        {
+          "join": "",
+          "name": "Brad Branson",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/2157551",
+          "id": 2157551
+        },
+        {
+          "join": "",
+          "name": "Brian Aris",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/2169398",
+          "id": 2169398
+        },
+        {
+          "join": "",
+          "name": "Chris Cuffaro",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/746852",
+          "id": 746852
+        },
+        {
+          "join": "",
+          "name": "James Wedge",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/2234773",
+          "id": 2234773
+        },
+        {
+          "join": "",
+          "name": "Neal Preston",
+          "anv": "Neil Preston",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/680061",
+          "id": 680061
+        },
+        {
+          "join": "",
+          "name": "Nick Knight",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/347680",
+          "id": 347680
+        },
+        {
+          "join": "",
+          "name": "Rankin (3)",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/2246531",
+          "id": 2246531
+        },
+        {
+          "join": "",
+          "name": "Russell Young (3)",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Additional]",
+          "resource_url": "http://api.discogs.com/artists/2241646",
+          "id": 2241646
+        },
+        {
+          "join": "",
+          "name": "George Michael",
+          "anv": "",
+          "tracks": "1-1 to 1-14, 2-3 to 2-8, 2-10, 2-12, 2-13",
+          "role": "Producer, Arranged By",
+          "resource_url": "http://api.discogs.com/artists/32990",
+          "id": 32990
+        }
+      ],
+      "title": "Ladies & Gentlemen - The Best Of George Michael",
+      "country": "US",
+      "notes": "Elton John appears courtesy of MCA Records.\r\nAstrud Gilberto appear by kind permission.\r\nAretha Franklin appears courtesy of Arista Records.\r\nQueen appears courtesy of EMI Records Ltd.\r\n2-2: Contains a recreated sample of \"Forget Me Nots\" originally performed by Patrice Rushen.\r\nThere is exactly one minute of silence between the end of the song contained in Track 2-13 and the beginning of Track 2-14.\r\n",
+      "identifiers": [
+        {
+          "type": "Barcode",
+          "value": "0 7464-69635-2 4"
+        },
+        {
+          "type": "Other",
+          "description": "Cat # - CD 1",
+          "value": "EK 69713"
+        },
+        {
+          "type": "Other",
+          "description": "Cat # - CD 2",
+          "value": "EK 69714"
+        }
+      ],
+      "companies": [
+        {
+          "name": "Sony Music Entertainment (UK) Ltd.",
+          "entity_type": "13",
+          "catno": "",
+          "resource_url": "http://api.discogs.com/labels/33768",
+          "id": 33768,
+          "entity_type_name": "Phonographic Copyright (p)"
+        },
+        {
+          "name": "Sony Music Entertainment (UK) Ltd.",
+          "entity_type": "14",
+          "catno": "",
+          "resource_url": "http://api.discogs.com/labels/33768",
+          "id": 33768,
+          "entity_type_name": "Copyright (c)"
+        },
+        {
+          "name": "Robobuild Ltd.",
+          "entity_type": "13",
+          "catno": "",
+          "resource_url": "http://api.discogs.com/labels/278456",
+          "id": 278456,
+          "entity_type_name": "Phonographic Copyright (p)"
+        },
+        {
+          "name": "Arista Records, Inc.",
+          "entity_type": "13",
+          "catno": "",
+          "resource_url": "http://api.discogs.com/labels/264254",
+          "id": 264254,
+          "entity_type_name": "Phonographic Copyright (p)"
+        },
+        {
+          "name": "QM Productions Ltd.",
+          "entity_type": "13",
+          "catno": "",
+          "resource_url": "http://api.discogs.com/labels/288831",
+          "id": 288831,
+          "entity_type_name": "Phonographic Copyright (p)"
+        },
+        {
+          "name": "EMI Records Ltd.",
+          "entity_type": "5",
+          "catno": "",
+          "resource_url": "http://api.discogs.com/labels/63404",
+          "id": 63404,
+          "entity_type_name": "Licensed To"
+        }
+      ],
+      "uri": "http://www.discogs.com/George-Michael-Ladies-Gentlemen-The-Best-Of-George-Michael/release/288308",
+      "artists": [
+        {
+          "join": "",
+          "name": "George Michael",
+          "anv": "",
+          "tracks": "",
+          "role": "",
+          "resource_url": "http://api.discogs.com/artists/32990",
+          "id": 32990
+        }
+      ],
+      "formats": [
+        {
+          "descriptions": [
+            "Compilation"
+          ],
+          "name": "CD",
+          "qty": "2"
+        }
+      ],
+      "resource_url": "http://api.discogs.com/releases/288308",
+      "master_id": 98699,
+      "tracklist": [
+        {
+          "duration": "",
+          "position": "",
+          "title": "For The Heart"
+        },
+        {
+          "duration": "6:49",
+          "position": "1-1",
+          "title": "Jesus To A Child",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:41",
+          "position": "1-2",
+          "title": "Father Figure",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:00",
+          "position": "1-3",
+          "title": "Careless Whisper",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Andrew Ridgeley",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/479358",
+              "id": 479358
+            },
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:47",
+          "position": "1-4",
+          "title": "Don't Let The Sun Go Down On Me",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Elton John",
+              "anv": "",
+              "tracks": "",
+              "role": "Featuring",
+              "resource_url": "http://api.discogs.com/artists/57103",
+              "id": 57103
+            },
+            {
+              "join": "",
+              "name": "Elton John & Bernie Taupin",
+              "anv": "Bernie Taupin/Elton John",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/825268",
+              "id": 825268
+            }
+          ],
+          "artists": [
+            {
+              "join": "With",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Elton John",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/57103",
+              "id": 57103
+            }
+          ]
+        },
+        {
+          "duration": "5:28",
+          "position": "1-5",
+          "title": "You Have Been Loved",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "David Austin",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/289104",
+              "id": 289104
+            },
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:36",
+          "position": "1-6",
+          "title": "Kissing A Fool",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:20",
+          "position": "1-7",
+          "title": "I Can't Make You Love Me",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Allen Shamblin",
+              "anv": "A. Shamblin",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/738330",
+              "id": 738330
+            },
+            {
+              "join": "",
+              "name": "Mike Reid",
+              "anv": "M. Reid",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/459835",
+              "id": 459835
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:46",
+          "position": "1-8",
+          "title": "Heal The Pain",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:43",
+          "position": "1-9",
+          "title": "A Moment With You",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "3:19",
+          "position": "1-10",
+          "title": "Desafinado",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Astrud Gilberto",
+              "anv": "",
+              "tracks": "",
+              "role": "Featuring",
+              "resource_url": "http://api.discogs.com/artists/8699",
+              "id": 8699
+            },
+            {
+              "join": "",
+              "name": "Antonio Carlos Jobim",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/27991",
+              "id": 27991
+            },
+            {
+              "join": "",
+              "name": "Newton Mendonça",
+              "anv": "Newton Ferriera de Mendonca",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/566916",
+              "id": 566916
+            }
+          ],
+          "artists": [
+            {
+              "join": "With",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Astrud Gilberto",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/8699",
+              "id": 8699
+            }
+          ]
+        },
+        {
+          "duration": "7:14",
+          "position": "1-11",
+          "title": "Cowboys And Angels",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:41",
+          "position": "1-12",
+          "title": "Praying For Time",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:53",
+          "position": "1-13",
+          "title": "One More Try",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:03",
+          "position": "1-14",
+          "title": "A Different Corner",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "",
+          "position": "",
+          "title": "For The Feet"
+        },
+        {
+          "duration": "4:44",
+          "position": "2-1",
+          "title": "Outside",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Jon Douglas",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer",
+              "resource_url": "http://api.discogs.com/artists/132381",
+              "id": 132381
+            },
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:31",
+          "position": "2-2",
+          "title": "Fastlove",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Jon Douglas",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer",
+              "resource_url": "http://api.discogs.com/artists/132381",
+              "id": 132381
+            },
+            {
+              "join": "",
+              "name": "Freddie Washington",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/253976",
+              "id": 253976
+            },
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Patrice Rushen",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/21262",
+              "id": 21262
+            },
+            {
+              "join": "",
+              "name": "Terri McFaddin",
+              "anv": "Theresa McFadden",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/201717",
+              "id": 201717
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "3:45",
+          "position": "2-3",
+          "title": "Too Funky",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "6:28",
+          "position": "2-4",
+          "title": "Freedom '90",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:39",
+          "position": "2-5",
+          "title": "Star People '97",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:16",
+          "position": "2-6",
+          "title": "Killer / Papa Was A Rollin' Stone",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Adam Tinley",
+              "anv": "Adam 'Adamski' Tinley",
+              "tracks": "",
+              "role": "Written-By [Killer]",
+              "resource_url": "http://api.discogs.com/artists/660006",
+              "id": 660006
+            },
+            {
+              "join": "",
+              "name": "Seal",
+              "anv": "Seal-Henry Samuel",
+              "tracks": "",
+              "role": "Written-By [Killer]",
+              "resource_url": "http://api.discogs.com/artists/10643",
+              "id": 10643
+            },
+            {
+              "join": "",
+              "name": "Whitfield-Strong",
+              "anv": "Barret Strong/Norman Whitfield",
+              "tracks": "",
+              "role": "Written-By [Papa Was A Rollin' Stone]",
+              "resource_url": "http://api.discogs.com/artists/780701",
+              "id": 780701
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:38",
+          "position": "2-7",
+          "title": "I Want Your Sex (Pt. II)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:47",
+          "position": "2-8",
+          "title": "Monkey",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "6:09",
+          "position": "2-9",
+          "title": "Spinning The Wheel",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer, Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Jon Douglas",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer, Written-By",
+              "resource_url": "http://api.discogs.com/artists/132381",
+              "id": 132381
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "4:50",
+          "position": "2-10",
+          "title": "Waiting For That Day / You Can't Always Get What You Want",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Jagger-Richards",
+              "anv": "Mick Jagger, Keith Richards",
+              "tracks": "",
+              "role": "Written-By [You Can't Always Get What You Want]",
+              "resource_url": "http://api.discogs.com/artists/845581",
+              "id": 845581
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "3:59",
+          "position": "2-11",
+          "title": "I Knew You Were Waiting (For Me)",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Aretha Franklin",
+              "anv": "",
+              "tracks": "",
+              "role": "Featuring",
+              "resource_url": "http://api.discogs.com/artists/38863",
+              "id": 38863
+            },
+            {
+              "join": "",
+              "name": "Narada Michael Walden",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer, Arranged By",
+              "resource_url": "http://api.discogs.com/artists/49530",
+              "id": 49530
+            },
+            {
+              "join": "",
+              "name": "Dennis Morgan",
+              "anv": "D. Morgan",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/436930",
+              "id": 436930
+            },
+            {
+              "join": "",
+              "name": "Simon Climie",
+              "anv": "S. Climie",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/92471",
+              "id": 92471
+            }
+          ],
+          "artists": [
+            {
+              "join": "With",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Aretha Franklin",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/38863",
+              "id": 38863
+            }
+          ]
+        },
+        {
+          "duration": "4:54",
+          "position": "2-12",
+          "title": "Hard Day",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "3:13",
+          "position": "2-13",
+          "title": "Faith",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ],
+          "artists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            }
+          ]
+        },
+        {
+          "duration": "5:24",
+          "position": "2-14",
+          "title": "Somebody To Love",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Queen",
+              "anv": "",
+              "tracks": "",
+              "role": "Producer",
+              "resource_url": "http://api.discogs.com/artists/81013",
+              "id": 81013
+            },
+            {
+              "join": "",
+              "name": "Freddie Mercury",
+              "anv": "",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/79949",
+              "id": 79949
+            }
+          ],
+          "artists": [
+            {
+              "join": "With",
+              "name": "George Michael",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/32990",
+              "id": 32990
+            },
+            {
+              "join": "",
+              "name": "Queen",
+              "anv": "",
+              "tracks": "",
+              "role": "",
+              "resource_url": "http://api.discogs.com/artists/81013",
+              "id": 81013
+            }
+          ]
+        }
+      ],
+      "data_quality": "Correct"
+    },
+    "version": "2.0"
+  }
+}

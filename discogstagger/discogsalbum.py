@@ -36,8 +36,7 @@ class DiscogsAlbum(object):
     def map(self):
         """ map the retrieved information to the tagger specific objects """
 
-        album = Album(self.release._id, self.release.title, ["Various"])
-            #self.artists(self.release.artists))
+        album = Album(self.release._id, self.release.title, self.artists(self.release.artists))
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
@@ -53,10 +52,9 @@ class DiscogsAlbum(object):
         album.disctotal = self.disctotal
         album.is_compilation = self.is_compilation
 
-        album.discs = self.discs_and_tracks
+        album.discs = self.discs_and_tracks(album)
 
         return album
-
 
 ## should be refactored to taggerutils or somewhere, use a template based approach then
     @property
@@ -132,11 +130,17 @@ class DiscogsAlbum(object):
             yield x.name
 
     def artists(self, artist_data):
-        """ obtain the album artists (normalized using clean_name). """
+        """ obtain the artists (normalized using clean_name). """
         artists = []
         for x in artist_data:
-#            logger.debug("%s " % inspect.getmembers(x))
-            artists.append(self.clean_name(x.name))
+# !TODO
+            if isinstance(x, basestring):
+                logger.debug("artist is string (join) - need to implement: %s " % x)
+# append the previous artist with the next one
+# can we just easily join the whole list?????
+            else:
+                artists.append(self.clean_name(x.name))
+
 
         return artists
 
@@ -145,7 +149,7 @@ class DiscogsAlbum(object):
         return self.clean_duplicate_handling(artist_data[0].name)
 
     def disc_and_track_no(self, position):
-        """ obtain the disc and tracknumber from given position 
+        """ obtain the disc and tracknumber from given position
             problem right now, discogs uses - and/or . as a separator, furthermore discogs uses
             A1 for vinyl based releases, we should implement this as well
         """
@@ -175,19 +179,20 @@ class DiscogsAlbum(object):
         for format in self.release.data["formats"]:
             if "descriptions" in format:
                 for description in format["descriptions"]:
-                    if description == "compilation":
+                    if description == "Compilation":
                         return True
 
         return False
 
-    @property
-    def discs_and_tracks(self):
+    def discs_and_tracks(self, album):
         """ provides the tracklist of the given release id """
 
         disc_list = []
         track_list = []
         discsubtitle = None
         disc = Disc(1)
+
+        discsubtitle = None
 
         for i, t in enumerate(x for x in self.release.tracklist):
 
@@ -198,34 +203,29 @@ class DiscogsAlbum(object):
                 discsubtitle = t["title"]
                 continue
 
-            sort_artist = self.sort_artist(t["artists"])
+            if t["artists"]:
+                artists = self.artists(t["artists"])
+                sort_artist = self.sort_artist(t["artists"])
+            else:
+                artists = album.artists
+                sort_artist = album.sort_artist
 
-#            logger.debug("trackartists: %s" % t["artists"])
-#            artist = self.artists(t["artists"])
-            artist = "HTTP needed"
+            track = Track(i + 1, t["title"], artists)
 
-            track = Track(i + 1, artist, t["title"])
-
-            track.position = i + 1
+            track.position = i
 
             pos = self.disc_and_track_no(t["position"])
             track.tracknumber = int(pos["tracknumber"])
             track.discnumber = int(pos["discnumber"])
 
+            logger.debug("discsubtitle: %s " % discsubtitle)
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 
-            track.sortartist = sort_artist
-            track.artist = artist
-
-#            logger.debug("track.discnumber: %s" % track.discnumber)
-#            logger.debug("disc.discnumber: %s" % disc.discnumber)
-
+            track.sortartists = sort_artist
 
             if track.discnumber != disc.discnumber:
-#                logger.debug("switching disc")
                 disc_list.append(disc)
-                discsubtitle = None
                 disc = Disc(track.discnumber)
 
             disc.tracks.append(track)

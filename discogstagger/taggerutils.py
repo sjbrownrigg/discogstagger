@@ -48,7 +48,7 @@ class TaggerUtils(object):
     # supported file types.
     FILE_TYPE = (".mp3", ".flac",)
 
-    def __init__(self, sourcedir, destdir, use_lower, ogsrelid, split_artists, 
+    def __init__(self, sourcedir, destdir, use_lower, ogsrelid, split_artists,
             split_genres_and_styles, copy_other_files):
 # default values should be specified earlier in the chain (eg. in the configuration option handler)
 # transfer the options via a hashmap to be able to specify additional options easier
@@ -78,8 +78,8 @@ class TaggerUtils(object):
             self.tag_map = False
 
     def _value_from_tag_format(self, format, trackno=1, position=1, filetype=".mp3"):
-        """ Fill in the used variables using the track information 
-            Transform all variables and use them in the given format string, make this 
+        """ Fill in the used variables using the track information
+            Transform all variables and use them in the given format string, make this
             slightly more flexible to be able to add variables easier
 
             Transfer this via a map.
@@ -117,7 +117,7 @@ class TaggerUtils(object):
         return format
 
     def _value_from_tag(self, format, trackno=1, position=1, filetype=".mp3"):
-        """ Generates the filename tagging map 
+        """ Generates the filename tagging map
             avoid usage of file extension here already, could lead to problems
         """
 
@@ -224,7 +224,7 @@ class TaggerUtils(object):
 
     @property
     def album_folder_name(self):
-        """ returns the album as the name for the sub-dir for multi disc 
+        """ returns the album as the name for the sub-dir for multi disc
             releases"""
 
         folder_name = "%s%s" % (get_clean_filename(str(self.album.title)), self.disc_folder_name)
@@ -325,7 +325,7 @@ def create_m3u(tag_map, folder_names, dest_dir_name, m3u_filename):
 
 
 def get_images(images, dest_dir_name, images_format, first_image_name):
-    """ Download and store any available images 
+    """ Download and store any available images
         we need http access here as well (see discogsalbum), and therefore the
         user-agent, we should be able to put this into a common object, ....
     """
