@@ -7,6 +7,19 @@ import discogs_client as discogs
 
 from album import Album, Disc, Track
 
+class memoized_property(object):
+
+    def __init__(self, fget, doc=None):
+        self.fget = fget
+        self.__doc__ = doc or fget.__doc__
+        self.__name__ = fget.__name__
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        obj.__dict__[self.__name__] = result = self.fget(obj)
+        return result
+
 logger = logging.getLogger(__name__)
 
 class DiscogsAlbum(object):
@@ -127,7 +140,14 @@ class DiscogsAlbum(object):
     def _gen_artist(self, artist_data):
         """ yields a list of artists name properties """
         for x in artist_data:
-            yield x.name
+            # bugfix to avoid the following scenario, or ensure we're yielding
+            # and artist object.
+            # AttributeError: 'unicode' object has no attribute 'name'
+            # [<Artist "A.D.N.Y*">, u'Presents', <Artist "Leiva">]
+            try:
+                yield x.name
+            except AttributeError:
+                pass
 
     def artists(self, artist_data):
         """ obtain the artists (normalized using clean_name). """
@@ -165,10 +185,27 @@ class DiscogsAlbum(object):
         tracknumber = position[idx + 1:]
         discnumber = position[:idx]
 
-        return {'tracknumber': tracknumber, 'discnumber': discnumber}
+        # some variance in how discogs releases spanning multiple discs
+        # or formats are kept, add regexs here as failures are encountered
+        NUMBERING_SCHEMES = (
+            "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
+            "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
+            "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05
+        )
+
+        for scheme in NUMBERING_SCHEMES:
+            re_match = re.search(scheme, position)
+
+            if re_match:
+                logging.debug("Found a disc and track number")
+                return {'tracknumber': re_match.group("tracknumber"),
+                        'discnumber': re_match.group("discnumber")}
+
+        logging.error("Unable to match multi-disc track/position")
+        return False
 
     def tracktotal_on_disc(self, discnumber):
-        logger.info("discs: %s" % self.discs)
+        logger.debug("discs: %s" % self.discs)
         return self.discs[discnumber]
 
     @property
