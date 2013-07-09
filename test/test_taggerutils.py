@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os, sys
+from nose.tools import *
+
 import logging
 
 logging.basicConfig(level=10)
@@ -17,59 +19,80 @@ from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.taggerutils import TaggerUtils
 
-def test_value_from_tag_format():
-    ogsrelid = "1448190"
 
-    # construct config with only default values
-    tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
-    config = tagger_config.config
+class TestTaggerUtils:
 
-    dummy_response = DummyResponse(ogsrelid)
-    discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
-    album = discogs_album.map()
+    def setUp(self):
+        self.ogsrelid = "1448190"
 
-    taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", ogsrelid,
-                              config, album)
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+        self.config = tagger_config.config
 
-    format = taggerutils._value_from_tag_format("%DISCNO%", 1, 1, 1, ".mp3")
-    assert format == "1"
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
+        self.album = discogs_album.map()
 
-    format = taggerutils._value_from_tag_format("%ALBARTIST%-%ALBTITLE%")
-    assert format == "Various-Megahits 2001 Die Erste"
+    def tearDown(self):
+        self.ogsrelid = None
+        self.config = None
+        self.album = None
 
-    format = taggerutils._value_from_tag_format("%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%")
-    assert format == "Various-Megahits 2001 Die Erste-(560 938-2)-Germany"
+    def test_value_from_tag_format(self):
+        taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
+                                  self.config, self.album)
 
-    format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
-    assert format == "01-Gigi D'Agostino-La Passion (Radio Cut).mp3"
+        format = taggerutils._value_from_tag_format("%DISCNO%", 1, 1, 1, ".mp3")
+        assert format == "1"
 
-    format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, 1, ".flac")
-    assert format == "01-Gigi D'Agostino-La Passion (Radio Cut)"
+        format = taggerutils._value_from_tag_format("%ALBARTIST%-%ALBTITLE%")
+        assert format == "Various-Megahits 2001 Die Erste"
 
-def test_value_from_tag():
-    ogsrelid = "1448190"
+        format = taggerutils._value_from_tag_format("%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%")
+        assert format == "Various-Megahits 2001 Die Erste-(560 938-2)-Germany"
 
-    # construct config with only default values
-    tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
-    config = tagger_config.config
+        format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
+        assert format == "01-Gigi D'Agostino-La Passion (Radio Cut).mp3"
 
-    dummy_response = DummyResponse(ogsrelid)
-    discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
-    album = discogs_album.map()
+        format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, 1, ".flac")
+        assert format == "01-Gigi D'Agostino-La Passion (Radio Cut)"
 
-    taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", ogsrelid,
-                              config, album)
+    def test_value_from_tag(self):
+        taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
+                                  self.config, self.album)
 
-    format = taggerutils._value_from_tag("%ALBARTIST%-%ALBTITLE%")
-    assert format == "various-megahits_2001_die_erste"
+        format = taggerutils._value_from_tag("%ALBARTIST%-%ALBTITLE%")
+        assert format == "various-megahits_2001_die_erste"
 
-    format = taggerutils._value_from_tag("%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%")
-    assert format == "various-megahits_2001_die_erste-(560_938-2)-germany"
+        format = taggerutils._value_from_tag("%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%")
+        assert format == "various-megahits_2001_die_erste-(560_938-2)-germany"
 
-    format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
-    assert format == "01-gigi_dagostino-la_passion_(radio_cut).mp3"
+        format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
+        assert format == "01-gigi_dagostino-la_passion_(radio_cut).mp3"
 
-    format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, 1, ".flac")
-    assert format == "01-gigi_dagostino-la_passion_(radio_cut)"
+        format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, 1, ".flac")
+        assert format == "01-gigi_dagostino-la_passion_(radio_cut)"
 
-    assert False
+    def test_dest_dir_name(self):
+        taggerutils = TaggerUtils("dummy_source_dir", "./dummy_dest_dir", self.ogsrelid,
+                                  self.config, self.album)
+
+        assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+
+        taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
+                                  self.config, self.album)
+
+        assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+
+        taggerutils = TaggerUtils("dummy_source_dir", "/dummy_dest_dir", self.ogsrelid,
+                                  self.config, self.album)
+
+        assert taggerutils.dest_dir_name == "/dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+
+        taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
+                                  self.config, self.album)
+
+        taggerutils.dir_format = "%GENRE%/%ALBARTIST%/%ALBTITLE%-(%CATNO%)-%YEAR%"
+
+        logger.debug("dest_dir_name: %s" % taggerutils.dest_dir_name)
+        assert taggerutils.dest_dir_name == "dummy_dest_dir/electronic/various/megahits_2001_die_erste-(560_938-2)-germany"

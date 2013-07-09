@@ -71,7 +71,6 @@ class TaggerUtils(object):
 #        if self.copy_other_files:
 #            self.copy_files = result["copy_files"]
 
-# !TODO move outside of constructor to be able to test the taggerutils
         if not album == None:
             self.album = album
         else:
@@ -203,19 +202,23 @@ class TaggerUtils(object):
     def dest_dir_name(self):
         """ generates new album directory name """
 
+        logger.debug("self.destdir: %s" % self.destdir)
+
         # determine if an absolute base path was specified.
-        if os.path.isabs(self.destdir):
-            path_name = os.path.normpath(self.destdir)
-        else:
-            path_name = os.path.dirname(os.path.normpath(self.destdir))
+        path_name = os.path.normpath(self.destdir)
+
+        logger.debug("path_name: %s" % path_name)
 
         dest_dir = ""
         for ddir in self.dir_format.split("/"):
+            logger.debug("d_dir: %s" % ddir)
             d_dir = get_clean_filename(self._value_from_tag(ddir))
             if dest_dir == "":
                 dest_dir = d_dir
             else:
                 dest_dir = dest_dir + "/" + d_dir
+
+            logger.debug("d_dir: %s" % dest_dir)
 
         dir_name = os.path.join(path_name, dest_dir)
 

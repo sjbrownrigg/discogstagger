@@ -19,6 +19,8 @@ from discogstagger.tagger_config import TaggerConfig
 
 import os, errno
 
+# !TODO move this to taggerutils - this class should handle basically the whole
+# logic, not in here
 def mkdir_p(path):
     try:
         os.makedirs(path)
@@ -52,16 +54,16 @@ logger = logging.getLogger(__name__)
 
 # read necessary config options for batch processing
 id_file = config.get("batch", "id_file")
-id_tag = config.get("batch", "id_tag")
 dir_format_batch = "dir"
 dir_format = None
 
 # read tags from batch file if available
 tagger_config.read(os.path.join(options.sdir, id_file))
 
-if config.get("source", id_tag):
-    releaseid = config.get("source", id_tag).strip()
+if config.get("source", "id"):
+    releaseid = config.get("source", "id").strip()
 
+# command line parameter overwrites config parameter in file
 if options.releaseid:
     releaseid = options.releaseid
 
@@ -84,19 +86,10 @@ use_lower_filenames = config.getboolean("details", "use_lower_filenames")
 use_folder_jpg = config.getboolean("details", "use_folder_jpg")
 copy_other_files = config.getboolean("details", "copy_other_files")
 
-nfo_format = config.get("file-formatting", "nfo")
-m3u_format = config.get("file-formatting", "m3u")
-
 user_agent = config.get("common", "user-agent")
 
 # config options "overwritable" through release-tags
 keep_tags = config.get("details", "keep_tags")
-
-dir_format = config.get("file-formatting", "dir")
-song_format = config.get("file-formatting", "song")
-va_song_format = config.get("file-formatting", "va_song")
-images_format = config.get("file-formatting", "images")
-disc_folder_name = config.get("file-formatting", "discs")
 
 enocder_tag = None
 encoder_tag = config.get("tags", "encoder")
@@ -109,13 +102,7 @@ if split_discs:
 split_artists = config.get("details", "split_artists").strip('"')
 split_genres_and_styles = config.get("details", "split_genres_and_styles").strip('"')
 
-release = TaggerUtils(options.sdir, destdir, use_lower_filenames, releaseid, 
-    split_artists, split_genres_and_styles, copy_other_files)
-release.nfo_format = nfo_format
-release.m3u_format = m3u_format
-release.dir_format = dir_format
-release.song_format = song_format
-release.va_song_format = va_song_format
+release = TaggerUtils(options.sdir, destdir, releaseid, config)
 release.disc_folder_name = disc_folder_name
 release.group_name = group_name
 
