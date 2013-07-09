@@ -197,7 +197,7 @@ class DiscogsAlbum(object):
             re_match = re.search(scheme, position)
 
             if re_match:
-                logging.debug("Found a disc and track number")
+#                logging.debug("Found a disc and track number")
                 return {'tracknumber': re_match.group("tracknumber"),
                         'discnumber': re_match.group("discnumber")}
 
@@ -255,7 +255,7 @@ class DiscogsAlbum(object):
             track.tracknumber = int(pos["tracknumber"])
             track.discnumber = int(pos["discnumber"])
 
-            logger.debug("discsubtitle: %s " % discsubtitle)
+#            logger.debug("discsubtitle: %s " % discsubtitle)
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 

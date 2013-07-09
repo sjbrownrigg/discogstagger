@@ -7,13 +7,13 @@ import sys
 import logging
 from unicodedata import normalize
 
-from discogsalbum import DiscogsAlbum, TrackContainer
+from discogstagger.discogsalbum import DiscogsAlbum
+from discogstagger.album import Album, Disc, Track
 
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
 logger = logging.getLogger(__name__)
-
 
 class TagOpener(FancyURLopener, object):
 
@@ -48,82 +48,77 @@ class TaggerUtils(object):
     # supported file types.
     FILE_TYPE = (".mp3", ".flac",)
 
-    def __init__(self, sourcedir, destdir, use_lower, ogsrelid, split_artists,
-            split_genres_and_styles, copy_other_files):
-# default values should be specified earlier in the chain (eg. in the configuration option handler)
-# transfer the options via a hashmap to be able to specify additional options easier
-        self.dir_format = "%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%-%GROUP%"
-        self.m3u_format = "00-%ALBARTIST%-%ALBTITLE%.m3u"
-        self.nfo_format = "00-%ALBARTIST%-%ALBTITLE%.nfo"
-        self.song_format = "%TRACKNO%-%ARTIST%-%TITLE%%TYPE%"
-        self.va_song_format = "%TRACKNO%-%ARTIST%-%TITLE%%TYPE%"
-        self.images_format = "00-image"
-        self.first_image_name = "folder.jpg"
+    def __init__(self, sourcedir, destdir, ogsrelid, config, album=None):
+        self.config = config
 
-        self.copy_other_files = copy_other_files
+        self.dir_format = config.get("file-formatting", "dir")
+        self.song_format = config.get("file-formatting", "song")
+        self.va_song_format = config.get("file-formatting", "va_song")
+        self.images_format = config.get("file-formatting", "images")
+        self.m3u_format = config.get("file-formatting", "m3u")
+        self.nfo_format = config.get("file-formatting", "nfo")
+
+        self.disc_folder_name = config.get("file-formatting", "discs")
+
+#        self.first_image_name = "folder.jpg"
+        self.copy_other_files = config.getboolean("file-formatting", "copy_other_files")
 
         self.sourcedir = sourcedir
         self.destdir = destdir
 
-        result = self._get_target_list()
-        self.files_to_tag = result["target_list"]
-        if self.copy_other_files:
-            self.copy_files = result["copy_files"]
-        self.album = DiscogsAlbum(ogsrelid, split_artists, split_genres_and_styles)
-        self.use_lower = use_lower
+#        result = self._get_target_list()
+#        self.files_to_tag = result["target_list"]
+#        if self.copy_other_files:
+#            self.copy_files = result["copy_files"]
 
-        if len(self.files_to_tag) == len(self.album.tracks):
-            self.tag_map = self._get_tag_map()
+# !TODO move outside of constructor to be able to test the taggerutils
+        if not album == None:
+            self.album = album
         else:
-            self.tag_map = False
+            discogs_album = DiscogsAlbum(ogsrelid)
+            self.album = discogs_album.map()
 
-    def _value_from_tag_format(self, format, trackno=1, position=1, filetype=".mp3"):
+ #       self.use_lower = use_lower
+
+ #       if len(self.files_to_tag) == len(self.album.tracks):
+ #           self.tag_map = self._get_tag_map()
+ #       else:
+ #           self.tag_map = False
+
+    def _value_from_tag_format(self, format, discno=1, trackno=1, position=1, filetype=".mp3"):
         """ Fill in the used variables using the track information
             Transform all variables and use them in the given format string, make this
             slightly more flexible to be able to add variables easier
 
             Transfer this via a map.
         """
-
-        logger.debug("parameters given: format: %s" % format)
-        logger.debug("parameters given: trackno: %d" % trackno)
-        logger.debug("parameters given: position: %d" % position)
-        logger.debug("paramerter avail: position: %d" % len(self.album.tracks))
-
         property_map = {
             "%ALBTITLE%": self.album.title,
-            "%ALBARTIST%": self.album.artist,
+            "%ALBARTIST%": self.album.artists[0],
             "%YEAR%": self.album.year,
-            "%CATNO%": self.album.catno,
-            "%GENRE%": self.album.genre,
-            "%STYLE%": self.album.style,
-            "%GROUP%": self.group_name,
-# could go wrong on multi discs (because of empty tracks with subdisc names)
-            "%ARTIST%": self.album.tracks[position].artist,
-# see artist
-            "%TITLE%": self.album.tracks[position].title,
-            "%DISCNO%": self.album.tracks[position].discnumber,
+            "%CATNO%": self.album.catnumbers[0],
+            "%GENRE%": self.album.genres[0],
+            "%STYLE%": self.album.styles[0],
+            "%ARTIST%": self.album.discs[discno - 1].tracks[trackno - 1].artists[0],
+            "%TITLE%": self.album.discs[discno - 1].tracks[trackno - 1].title,
+            "%DISCNO%": discno,
             "%TRACKNO%": "%.2d" % trackno,
             "%TYPE%": filetype,
-            "%LABEL%": self.album.label,
+            "%LABEL%": self.album.labels[0],
         }
 
         for hashtag in property_map.keys():
-            format = format.replace(hashtag,
-                                            str(property_map[hashtag]))
-
-        logger.debug("format output: %s" % format)
+            format = format.replace(hashtag, str(property_map[hashtag]))
 
         return format
 
-    def _value_from_tag(self, format, trackno=1, position=1, filetype=".mp3"):
+    def _value_from_tag(self, format, discno=1, trackno=1, position=1, filetype=".mp3"):
         """ Generates the filename tagging map
             avoid usage of file extension here already, could lead to problems
         """
+        format = self._value_from_tag_format(format, discno, trackno, position, filetype)
 
-        format = self._value_from_tag_format(format, trackno, position, filetype)
-
-        if self.use_lower:
+        if self.config.getboolean("details", "use_lower_filenames"):
             format = format.lower()
 
         format = get_clean_filename(format)
@@ -144,7 +139,7 @@ class TaggerUtils(object):
             target_list = [os.path.join(self.sourcedir, x) for x in dir_list
                              if x.lower().endswith(TaggerUtils.FILE_TYPE)]
             if self.copy_other_files:
-                copy_files = [os.path.join(self.sourcedir, x) for x in 
+                copy_files = [os.path.join(self.sourcedir, x) for x in
                     dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
             if not target_list:
@@ -159,10 +154,10 @@ class TaggerUtils(object):
                         tmp_list = [os.path.join(sub_dir, y) for y in tmp_list]
 
 			# strip unwanted files
-			target_list.extend([z for z in tmp_list if 
+			target_list.extend([z for z in tmp_list if
 				    z.lower().endswith(TaggerUtils.FILE_TYPE)])
 			if self.copy_other_files:
-			    copy_files = [z for z in tmp_list if not 
+			    copy_files = [z for z in tmp_list if not
 				    z.lower().endswith(TaggerUtils.FILE_TYPE)]
 
         except OSError, e:

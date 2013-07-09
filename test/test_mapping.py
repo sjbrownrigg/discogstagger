@@ -11,27 +11,14 @@ sys.path.append(parentdir)
 
 logger.debug("parentdir: %s" % parentdir)
 
-from discogstagger.discogsalbum import DiscogsAlbum
-
-class DummyResponse:
-    def __init__(self, releaseid):
-        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        json_file_name =  "%s/release.json" % releaseid
-        json_file_path = os.path.join(__location__, json_file_name)
-        json_file = open(json_file_path, "r")
-
-        self.status_code = 200
-        self.content = json_file.read()
+from _common_test import DummyResponse, DummyDiscogsAlbum
 
 def test_map_multidisc():
     ogsrelid = "1448190"
 
-    discogs_album = DiscogsAlbum(ogsrelid)
-    # mock response, so that the unit tests do not ask for the http connection
-    # every time
-    discogs_album.release._cached_response = DummyResponse(ogsrelid)
-
-    album = discogs_album.map()
+    dummy_response = DummyResponse(ogsrelid)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
     assert album.labels[0] == "Polystar"
@@ -41,6 +28,8 @@ def test_map_multidisc():
 
     assert len(album.images) == 4
     assert album.images[0] == "http://api.discogs.com/image/R-1448190-1220476110.jpeg"
+
+    assert album.title == "Megahits 2001 Die Erste"
 
     assert len(album.artists) == 1
     assert album.artists[0] == "Various"
@@ -112,12 +101,9 @@ def test_map_multidisc():
 def test_map_multidisc_with_disctitle():
     ogsrelid = "288308"
 
-    discogs_album = DiscogsAlbum(ogsrelid)
-    # mock response, so that the unit tests do not ask for the http connection
-    # every time
-    discogs_album.release._cached_response = DummyResponse(ogsrelid)
-
-    album = discogs_album.map()
+    dummy_response = DummyResponse(ogsrelid)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
     assert album.labels[0] == "Epic"
@@ -193,12 +179,9 @@ def test_map_multidisc_with_disctitle():
 def test_map_multidisc_with_disctitle_for_tracks():
     ogsrelid = "282923"
 
-    discogs_album = DiscogsAlbum(ogsrelid)
-    # mock response, so that the unit tests do not ask for the http connection
-    # every time
-    discogs_album.release._cached_response = DummyResponse(ogsrelid)
-
-    album = discogs_album.map()
+    dummy_response = DummyResponse(ogsrelid)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
     assert album.labels[0] == "Columbia"

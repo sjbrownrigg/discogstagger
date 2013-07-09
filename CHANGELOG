@@ -1,5 +1,12 @@
 ## Changelog
 
+Version 2.0.0
+
+* improvement: remove group-config tag, as this could be easily added in the
+               dir-format
+* improvement: replace id.txt structure with usual config structure, to be able
+               to overwrite config options in batch mode for each album/release
+
 Version 1.2.0
 
 * improvement: add several new tags (e.g. artist_sort, url) to the tracks
