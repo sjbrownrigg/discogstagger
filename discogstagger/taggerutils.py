@@ -51,6 +51,8 @@ class TaggerUtils(object):
     def __init__(self, sourcedir, destdir, ogsrelid, config, album=None):
         self.config = config
 
+# !TODO should we define those in here or in each method (where needed) or in a separate method
+# doing the "mapping"?
         self.dir_format = config.get("file-formatting", "dir")
         self.song_format = config.get("file-formatting", "song")
         self.va_song_format = config.get("file-formatting", "va_song")
@@ -59,6 +61,8 @@ class TaggerUtils(object):
         self.nfo_format = config.get("file-formatting", "nfo")
 
         self.disc_folder_name = config.get("file-formatting", "discs")
+
+        self.use_lower = config.getboolean("details", "use_lower_filenames")
 
 #        self.first_image_name = "folder.jpg"
         self.copy_other_files = config.getboolean("file-formatting", "copy_other_files")
@@ -77,7 +81,7 @@ class TaggerUtils(object):
             discogs_album = DiscogsAlbum(ogsrelid)
             self.album = discogs_album.map()
 
- #       self.use_lower = use_lower
+
 
  #       if len(self.files_to_tag) == len(self.album.tracks):
  #           self.tag_map = self._get_tag_map()
@@ -117,7 +121,7 @@ class TaggerUtils(object):
         """
         format = self._value_from_tag_format(format, discno, trackno, position, filetype)
 
-        if self.config.getboolean("details", "use_lower_filenames"):
+        if self.use_lower:
             format = format.lower()
 
         format = get_clean_filename(format)
@@ -226,15 +230,11 @@ class TaggerUtils(object):
 
 # !TODO the following method should use folder name defined by the corresponding file-format config
 # option
-    @property
-    def album_folder_name(self):
+    def album_folder_name(self, discno):
         """ returns the album as the name for the sub-dir for multi disc
             releases"""
 
-        folder_name = "%s%s" % (get_clean_filename(str(self.album.title)), self.disc_folder_name)
-
-        if self.use_lower:
-            folder_name = folder_name.lower()
+        folder_name = get_clean_filename(self._value_from_tag(self.disc_folder_name, discno, 1, 1))
 
         return folder_name
 
