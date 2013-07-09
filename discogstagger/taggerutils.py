@@ -224,6 +224,8 @@ class TaggerUtils(object):
 
         return dir_name
 
+# !TODO the following method should use folder name defined by the corresponding file-format config
+# option
     @property
     def album_folder_name(self):
         """ returns the album as the name for the sub-dir for multi disc
@@ -236,6 +238,7 @@ class TaggerUtils(object):
 
         return folder_name
 
+# !TODO use templates for the following methods, to be able to define different files
     @property
     def m3u_filename(self):
         """ generates the m3u file name """
