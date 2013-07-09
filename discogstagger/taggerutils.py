@@ -228,8 +228,6 @@ class TaggerUtils(object):
 
         return dir_name
 
-# !TODO the following method should use folder name defined by the corresponding file-format config
-# option
     def album_folder_name(self, discno):
         """ returns the album as the name for the sub-dir for multi disc
             releases"""
