@@ -20,8 +20,7 @@ from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.taggerutils import TaggerUtils
 
-
-class TestTaggerUtils:
+class TaggerUtilsBase(object):
 
     def setUp(self):
         self.ogsrelid = "1448190"
@@ -38,6 +37,8 @@ class TestTaggerUtils:
         self.ogsrelid = None
         self.config = None
         self.album = None
+
+class TestTaggerUtils(TaggerUtilsBase):
 
     def test_value_from_tag_format(self):
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
@@ -100,29 +101,60 @@ class TestTaggerUtils:
         assert taggerutils.album_folder_name(1) == "megahits_2001_die_erste-disc1"
         assert taggerutils.album_folder_name(2) == "megahits_2001_die_erste-disc2"
 
-    def test_get_target_list(self):
-        source_dir = "/tmp/dummy_source_dir"
-        target_dir = "/tmp/dummy_dest_dir"
-        source_file = "test/files/test.flac"
+class TestTaggerUtilFiles(TaggerUtilsBase):
 
-        os.mkdir(source_dir)
-        os.mkdir(target_dir)
+    def setUp(self):
+        TaggerUtilsBase.setUp(self)
 
+        self.source_dir = "/tmp/dummy_source_dir"
+        self.target_dir = "/tmp/dummy_dest_dir"
+        self.source_file = "test/files/test.flac"
+        self.source_copy_file = "test/files/test.txt"
+
+        os.mkdir(self.source_dir)
+        os.mkdir(self.target_dir)
+
+    def tearDown(self):
+        TaggerUtilsBase.tearDown(self)
+
+        shutil.rmtree(self.source_dir)
+        shutil.rmtree(self.target_dir)
+
+    def test__get_target_list(self):
         # copy file to source directory and rename it
         for i in range(1, 21):
             target_file_name = "%.2d-song.flac" % i
-            logger.debug("file_name: %s" % target_file_name)
-            shutil.copyfile(source_file, os.path.join(source_dir, target_file_name))
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
 
-        taggerutils = TaggerUtils(source_dir, target_dir, self.ogsrelid,
+        # copy file to source directory and rename it
+        target_file_name = "album.m3u"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.cue"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
                                   self.config, self.album)
 
         result = taggerutils._get_target_list()
 
-        assert not result["target_list"] == None
+        assert not result["target_list"] == []
         assert len(result["target_list"]) == 20
 
-        assert result["copy_files"] == []
+        assert not result["copy_files"] == []
+        assert len(result["copy_files"]) == 2
 
-        shutil.rmtree(source_dir)
-        shutil.rmtree(target_dir)
+    def test__get_tag_map(self):
+        # copy file to source directory and rename it
+        for i in range(1, 21):
+            target_file_name = "%.2d-song.flac" % i
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
+                                  self.config, self.album)
+
+        tag_map = taggerutils._get_tag_map()
+
+        logger.debug("tag_map: %s" % tag_map)
+
+        assert len(tag_map) == 20

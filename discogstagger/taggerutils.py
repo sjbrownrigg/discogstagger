@@ -131,7 +131,10 @@ class TaggerUtils(object):
         return format
 
     def _get_target_list(self):
-        """ fetches a list of files in the self.sourcedir location. """
+        """ fetches a list of files with the defined file_type
+            in the self.sourcedir location as target_list, other
+            files int he sourcedir are returned in the copy_files list.
+        """
 
         copy_files = None
         target_list = None
@@ -174,29 +177,30 @@ class TaggerUtils(object):
 
         return {"target_list": target_list, "copy_files": copy_files}
 
-    def _get_tag_map(self):
+    def _get_tag_map(self, discno=1):
         """ matches the old with new via TargetTagMap object. """
 
         tag_map = []
+        files_to_tag = self._get_target_list()["target_list"]
 
         # ignore files that do not match FILE_TYPE
-        for position, filename in enumerate(self.files_to_tag):
+        for position, filename in enumerate(files_to_tag):
             logger.debug("track position: %d" % position)
             # add the found files to the tag_map list
             logger.debug("mapping file %s --to--> %s - %s" % (filename,
-                         self.album.tracks[position].artist,
-                         self.album.tracks[position].title))
+                         self.album.discs[discno - 1].tracks[position].artists[0],
+                         self.album.discs[discno - 1].tracks[position].title))
             pos = position + 1
-            track = self.album.tracks[position]
+            track = self.album.discs[discno - 1].tracks[position]
             track.orig_file = filename
             fileext = os.path.splitext(filename)[1]
 
             # special handling for Various Artists discs
-            if self.album.artist == "Various":
-                newfile = self._value_from_tag(self.va_song_format,
+            if self.album.artists[0] == "Various":
+                newfile = self._value_from_tag(self.va_song_format, discno,
                                            track.tracknumber, position, fileext)
             else:
-                newfile = self._value_from_tag(self.song_format,
+                newfile = self._value_from_tag(self.song_format, discno,
                                            track.tracknumber, position, fileext)
 
             track.new_file = get_clean_filename(newfile)
