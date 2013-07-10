@@ -177,6 +177,9 @@ class TaggerUtils(object):
 
         return {"target_list": target_list, "copy_files": copy_files}
 
+# !TODO refactor to use album.disc structure instead of an own map...
+# set directory for each disc (source and target) onto album.disc already
+# before calling this one.
     def _get_tag_map(self, discno=1):
         """ matches the old with new via TargetTagMap object. """
 
