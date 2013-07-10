@@ -137,6 +137,10 @@ else:
 logger.info("Downloading and storing images")
 get_images(release.album.images, dest_dir_name, images_format, first_image_name)
 
+# !TODO remove all the following stuff, should be done in the taggerutils (rename
+# to taghandler?) or in a new class, this wrapper should just provide all needed
+# information for the real tagging and thats it.
+
 disc_names = dict()
 folder_names = dict()
 if release.album.disctotal > 1 and split_discs_folder:

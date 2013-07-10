@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os, sys
+import shutil
 from nose.tools import *
 
 import logging
@@ -97,3 +98,31 @@ class TestTaggerUtils:
                                   self.config, self.album)
 
         assert taggerutils.album_folder_name(1) == "megahits_2001_die_erste-disc1"
+        assert taggerutils.album_folder_name(2) == "megahits_2001_die_erste-disc2"
+
+    def test_get_target_list(self):
+        source_dir = "/tmp/dummy_source_dir"
+        target_dir = "/tmp/dummy_dest_dir"
+        source_file = "test/files/test.flac"
+
+        os.mkdir(source_dir)
+        os.mkdir(target_dir)
+
+        # copy file to source directory and rename it
+        for i in range(1, 21):
+            target_file_name = "%.2d-song.flac" % i
+            logger.debug("file_name: %s" % target_file_name)
+            shutil.copyfile(source_file, os.path.join(source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(source_dir, target_dir, self.ogsrelid,
+                                  self.config, self.album)
+
+        result = taggerutils._get_target_list()
+
+        assert not result["target_list"] == None
+        assert len(result["target_list"]) == 20
+
+        assert result["copy_files"] == []
+
+        shutil.rmtree(source_dir)
+        shutil.rmtree(target_dir)

@@ -134,6 +134,8 @@ class TaggerUtils(object):
         """ fetches a list of files in the self.sourcedir location. """
 
         copy_files = None
+        target_list = None
+
         try:
             dir_list = os.listdir(self.sourcedir)
             dir_list.sort()
@@ -141,9 +143,9 @@ class TaggerUtils(object):
             # strip unwanted files
             target_list = [os.path.join(self.sourcedir, x) for x in dir_list
                              if x.lower().endswith(TaggerUtils.FILE_TYPE)]
-            if self.copy_other_files:
-                copy_files = [os.path.join(self.sourcedir, x) for x in
-                    dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
+
+            copy_files = [os.path.join(self.sourcedir, x) for x in dir_list
+                            if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
             if not target_list:
                 logger.debug("target_list empty, try to retrieve subfolders")
@@ -157,11 +159,11 @@ class TaggerUtils(object):
                         tmp_list = [os.path.join(sub_dir, y) for y in tmp_list]
 
 			# strip unwanted files
-			target_list.extend([z for z in tmp_list if
+			target_list.append([z for z in tmp_list if
 				    z.lower().endswith(TaggerUtils.FILE_TYPE)])
-			if self.copy_other_files:
-			    copy_files = [z for z in tmp_list if not
-				    z.lower().endswith(TaggerUtils.FILE_TYPE)]
+
+		    copy_files = [z for z in tmp_list if not
+                    z.lower().endswith(TaggerUtils.FILE_TYPE)]
 
         except OSError, e:
             if e.errno == errno.EEXIST:
