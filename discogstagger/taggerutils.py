@@ -81,6 +81,10 @@ class TaggerUtils(object):
             discogs_album = DiscogsAlbum(ogsrelid)
             self.album = discogs_album.map()
 
+        # the album itself (or the discogsalbum), does not need to know about
+        # this
+        self.album.sourcedir = sourcedir
+        self.album.destdir = destdir
 
 
  #       if len(self.files_to_tag) == len(self.album.tracks):
@@ -136,8 +140,8 @@ class TaggerUtils(object):
             files int he sourcedir are returned in the copy_files list.
         """
 
-        copy_files = None
-        target_list = None
+        copy_files = []
+        target_list = []
 
         try:
             dir_list = os.listdir(self.sourcedir)
@@ -150,23 +154,31 @@ class TaggerUtils(object):
             copy_files = [os.path.join(self.sourcedir, x) for x in dir_list
                             if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
+            logger.debug("copy_files: %s" % copy_files)
+
             if not target_list:
                 logger.debug("target_list empty, try to retrieve subfolders")
-                for y in dir_list:
+                for i, y in enumerate(dir_list):
                     tmp_list = []
                     logger.debug("subfolder: %s" % y)
+
                     sub_dir = os.path.join(self.sourcedir, y)
                     if os.path.isdir(sub_dir):
                         tmp_list.extend(os.listdir(sub_dir))
                         tmp_list.sort()
                         tmp_list = [os.path.join(sub_dir, y) for y in tmp_list]
 
+                        if self.album.has_multi_disc:
+                            self.album.discs[i].sourcedir = y
+
 			# strip unwanted files
-			target_list.append([z for z in tmp_list if
+			target_list.extend([z for z in tmp_list if
 				    z.lower().endswith(TaggerUtils.FILE_TYPE)])
 
-		    copy_files = [z for z in tmp_list if not
-                    z.lower().endswith(TaggerUtils.FILE_TYPE)]
+		    copy_files.extend([z for z in tmp_list if not
+                    z.lower().endswith(TaggerUtils.FILE_TYPE)])
+
+            logger.debug("copy_files: %s" % copy_files)
 
         except OSError, e:
             if e.errno == errno.EEXIST:

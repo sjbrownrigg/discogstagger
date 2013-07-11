@@ -39,3 +39,7 @@ class Album(BaseObject):
         self.title = title
         self.discs = []
         self.fileformat = "flac"
+
+    @property
+    def has_multi_disc(self):
+        return len(self.discs) > 1

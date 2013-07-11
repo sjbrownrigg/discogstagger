@@ -108,6 +108,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
 
         self.source_dir = "/tmp/dummy_source_dir"
         self.target_dir = "/tmp/dummy_dest_dir"
+
         self.source_file = "test/files/test.flac"
         self.source_copy_file = "test/files/test.txt"
 
@@ -120,17 +121,25 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         shutil.rmtree(self.source_dir)
         shutil.rmtree(self.target_dir)
 
-    def test__get_target_list(self):
+    def test__get_target_list_multi_disc(self):
         # copy file to source directory and rename it
-        for i in range(1, 21):
-            target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+        for dir in range(1, 3):
+            dir_name = "disc%d" % dir
+            multi_source_dir = os.path.join(self.source_dir, dir_name)
+            logger.debug("multi source dir: %s" % multi_source_dir)
+            os.mkdir(multi_source_dir)
 
-        # copy file to source directory and rename it
-        target_file_name = "album.m3u"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+            for i in range(1, 21):
+                target_file_name = "%.2d-song.flac" % i
+                shutil.copyfile(self.source_file, os.path.join(multi_source_dir, target_file_name))
 
-        target_file_name = "album.cue"
+            target_file_name = "album.m3u"
+            shutil.copyfile(self.source_copy_file, os.path.join(multi_source_dir, target_file_name))
+
+            target_file_name = "album.cue"
+            shutil.copyfile(self.source_copy_file, os.path.join(multi_source_dir, target_file_name))
+
+        target_file_name = "id.txt"
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
@@ -139,16 +148,55 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         result = taggerutils._get_target_list()
 
         assert not result["target_list"] == []
-        assert len(result["target_list"]) == 20
+        logger.debug("result: %s" % len(result["target_list"]))
+        assert len(result["target_list"]) == 40
 
         assert not result["copy_files"] == []
-        assert len(result["copy_files"]) == 2
+        logger.debug("result2: %s " % len(result["copy_files"]))
+        assert len(result["copy_files"]) == 7
 
+    def test__get_target_list_single_disc(self):
+        self.ogsrelid = "3083"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+        self.config = tagger_config.config
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
+        self.album = discogs_album.map()
+
+        # copy file to source directory and rename it
+        for i in range(1, 18):
+            target_file_name = "%.2d-song.flac" % i
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.m3u"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.cue"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "id.txt"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
+                                  self.config, self.album)
+
+        result = taggerutils._get_target_list()
+
+        assert not result["target_list"] == []
+        assert len(result["target_list"]) == 17
+
+        assert not result["copy_files"] == []
+        assert len(result["copy_files"]) == 3
+
+"""
     def test__get_tag_map(self):
         # copy file to source directory and rename it
         for i in range(1, 21):
             target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))#
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
                                   self.config, self.album)
@@ -158,3 +206,4 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         logger.debug("tag_map: %s" % tag_map)
 
         assert len(tag_map) == 20
+"""

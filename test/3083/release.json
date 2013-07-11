@@ -1,0 +1,890 @@
+{
+  "resp": {
+    "status": true,
+    "release": {
+      "status": "Accepted",
+      "styles": [
+        "Downtempo",
+        "Trip Hop"
+      ],
+      "videos": [
+        {
+          "duration": 65,
+          "description": "YONDERBOI - Intro",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=YTzzFHZILU8",
+          "title": "YONDERBOI - Intro"
+        },
+        {
+          "duration": 237,
+          "description": "Yonderboi - Road Movie",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=p4s2eNJNQ6g",
+          "title": "Yonderboi - Road Movie"
+        },
+        {
+          "duration": 173,
+          "description": "Yonderboi - 100% Trevira",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=srzHr8JWxEM",
+          "title": "Yonderboi - 100% Trevira"
+        },
+        {
+          "duration": 525,
+          "description": "Yonderboi - Milonga Del Mar",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=2nDZNF5gME0",
+          "title": "Yonderboi - Milonga Del Mar"
+        },
+        {
+          "duration": 293,
+          "description": "Yonderboi - Sinking Slowly",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=Hq10OcjJJY8",
+          "title": "Yonderboi - Sinking Slowly"
+        },
+        {
+          "duration": 224,
+          "description": "Yonderboi - Chase & chaser",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=PiKKI9JIR70",
+          "title": "Yonderboi - Chase & chaser"
+        },
+        {
+          "duration": 288,
+          "description": "Yonderboi - Thousand Bells",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=d6Am_01vtjw",
+          "title": "Yonderboi - Thousand Bells"
+        },
+        {
+          "duration": 72,
+          "description": "Yonderboi - Cantaloupe Island (Interlude)",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=eA11tm3fwCU",
+          "title": "Yonderboi - Cantaloupe Island (Interlude)"
+        },
+        {
+          "duration": 318,
+          "description": "Yonderboi - Fairy Of The Lake",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=9w2bQAOU8ro",
+          "title": "Yonderboi - Fairy Of The Lake"
+        },
+        {
+          "duration": 209,
+          "description": "Yonderboi - Ohne Chanteuse",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=butlFTTcMAc",
+          "title": "Yonderboi - Ohne Chanteuse"
+        },
+        {
+          "duration": 418,
+          "description": "Yonderboi - Road Movie",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=HdtBJ8RGMV0",
+          "title": "Yonderboi - Road Movie"
+        },
+        {
+          "duration": 270,
+          "description": "Yonderboi - No Answe Petrograd",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=l-MQWQ6qrws",
+          "title": "Yonderboi - No Answe Petrograd"
+        },
+        {
+          "duration": 245,
+          "description": "Yonderboi - Bodysurf",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=0SfYoFTsPOo",
+          "title": "Yonderboi - Bodysurf"
+        },
+        {
+          "duration": 173,
+          "description": "Yonderboi - 100 percent trevira",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=OCKpvSoMiVw",
+          "title": "Yonderboi - 100 percent trevira"
+        },
+        {
+          "duration": 260,
+          "description": "Yonderboi - Riders On The Storm, Pink Solidism",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=6glGL1w6WMc",
+          "title": "Yonderboi - Riders On The Storm, Pink Solidism"
+        },
+        {
+          "duration": 240,
+          "description": "Yonderboi - Pabadam",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=u6kwfZ2vatE",
+          "title": "Yonderboi - Pabadam"
+        },
+        {
+          "duration": 420,
+          "description": "Yonderboi - Another Geometry (Live in Moscow)",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=jHFifI2s3uc",
+          "title": "Yonderboi - Another Geometry (Live in Moscow)"
+        },
+        {
+          "duration": 29,
+          "description": "Yonderboi - The Severance",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=U6Ohr8Ght4M",
+          "title": "Yonderboi - The Severance"
+        },
+        {
+          "duration": 309,
+          "description": "Yonderboi - Another Geometry",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=F2hE-rqpCAE",
+          "title": "Yonderboi - Another Geometry"
+        },
+        {
+          "duration": 298,
+          "description": "Yonderboi - Sinking Slowly",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=8qSBspAdsmo",
+          "title": "Yonderboi - Sinking Slowly"
+        },
+        {
+          "duration": 249,
+          "description": "Yonderboi - Bodysurf",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=29THHJZdp6Q",
+          "title": "Yonderboi - Bodysurf"
+        },
+        {
+          "duration": 259,
+          "description": "Yonderboi - Riders on the Storm.",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=VyNSRoxdKx4",
+          "title": "Yonderboi - Riders on the Storm."
+        },
+        {
+          "duration": 411,
+          "description": "yonderboi - road movie",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=QfLDQ5PltPQ",
+          "title": "yonderboi - road movie"
+        },
+        {
+          "duration": 310,
+          "description": "Yonderboi ~ Fairy Of The Lake",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=3kK-A_t5ZIQ",
+          "title": "Yonderboi ~ Fairy Of The Lake"
+        },
+        {
+          "duration": 313,
+          "description": "Yonderboi - Another Geometry",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=D_R1MRpSLcs",
+          "title": "Yonderboi - Another Geometry"
+        },
+        {
+          "duration": 80,
+          "description": "Yonderboi - Outro",
+          "embed": true,
+          "uri": "http://www.youtube.com/watch?v=DOlg3PZEygk",
+          "title": "Yonderboi - Outro"
+        }
+      ],
+      "series": [],
+      "released_formatted": "21 Feb 2000",
+      "labels": [
+        {
+          "id": 236,
+          "resource_url": "http://api.discogs.com/labels/236",
+          "catno": "MOLECD023-2",
+          "name": "Mole Listening Pearls",
+          "entity_type": ""
+        },
+        {
+          "id": 236,
+          "resource_url": "http://api.discogs.com/labels/236",
+          "catno": "MOLE023-2",
+          "name": "Mole Listening Pearls",
+          "entity_type": ""
+        }
+      ],
+      "community": {
+        "status": "Accepted",
+        "rating": {
+          "count": 99,
+          "average": 4.46
+        },
+        "have": 227,
+        "contributors": [
+          {
+            "username": "koil",
+            "resource_url": "http://api.discogs.com/users/koil"
+          },
+          {
+            "username": "CommercialSuicide",
+            "resource_url": "http://api.discogs.com/users/CommercialSuicide"
+          },
+          {
+            "username": "assaiki",
+            "resource_url": "http://api.discogs.com/users/assaiki"
+          },
+          {
+            "username": "kisdubos",
+            "resource_url": "http://api.discogs.com/users/kisdubos"
+          },
+          {
+            "username": "RipYo",
+            "resource_url": "http://api.discogs.com/users/RipYo"
+          },
+          {
+            "username": "wax_junkie",
+            "resource_url": "http://api.discogs.com/users/wax_junkie"
+          },
+          {
+            "username": "cocktailmix",
+            "resource_url": "http://api.discogs.com/users/cocktailmix"
+          }
+        ],
+        "want": 30,
+        "submitter": {
+          "username": "koil",
+          "resource_url": "http://api.discogs.com/users/koil"
+        },
+        "data_quality": "Needs Vote"
+      },
+      "released": "2000-02-21",
+      "master_url": "http://api.discogs.com/masters/31587",
+      "year": 2000,
+      "images": [
+        {
+          "uri": "http://api.discogs.com/image/R-3083-1167766285.jpeg",
+          "height": 598,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-3083-1167766285.jpeg",
+          "type": "primary",
+          "uri150": "http://api.discogs.com/image/R-150-3083-1167766285.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-3083-1167766455.jpeg",
+          "height": 598,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-3083-1167766455.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-3083-1167766455.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-3083-1167766557.jpeg",
+          "height": 600,
+          "width": 598,
+          "resource_url": "http://api.discogs.com/image/R-3083-1167766557.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-3083-1167766557.jpeg"
+        },
+        {
+          "uri": "http://api.discogs.com/image/R-3083-1167766634.jpeg",
+          "height": 470,
+          "width": 600,
+          "resource_url": "http://api.discogs.com/image/R-3083-1167766634.jpeg",
+          "type": "secondary",
+          "uri150": "http://api.discogs.com/image/R-150-3083-1167766634.jpeg"
+        }
+      ],
+      "id": 3083,
+      "genres": [
+        "Electronic"
+      ],
+      "thumb": "http://api.discogs.com/image/R-150-3083-1167766285.jpeg",
+      "extraartists": [
+        {
+          "join": "",
+          "name": "UC Graphic",
+          "anv": "U.C.Graphic",
+          "tracks": "",
+          "role": "Artwork",
+          "resource_url": "http://api.discogs.com/artists/1832542",
+          "id": 1832542
+        },
+        {
+          "join": "",
+          "name": "Árpád Vajdovich",
+          "anv": "",
+          "tracks": "2, 3, 6, 7, 13",
+          "role": "Bass",
+          "resource_url": "http://api.discogs.com/artists/458745",
+          "id": 458745
+        },
+        {
+          "join": "",
+          "name": "Balázs Zságer",
+          "anv": "",
+          "tracks": "8, 12, 16",
+          "role": "Electric Piano [Fender Rhodes]",
+          "resource_url": "http://api.discogs.com/artists/458747",
+          "id": 458747
+        },
+        {
+          "join": "",
+          "name": "Andor Kovács",
+          "anv": "",
+          "tracks": "3, 9, 10, 13",
+          "role": "Guitar",
+          "resource_url": "http://api.discogs.com/artists/355877",
+          "id": 355877
+        },
+        {
+          "join": "",
+          "name": "Balázs Zságer",
+          "anv": "",
+          "tracks": "2, 3, 7, 13, 14, 16",
+          "role": "Keyboards",
+          "resource_url": "http://api.discogs.com/artists/458747",
+          "id": 458747
+        },
+        {
+          "join": "",
+          "name": "Zoltán Tombor",
+          "anv": "",
+          "tracks": "",
+          "role": "Photography By [Cover]",
+          "resource_url": "http://api.discogs.com/artists/2243763",
+          "id": 2243763
+        },
+        {
+          "join": "",
+          "name": "László Fogarasi Jr.",
+          "anv": "",
+          "tracks": "",
+          "role": "Producer, Mixed By, Programmed By, Arranged By, Technician [Knobs & Faders]",
+          "resource_url": "http://api.discogs.com/artists/458749",
+          "id": 458749
+        },
+        {
+          "join": "",
+          "name": "Dániel Váczi",
+          "anv": "",
+          "tracks": "2, 3, 5",
+          "role": "Saxophone",
+          "resource_url": "http://api.discogs.com/artists/458750",
+          "id": 458750
+        },
+        {
+          "join": "",
+          "name": "DJ Bootsie",
+          "anv": "Bootsie",
+          "tracks": "1, 5, 7, 11, 15",
+          "role": "Scratches",
+          "resource_url": "http://api.discogs.com/artists/322885",
+          "id": 322885
+        },
+        {
+          "join": "",
+          "name": "Edina Kutzora",
+          "anv": "",
+          "tracks": "2, 3, 8, 14",
+          "role": "Vocals",
+          "resource_url": "http://api.discogs.com/artists/117983",
+          "id": 117983
+        }
+      ],
+      "title": "Shallow And Profound",
+      "country": "Germany",
+      "identifiers": [
+        {
+          "type": "Barcode",
+          "description": "Text",
+          "value": "4 017866 921482"
+        },
+        {
+          "type": "Barcode",
+          "description": "Scanned",
+          "value": "4017866921482"
+        },
+        {
+          "type": "Matrix / Runout",
+          "value": "UCMG MOLECD023-2 A030627-01"
+        },
+        {
+          "type": "Other",
+          "description": "Mastering SID Code",
+          "value": "ifpi L571"
+        },
+        {
+          "type": "Other",
+          "description": "Mould SID Code",
+          "value": "IFPI 9713"
+        },
+        {
+          "type": "Other",
+          "description": "Label Code",
+          "value": "LC 6082"
+        },
+        {
+          "type": "Other",
+          "description": "Rights Society",
+          "value": "GEMA"
+        }
+      ],
+      "companies": [],
+      "uri": "http://www.discogs.com/Yonderboi-Shallow-And-Profound/release/3083",
+      "artists": [
+        {
+          "join": "",
+          "name": "Yonderboi",
+          "anv": "",
+          "tracks": "",
+          "role": "",
+          "resource_url": "http://api.discogs.com/artists/1784",
+          "id": 1784
+        }
+      ],
+      "formats": [
+        {
+          "descriptions": [
+            "Album"
+          ],
+          "name": "CD",
+          "qty": "1"
+        }
+      ],
+      "resource_url": "http://api.discogs.com/releases/3083",
+      "master_id": 31587,
+      "tracklist": [
+        {
+          "duration": "1:03",
+          "position": "1",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Benski",
+              "anv": "",
+              "tracks": "",
+              "role": "Vocals [Words]",
+              "resource_url": "http://api.discogs.com/artists/458752",
+              "id": 458752
+            }
+          ],
+          "title": "Intro"
+        },
+        {
+          "duration": "8:44",
+          "position": "2",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Balázs Zságer",
+              "anv": "Zságer",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458747",
+              "id": 458747
+            },
+            {
+              "join": "",
+              "name": "Edina Kutzora",
+              "anv": "Kutzora",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/117983",
+              "id": 117983
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Milonga Del Mar"
+        },
+        {
+          "duration": "3:41",
+          "position": "3",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Dániel Váczi",
+              "anv": "Váczi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458750",
+              "id": 458750
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Chase And Chaser"
+        },
+        {
+          "duration": "1:09",
+          "position": "4",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "David Yengibarian",
+              "anv": "",
+              "tracks": "",
+              "role": "Accordion",
+              "resource_url": "http://api.discogs.com/artists/458748",
+              "id": 458748
+            },
+            {
+              "join": "",
+              "name": "Herbie Hancock",
+              "anv": "Hancock",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/3865",
+              "id": 3865
+            }
+          ],
+          "title": "Cantaloupe Island (Interlude)"
+        },
+        {
+          "duration": "3:41",
+          "position": "5",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Ohne Chanteuse"
+        },
+        {
+          "duration": "4:32",
+          "position": "6",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "David Yengibarian",
+              "anv": "",
+              "tracks": "",
+              "role": "Accordion",
+              "resource_url": "http://api.discogs.com/artists/458748",
+              "id": 458748
+            },
+            {
+              "join": "",
+              "name": "David Yengibarian",
+              "anv": "Yengibarian",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458748",
+              "id": 458748
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "No Answer From Petrograd"
+        },
+        {
+          "duration": "2:52",
+          "position": "7",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Balázs Zságer",
+              "anv": "",
+              "tracks": "",
+              "role": "Noises [Comb]",
+              "resource_url": "http://api.discogs.com/artists/458747",
+              "id": 458747
+            },
+            {
+              "join": "",
+              "name": "Balázs Zságer",
+              "anv": "Zságer",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458747",
+              "id": 458747
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "100% Trevira"
+        },
+        {
+          "duration": "3:59",
+          "position": "8",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Dr. Zsombor Zubka",
+              "anv": "",
+              "tracks": "",
+              "role": "Vibraphone",
+              "resource_url": "http://api.discogs.com/artists/458746",
+              "id": 458746
+            },
+            {
+              "join": "",
+              "name": "Dr. Zsombor Zubka",
+              "anv": "Zubka",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458746",
+              "id": 458746
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Pabadam"
+        },
+        {
+          "duration": "0:23",
+          "position": "9",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Andor Kovács",
+              "anv": "Kovács",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/355877",
+              "id": 355877
+            }
+          ],
+          "title": "The Severance"
+        },
+        {
+          "duration": "4:52",
+          "position": "10",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Andor Kovács",
+              "anv": "Kovács",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/355877",
+              "id": 355877
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Sinking Slowly"
+        },
+        {
+          "duration": "4:04",
+          "position": "11",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Body Surf"
+        },
+        {
+          "duration": "4:19",
+          "position": "12",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Jim Morrison",
+              "anv": "Morrison",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/260501",
+              "id": 260501
+            },
+            {
+              "join": "",
+              "name": "John Densmore",
+              "anv": "Densmore",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/271572",
+              "id": 271572
+            },
+            {
+              "join": "",
+              "name": "Ray Manzarek",
+              "anv": "Manzarek",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/242088",
+              "id": 242088
+            },
+            {
+              "join": "",
+              "name": "Robby Krieger",
+              "anv": "Krieger",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/271569",
+              "id": 271569
+            }
+          ],
+          "title": "Riders On The Storm / Pink Solidism"
+        },
+        {
+          "duration": "6:50",
+          "position": "13",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Andor Kovács",
+              "anv": "Kovács",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/355877",
+              "id": 355877
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Road Movie"
+        },
+        {
+          "duration": "4:46",
+          "position": "14",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Balázs Zságer",
+              "anv": "Zságer",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458747",
+              "id": 458747
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Thousand Bells"
+        },
+        {
+          "duration": "5:08",
+          "position": "15",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Dr. Zsombor Zubka",
+              "anv": "",
+              "tracks": "",
+              "role": "Vibraphone",
+              "resource_url": "http://api.discogs.com/artists/458746",
+              "id": 458746
+            },
+            {
+              "join": "",
+              "name": "Dr. Zsombor Zubka",
+              "anv": "Zubka",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458746",
+              "id": 458746
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Fairy Of The Lake"
+        },
+        {
+          "duration": "5:13",
+          "position": "16",
+          "extraartists": [
+            {
+              "join": "",
+              "name": "Balázs Zságer",
+              "anv": "Zságer",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458747",
+              "id": 458747
+            },
+            {
+              "join": "",
+              "name": "László Fogarasi Jr.",
+              "anv": "Fogarasi",
+              "tracks": "",
+              "role": "Written-By",
+              "resource_url": "http://api.discogs.com/artists/458749",
+              "id": 458749
+            }
+          ],
+          "title": "Another Geometry"
+        },
+        {
+          "duration": "1:19",
+          "position": "17",
+          "title": "Outro"
+        }
+      ],
+      "data_quality": "Needs Vote"
+    },
+    "version": "2.0"
+  }
+}

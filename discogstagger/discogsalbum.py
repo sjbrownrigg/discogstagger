@@ -173,33 +173,25 @@ class DiscogsAlbum(object):
             problem right now, discogs uses - and/or . as a separator, furthermore discogs uses
             A1 for vinyl based releases, we should implement this as well
         """
-        idx = position.find("-")
-        if idx == -1:
-            idx = position.find(".")
-# need to find a nice regular expression for this
-#        if idx == -1:
-#            idx = position.find("A")
-#            discnumber = 1
-        if idx == -1:
-            idx = 0
-        tracknumber = position[idx + 1:]
-        discnumber = position[:idx]
+        if position.find("-") > -1 or position.find(".") > -1:
+            # some variance in how discogs releases spanning multiple discs
+            # or formats are kept, add regexs here as failures are encountered
+            NUMBERING_SCHEMES = (
+                "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
+                "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
+                "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05
+            )
 
-        # some variance in how discogs releases spanning multiple discs
-        # or formats are kept, add regexs here as failures are encountered
-        NUMBERING_SCHEMES = (
-            "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
-            "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
-            "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05
-        )
+            for scheme in NUMBERING_SCHEMES:
+                re_match = re.search(scheme, position)
 
-        for scheme in NUMBERING_SCHEMES:
-            re_match = re.search(scheme, position)
+                if re_match:
+                    return {'tracknumber': re_match.group("tracknumber"),
+                            'discnumber': re_match.group("discnumber")}
+        else:
+            return {'tracknumber': position,
+                    'discnumber': 1}
 
-            if re_match:
-#                logging.debug("Found a disc and track number")
-                return {'tracknumber': re_match.group("tracknumber"),
-                        'discnumber': re_match.group("discnumber")}
 
         logging.error("Unable to match multi-disc track/position")
         return False

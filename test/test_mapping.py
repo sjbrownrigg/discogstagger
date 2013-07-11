@@ -244,3 +244,51 @@ def test_map_multidisc_with_disctitle_for_tracks():
     assert track.title == "Stupid"
     assert track.discsubtitle == "Bonustracks"
     assert track.artists[0] == "Deine Lakaien"
+
+def test_map_singledisc():
+    ogsrelid = "3083"
+
+    dummy_response = DummyResponse(ogsrelid)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    album = dummy_discogs_album.map()
+
+    assert len(album.labels) == 2
+    assert album.labels[0] == "Mole Listening Pearls"
+
+    assert len(album.catnumbers) == len(album.labels)
+    assert album.catnumbers[0] == "MOLECD023-2"
+
+    assert len(album.images) == 4
+    assert album.images[0] == "http://api.discogs.com/image/R-3083-1167766285.jpeg"
+
+    assert album.title == "Shallow And Profound"
+
+    assert len(album.artists) == 1
+    assert album.artists[0] == "Yonderboi"
+
+    assert len(album.genres) == 1
+
+    assert len(album.styles) == 2
+
+    assert not album.is_compilation
+
+    assert album.disctotal == 1
+    assert len(album.discs) == album.disctotal
+
+    assert len(album.discs[0].tracks) == 17
+
+# first track on first disc
+    track = album.discs[0].tracks[0]
+
+    assert track.tracknumber == 1
+    assert track.discnumber == 1
+    assert track.title == "Intro"
+    assert track.artists[0] == "Yonderboi"
+
+# last track on first disc
+    track = album.discs[0].tracks[16]
+
+    assert track.tracknumber == 17
+    assert track.discnumber == 1
+    assert track.title == "Outro"
+    assert track.artists[0] == "Yonderboi"
