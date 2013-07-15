@@ -135,50 +135,73 @@ class TaggerUtils(object):
         return format
 
     def _get_target_list(self):
-        """ fetches a list of files with the defined file_type
+        """
+            fetches a list of files with the defined file_type
             in the self.sourcedir location as target_list, other
-            files int he sourcedir are returned in the copy_files list.
+            files in the sourcedir are returned in the copy_files list.
         """
 
         copy_files = []
         target_list = []
 
+        sourcedir = self.album.sourcedir
+
         try:
-            dir_list = os.listdir(self.sourcedir)
+            dir_list = os.listdir(sourcedir)
             dir_list.sort()
 
-            # strip unwanted files
-            target_list = [os.path.join(self.sourcedir, x) for x in dir_list
-                             if x.lower().endswith(TaggerUtils.FILE_TYPE)]
+            if self.album.has_multi_disc:
+                self.album.copy_files = []
 
-            copy_files = [os.path.join(self.sourcedir, x) for x in dir_list
-                            if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
-
-            logger.debug("copy_files: %s" % copy_files)
-
-            if not target_list:
-                logger.debug("target_list empty, try to retrieve subfolders")
                 for i, y in enumerate(dir_list):
-                    tmp_list = []
-                    logger.debug("subfolder: %s" % y)
+                    if os.path.isdir(os.path.join(sourcedir, y)):
+                        self.album.discs[i].sourcedir = os.path.join(sourcedir, y)
+                    else:
+                        self.album.copy_files.append(y)
+            else:
+                self.album.discs[0].sourcedir = sourcedir
 
-                    sub_dir = os.path.join(self.sourcedir, y)
-                    if os.path.isdir(sub_dir):
-                        tmp_list.extend(os.listdir(sub_dir))
-                        tmp_list.sort()
-                        tmp_list = [os.path.join(sub_dir, y) for y in tmp_list]
+            for disc in self.album.discs:
+                disc_source_dir = disc.sourcedir
 
-                        if self.album.has_multi_disc:
-                            self.album.discs[i].sourcedir = y
+                logger.debug("discno: %d" % disc.discnumber)
+                logger.debug("sourcedir: %s" % disc.sourcedir)
 
-			# strip unwanted files
-			target_list.extend([z for z in tmp_list if
-				    z.lower().endswith(TaggerUtils.FILE_TYPE)])
+                # strip unwanted files
+                disc_list = os.listdir(disc_source_dir)
+                disc_list.sort()
 
-		    copy_files.extend([z for z in tmp_list if not
-                    z.lower().endswith(TaggerUtils.FILE_TYPE)])
+                disc.copy_files = [x for x in disc_list
+                                if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
-            logger.debug("copy_files: %s" % copy_files)
+                target_list = [os.path.join(disc_source_dir, x) for x in disc_list
+                                 if x.lower().endswith(TaggerUtils.FILE_TYPE)]
+
+                if not len(target_list) == len(disc.tracks):
+                    logger.debug("target_list: %s" % target_list)
+                    logger.error("not matching number of files....")
+                    # we should throw an error in here
+
+                for position, filename in enumerate(target_list):
+                    logger.debug("track position: %d" % position)
+
+                    track = disc.tracks[position]
+
+                    logger.debug("mapping file %s --to--> %s - %s" % (filename,
+                                 track.artists[0], track.title))
+                    track.orig_file = os.path.basename(filename)
+
+                    filetype = os.path.splitext(filename)[1]
+
+                    # special handling for Various Artists discs
+                    if self.album.artists[0] == "Various":
+                        newfile = self._value_from_tag(self.va_song_format, disc.discnumber,
+                                                   track.tracknumber, position, filetype)
+                    else:
+                        newfile = self._value_from_tag(self.song_format, disc.discnumber,
+                                                   track.tracknumber, position, filetype)
+
+                    track.new_file = get_clean_filename(newfile)
 
         except OSError, e:
             if e.errno == errno.EEXIST:
@@ -186,42 +209,6 @@ class TaggerUtils(object):
                 raise IOError("No such directory '%s'", self.sourcedir)
             else:
                 raise IOError("General IO system error '%s'" % errno[e])
-
-        return {"target_list": target_list, "copy_files": copy_files}
-
-# !TODO refactor to use album.disc structure instead of an own map...
-# set directory for each disc (source and target) onto album.disc already
-# before calling this one.
-    def _get_tag_map(self, discno=1):
-        """ matches the old with new via TargetTagMap object. """
-
-        tag_map = []
-        files_to_tag = self._get_target_list()["target_list"]
-
-        # ignore files that do not match FILE_TYPE
-        for position, filename in enumerate(files_to_tag):
-            logger.debug("track position: %d" % position)
-            # add the found files to the tag_map list
-            logger.debug("mapping file %s --to--> %s - %s" % (filename,
-                         self.album.discs[discno - 1].tracks[position].artists[0],
-                         self.album.discs[discno - 1].tracks[position].title))
-            pos = position + 1
-            track = self.album.discs[discno - 1].tracks[position]
-            track.orig_file = filename
-            fileext = os.path.splitext(filename)[1]
-
-            # special handling for Various Artists discs
-            if self.album.artists[0] == "Various":
-                newfile = self._value_from_tag(self.va_song_format, discno,
-                                           track.tracknumber, position, fileext)
-            else:
-                newfile = self._value_from_tag(self.song_format, discno,
-                                           track.tracknumber, position, fileext)
-
-            track.new_file = get_clean_filename(newfile)
-            tag_map.append(track)
-
-        return tag_map
 
     @property
     def dest_dir_name(self):

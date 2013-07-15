@@ -145,15 +145,21 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
                                   self.config, self.album)
 
-        result = taggerutils._get_target_list()
+        taggerutils._get_target_list()
 
-        assert not result["target_list"] == []
-        logger.debug("result: %s" % len(result["target_list"]))
-        assert len(result["target_list"]) == 40
+        assert self.album.copy_files[0] == "id.txt"
 
-        assert not result["copy_files"] == []
-        logger.debug("result2: %s " % len(result["copy_files"]))
-        assert len(result["copy_files"]) == 7
+        assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
+        assert self.album.discs[0].tracks[0].new_file == "01-gigi_dagostino-la_passion_(radio_cut).flac"
+
+        assert self.album.discs[0].tracks[19].orig_file == "20-song.flac"
+        assert self.album.discs[0].tracks[19].new_file == "20-papa_roach-last_resort_(album_version_explizit).flac"
+
+        assert self.album.discs[1].tracks[0].orig_file == "01-song.flac"
+        assert self.album.discs[1].tracks[0].new_file == "01-die_3_generation-ich_will_dass_du_mich_liebst_(radio_edit).flac"
+
+        assert self.album.discs[1].tracks[19].orig_file == "20-song.flac"
+        assert self.album.discs[1].tracks[19].new_file == "20-jay-z-i_just_wanna_love_u_(give_it_2_me)_(radio_edit).flac"
 
     def test__get_target_list_single_disc(self):
         self.ogsrelid = "3083"
@@ -183,27 +189,17 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
                                   self.config, self.album)
 
-        result = taggerutils._get_target_list()
+        taggerutils._get_target_list()
 
-        assert not result["target_list"] == []
-        assert len(result["target_list"]) == 17
+        assert self.album.sourcedir == "/tmp/dummy_source_dir"
+        assert self.album.discs[0].sourcedir == "/tmp/dummy_source_dir"
 
-        assert not result["copy_files"] == []
-        assert len(result["copy_files"]) == 3
+        assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
+        assert self.album.discs[0].tracks[0].new_file == "01-yonderboi-intro.flac"
 
-"""
-    def test__get_tag_map(self):
-        # copy file to source directory and rename it
-        for i in range(1, 21):
-            target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))#
+        assert self.album.discs[0].tracks[16].orig_file == "17-song.flac"
+        assert self.album.discs[0].tracks[16].new_file == "17-yonderboi-outro.flac"
 
-        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
-                                  self.config, self.album)
-
-        tag_map = taggerutils._get_tag_map()
-
-        logger.debug("tag_map: %s" % tag_map)
-
-        assert len(tag_map) == 20
-"""
+        assert self.album.discs[0].copy_files[0] == "album.cue"
+        assert self.album.discs[0].copy_files[1] == "album.m3u"
+        assert self.album.discs[0].copy_files[2] == "id.txt"
