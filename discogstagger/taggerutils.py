@@ -145,6 +145,7 @@ class TaggerUtils(object):
         target_list = []
 
         sourcedir = self.album.sourcedir
+        self.album.target_dir = self.dest_dir_name
 
         try:
             dir_list = os.listdir(sourcedir)
@@ -163,6 +164,11 @@ class TaggerUtils(object):
 
             for disc in self.album.discs:
                 disc_source_dir = disc.sourcedir
+
+                if self.album_folder_name(disc.discnumber) == self.album.target_dir:
+                    disc.target_dir = None
+                else:
+                    disc.target_dir = self.album_folder_name(disc.discnumber)
 
                 logger.debug("discno: %d" % disc.discnumber)
                 logger.debug("sourcedir: %s" % disc.sourcedir)
@@ -240,7 +246,10 @@ class TaggerUtils(object):
         """ returns the album as the name for the sub-dir for multi disc
             releases"""
 
-        folder_name = get_clean_filename(self._value_from_tag(self.disc_folder_name, discno, 1, 1))
+        if self.album.has_multi_disc:
+            folder_name = get_clean_filename(self._value_from_tag(self.dir_format))
+        else:
+            folder_name = get_clean_filename(self._value_from_tag(self.disc_folder_name, discno, 1, 1))
 
         return folder_name
 

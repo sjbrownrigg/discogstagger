@@ -149,6 +149,24 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
 
         assert self.album.copy_files[0] == "id.txt"
 
+        logger.debug("a-source: %s" % self.album.sourcedir)
+        logger.debug("a-source1: %s" % self.album.discs[0].sourcedir)
+        logger.debug("a-source2: %s" % self.album.discs[1].sourcedir)
+
+        assert self.album.sourcedir == "/tmp/dummy_source_dir"
+        assert self.album.discs[0].sourcedir == "disc1"
+        assert self.album.discs[1].sourcedir == "disc2"
+
+        assert self.album.target_dir == "/tmp/dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+        assert self.album.discs[0].target_dir == "megahits_2001_die_erste-disc1"
+        assert self.album.discs[1].target_dir == "megahits_2001_die_erste-disc2"
+
+        assert self.album.discs[0].copy_files[0] == "album.cue"
+        assert self.album.discs[0].copy_files[1] == "album.m3u"
+
+        assert self.album.discs[1].copy_files[0] == "album.cue"
+        assert self.album.discs[1].copy_files[1] == "album.m3u"
+
         assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
         assert self.album.discs[0].tracks[0].new_file == "01-gigi_dagostino-la_passion_(radio_cut).flac"
 
@@ -191,8 +209,15 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
 
         taggerutils._get_target_list()
 
+        logger.debug("a-source: %s" % self.album.sourcedir)
+        logger.debug("a-source1: %s" % self.album.discs[0].sourcedir)
+
         assert self.album.sourcedir == "/tmp/dummy_source_dir"
-        assert self.album.discs[0].sourcedir == "/tmp/dummy_source_dir"
+        assert self.album.discs[0].sourcedir == None
+
+        logger.debug("tdir2: %s" % self.album.discs[0].target_dir)
+        assert self.album.target_dir == "/tmp/dummy_dest_dir"
+        assert self.album.discs[0].target_dir == "yonderboi-shallow_and_profound-(molecd023-2)-germany"
 
         assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
         assert self.album.discs[0].tracks[0].new_file == "01-yonderboi-intro.flac"
