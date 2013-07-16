@@ -1,0 +1,12 @@
+_ _______________________________________________ _ _
+  Name : ${album.artists[0]}, ${album.title}
+ Label : ${album.labels[0]}
+ Genre : ${album.genres[0]}
+ Catno : self.catno
+  Year : self.year
+   URL : self.url
+
+Master : http://www.discogs.com/master/self.master_id
+_ _______________________________________________ _ _
+for song in self.tracks:
+    r += "%.2d. %s - %s\n" % (song.position, song.artist, song.title)

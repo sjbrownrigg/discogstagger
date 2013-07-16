@@ -7,6 +7,9 @@ import sys
 import logging
 from unicodedata import normalize
 
+from mako.template import Template
+from mako.lookup import TemplateLookup
+
 from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.album import Album, Disc, Track
 
@@ -78,6 +81,9 @@ class TaggerUtils(object):
 
         self.album.sourcedir = sourcedir
         self.album.target_dir = self.destdir
+
+        # add template functionality ;-)
+        self.template_lookup = TemplateLookup(directories=["templates"])
 
     def _value_from_tag_format(self, format, discno=1, trackno=1, position=1, filetype=".mp3"):
         """ Fill in the used variables using the track information
@@ -275,6 +281,11 @@ class TaggerUtils(object):
             cf = cf.lower()
 
         return cf
+
+    def create_file_from_template(self, template_name, file_name):
+        file_template = self.template_lookup.get_template(template_name)
+        write_file(file_template.render(album=self.album), 
+            os.path.join(self.album.target_dir, file_name))
 
 
 def write_file(filecontents, filename):

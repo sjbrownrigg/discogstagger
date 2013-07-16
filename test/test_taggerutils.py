@@ -214,3 +214,19 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert self.album.discs[0].copy_files[0] == "album.cue"
         assert self.album.discs[0].copy_files[1] == "album.m3u"
         assert self.album.discs[0].copy_files[2] == "id.txt"
+
+    def test__create_file_from_template(self):
+        self.ogsrelid = "3083"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+        self.config = tagger_config.config
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
+        self.album = discogs_album.map()
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
+                                  self.config, self.album)
+
+        taggerutils.create_file_from_template("/info.txt", "/tmp/info.nfo")
