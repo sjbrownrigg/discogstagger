@@ -70,27 +70,14 @@ class TaggerUtils(object):
         self.sourcedir = sourcedir
         self.destdir = destdir
 
-#        result = self._get_target_list()
-#        self.files_to_tag = result["target_list"]
-#        if self.copy_other_files:
-#            self.copy_files = result["copy_files"]
-
         if not album == None:
             self.album = album
         else:
             discogs_album = DiscogsAlbum(ogsrelid)
             self.album = discogs_album.map()
 
-        # the album itself (or the discogsalbum), does not need to know about
-        # this
         self.album.sourcedir = sourcedir
-        self.album.destdir = destdir
-
-
- #       if len(self.files_to_tag) == len(self.album.tracks):
- #           self.tag_map = self._get_tag_map()
- #       else:
- #           self.tag_map = False
+        self.album.target_dir = self.destdir
 
     def _value_from_tag_format(self, format, discno=1, trackno=1, position=1, filetype=".mp3"):
         """ Fill in the used variables using the track information
@@ -124,11 +111,7 @@ class TaggerUtils(object):
             avoid usage of file extension here already, could lead to problems
         """
         format = self._value_from_tag_format(format, discno, trackno, position, filetype)
-
-        if self.use_lower:
-            format = format.lower()
-
-        format = get_clean_filename(format)
+        format = self.get_clean_filename(format)
 
         logger.debug("output: %s" % format)
 
@@ -145,7 +128,8 @@ class TaggerUtils(object):
         target_list = []
 
         sourcedir = self.album.sourcedir
-        self.album.target_dir = self.dest_dir_name
+
+        logger.debug("target_dir: %s" % self.album.target_dir)
 
         try:
             dir_list = os.listdir(sourcedir)
@@ -156,25 +140,28 @@ class TaggerUtils(object):
 
                 for i, y in enumerate(dir_list):
                     if os.path.isdir(os.path.join(sourcedir, y)):
-                        self.album.discs[i].sourcedir = os.path.join(sourcedir, y)
+                        self.album.discs[i].sourcedir = y
                     else:
                         self.album.copy_files.append(y)
             else:
-                self.album.discs[0].sourcedir = sourcedir
+                self.album.discs[0].sourcedir = None
 
             for disc in self.album.discs:
                 disc_source_dir = disc.sourcedir
 
-                if self.album_folder_name(disc.discnumber) == self.album.target_dir:
+                if disc_source_dir == None:
+                    disc_source_dir = self.album.sourcedir
+
+                if not self.album.has_multi_disc:
                     disc.target_dir = None
                 else:
-                    disc.target_dir = self.album_folder_name(disc.discnumber)
+                    disc.target_dir = self.get_clean_filename(self._value_from_tag_format(self.disc_folder_name, disc.discnumber))
 
                 logger.debug("discno: %d" % disc.discnumber)
                 logger.debug("sourcedir: %s" % disc.sourcedir)
 
                 # strip unwanted files
-                disc_list = os.listdir(disc_source_dir)
+                disc_list = os.listdir(os.path.join(self.album.sourcedir, disc_source_dir))
                 disc_list.sort()
 
                 disc.copy_files = [x for x in disc_list
@@ -207,7 +194,7 @@ class TaggerUtils(object):
                         newfile = self._value_from_tag(self.song_format, disc.discnumber,
                                                    track.tracknumber, position, filetype)
 
-                    track.new_file = get_clean_filename(newfile)
+                    track.new_file = self.get_clean_filename(newfile)
 
         except OSError, e:
             if e.errno == errno.EEXIST:
@@ -230,7 +217,7 @@ class TaggerUtils(object):
         dest_dir = ""
         for ddir in self.dir_format.split("/"):
             logger.debug("d_dir: %s" % ddir)
-            d_dir = get_clean_filename(self._value_from_tag(ddir))
+            d_dir = self.get_clean_filename(self._value_from_tag(ddir))
             if dest_dir == "":
                 dest_dir = d_dir
             else:
@@ -242,58 +229,52 @@ class TaggerUtils(object):
 
         return dir_name
 
-    def album_folder_name(self, discno):
-        """ returns the album as the name for the sub-dir for multi disc
-            releases"""
-
-        if self.album.has_multi_disc:
-            folder_name = get_clean_filename(self._value_from_tag(self.dir_format))
-        else:
-            folder_name = get_clean_filename(self._value_from_tag(self.disc_folder_name, discno, 1, 1))
-
-        return folder_name
-
 # !TODO use templates for the following methods, to be able to define different files
     @property
     def m3u_filename(self):
         """ generates the m3u file name """
 
         m3u = self._value_from_tag(self.m3u_format)
-        return get_clean_filename(m3u)
+        return self.get_clean_filename(m3u)
 
     @property
     def nfo_filename(self):
         """ generates the nfo file name """
 
         nfo = self._value_from_tag(self.nfo_format)
-        return get_clean_filename(nfo)
+        return self.get_clean_filename(nfo)
 
 
-def get_clean_filename(f):
-    """ Removes unwanted characters from file names """
+    def get_clean_filename(self, f):
+        """ Removes unwanted characters from file names """
 
-    filename, fileext = os.path.splitext(f)
+        filename, fileext = os.path.splitext(f)
 
-    if not fileext in TaggerUtils.FILE_TYPE and not fileext in [".m3u", ".nfo"]:
-        logger.debug("fileext: %s" % fileext)
-        filename = f
-        fileext = ""
+        if not fileext in TaggerUtils.FILE_TYPE and not fileext in [".m3u", ".nfo"]:
+            logger.debug("fileext: %s" % fileext)
+            filename = f
+            fileext = ""
 
-    a = unicode(filename, "utf-8")
+        a = unicode(filename, "utf-8")
 
-    for k, v in TaggerUtils.CHAR_EXCEPTIONS.iteritems():
-        a = a.replace(k, v)
+        for k, v in TaggerUtils.CHAR_EXCEPTIONS.iteritems():
+            a = a.replace(k, v)
 
-    a = normalize("NFKD", a).encode("ascii", "ignore")
+        a = normalize("NFKD", a).encode("ascii", "ignore")
 
-    cf = re.compile(r"[^-\w.\(\)_]")
-    cf = cf.sub("", str(a))
+        cf = re.compile(r"[^-\w.\(\)_]")
+        cf = cf.sub("", str(a))
 
-    cf = cf.replace(" ", "_")
-    cf = cf.replace("__", "_")
-    cf = cf.replace("_-_", "-")
+        cf = cf.replace(" ", "_")
+        cf = cf.replace("__", "_")
+        cf = cf.replace("_-_", "-")
 
-    return "%s%s" % (cf, fileext)
+        cf = "".join([cf, fileext])
+
+        if self.use_lower:
+            cf = cf.lower()
+
+        return cf
 
 
 def write_file(filecontents, filename):
