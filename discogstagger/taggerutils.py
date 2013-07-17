@@ -284,8 +284,27 @@ class TaggerUtils(object):
 
     def create_file_from_template(self, template_name, file_name):
         file_template = self.template_lookup.get_template(template_name)
-        write_file(file_template.render(album=self.album), 
+        return write_file(file_template.render(album=self.album),
             os.path.join(self.album.target_dir, file_name))
+
+    def create_nfo(self, dest_dir):
+        """ Writes the .nfo file to disk. """
+        return self.create_file_from_template("info.txt", self.nfo_filename)
+
+    def create_m3u(self, dest_dir):
+        """ Generates the playlist for the given albm.
+            Adhering to the following m3u format.
+
+            ---
+            #EXTM3U
+            #EXTINF:233,Artist - Song
+            directory\file_name.mp3.mp3
+            #EXTINF:-1,My Cool Stream
+            http://www.site.com:8000/listen.pls
+            ---
+
+            Taken from http://forums.winamp.com/showthread.php?s=&threadid=65772"""
+        return self.create_file_from_template("m3u.txt", self.m3u_filename)
 
 
 def write_file(filecontents, filename):
@@ -303,38 +322,6 @@ def write_file(filecontents, filename):
         logger.error("Unable to write file '%s'" % filename)
 
     return True
-
-
-def create_nfo(nfo, dest_dir, nfo_file):
-    """ Writes the .nfo file to disk. """
-
-    return write_file(nfo, os.path.join(dest_dir, nfo_file))
-
-
-def create_m3u(tag_map, folder_names, dest_dir_name, m3u_filename):
-    """ Generates the playlist for the given albm.
-        Adhering to the following m3u format.
-
-        ---
-        #EXTM3U
-        #EXTINF:233,Artist - Song
-        directory\file_name.mp3.mp3
-        #EXTINF:-1,My Cool Stream
-        http://www.site.com:8000/listen.pls
-        ---
-
-        Taken from http://forums.winamp.com/showthread.php?s=&threadid=65772"""
-
-    m3u = "#EXTM3U\n"
-    for track in tag_map:
-        m3u += "#EXTINF:-1,%s - %s\n" % (track.artist, track.title)
-        folder_name = folder_names[track.discnumber]
-        if folder_name is not "":
-            folder_name = "%s/" % folder_name
-        m3u += "%s%s\n" % (folder_name, track.new_file)
-
-    return write_file(m3u, os.path.join(dest_dir_name, m3u_filename))
-
 
 def get_images(images, dest_dir_name, images_format, first_image_name):
     """ Download and store any available images

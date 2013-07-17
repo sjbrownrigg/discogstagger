@@ -1,0 +1,3 @@
+#EXTM3U
+#EXTINF:-1,${track.artists[0]} - ${track.title}
+${track.new_file}

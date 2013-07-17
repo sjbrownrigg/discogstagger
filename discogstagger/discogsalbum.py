@@ -65,33 +65,11 @@ class DiscogsAlbum(object):
         album.disctotal = self.disctotal
         album.is_compilation = self.is_compilation
 
+        album.master_id = self.master_id
+
         album.discs = self.discs_and_tracks(album)
 
         return album
-
-## should be refactored to taggerutils or somewhere, use a template based approach then
-    @property
-    def album_info(self):
-        """ Dumps the release data to a formatted text string. Formatted for
-            .nfo file  """
-
-        logger.debug("Writing nfo file")
-        div = "_ _______________________________________________ _ _\n"
-        r = div
-        r += "  Name : %s - %s\n" % (self.artist, self.title)
-        r += " Label : %s\n" % (self.label)
-        r += " Genre : %s\n" % (self.genre)
-        r += " Catno : %s\n" % (self.catno)
-        r += "  Year : %s\n" % (self.year)
-        r += "   URL : %s\n" % (self.url)
-
-        if self.master_id:
-            r += "Master : http://www.discogs.com/master/%s\n" % self.master_id
-
-        r += div
-        for song in self.tracks:
-            r += "%.2d. %s - %s\n" % (song.position, song.artist, song.title)
-        return r
 
     @property
     def url(self):

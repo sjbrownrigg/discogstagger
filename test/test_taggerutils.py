@@ -229,4 +229,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
                                   self.config, self.album)
 
-        taggerutils.create_file_from_template("/info.txt", "/tmp/info.nfo")
+        create_file = os.path.join(self.target_dir, "info.nfo")
+        assert taggerutils.create_file_from_template("/info.txt", create_file)
+
+        assert os.path.exists(create_file)
