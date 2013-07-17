@@ -19,6 +19,10 @@ class Track(BaseObject):
         self.artists = artists
         self.discsubtitle = None
 
+    @property
+    def artist(self):
+        return self.artists[0]
+
 class Disc(BaseObject):
     """ An album has one or more discs, each disc has a number and
         could have also a disctitle, furthermore several tracks
@@ -27,6 +31,9 @@ class Disc(BaseObject):
     def __init__(self, discnumber):
         self.discnumber = discnumber
         self.tracks = []
+
+    def track(self, trackno):
+        return self.tracks[trackno - 1]
 
 class Album(BaseObject):
     """ An album contains one or more discs and has a title, an artist
@@ -39,7 +46,24 @@ class Album(BaseObject):
         self.title = title
         self.discs = []
         self.fileformat = "flac"
+        self.genres = []
+        self.styles = []
 
     @property
     def has_multi_disc(self):
         return len(self.discs) > 1
+
+    def disc(self, discno):
+        return self.discs[discno - 1]
+
+    @property
+    def artist(self):
+        return self.artists[0]
+
+    @property
+    def genre(self):
+        return self.genres[0]
+
+    @property
+    def style(self):
+        return self.styles[0]

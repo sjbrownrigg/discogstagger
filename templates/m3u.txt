@@ -1,3 +1,7 @@
 #EXTM3U
-#EXTINF:-1,${track.artists[0]} - ${track.title}
+% for disc in album.discs:
+    % for track in disc.tracks:
+#EXTINF:-1,${track.artist} - ${track.title}
 ${track.new_file}
+    % endfor
+% endfor

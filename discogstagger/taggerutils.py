@@ -94,13 +94,13 @@ class TaggerUtils(object):
         """
         property_map = {
             "%ALBTITLE%": self.album.title,
-            "%ALBARTIST%": self.album.artists[0],
+            "%ALBARTIST%": self.album.artist,
             "%YEAR%": self.album.year,
             "%CATNO%": self.album.catnumbers[0],
-            "%GENRE%": self.album.genres[0],
-            "%STYLE%": self.album.styles[0],
-            "%ARTIST%": self.album.discs[discno - 1].tracks[trackno - 1].artists[0],
-            "%TITLE%": self.album.discs[discno - 1].tracks[trackno - 1].title,
+            "%GENRE%": self.album.genre,
+            "%STYLE%": self.album.style,
+            "%ARTIST%": self.album.disc(discno).track(trackno).artist,
+            "%TITLE%": self.album.disc(discno).track(trackno).title,
             "%DISCNO%": discno,
             "%TRACKNO%": "%.2d" % trackno,
             "%TYPE%": filetype,

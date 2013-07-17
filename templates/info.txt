@@ -1,7 +1,7 @@
 _ _______________________________________________ _ _
-  Name : ${album.artists[0]}, ${album.title}
+  Name : ${album.artist}, ${album.title}
  Label : ${album.labels[0]}
- Genre : ${album.genres[0]}
+ Genre : ${album.genre}
  Catno : ${album.catnumbers[0]}
   Year : ${album.year}
    URL : ${album.url}
@@ -11,6 +11,6 @@ _ ______________________________________________ _ _
 
 % for disc in album.discs:
     % for track in disc.tracks:
-        ${track.tracknumber} ${track.artists[0]} ${track.title}
+        ${track.tracknumber} ${track.artist} ${track.title}
     % endfor
 % endfor

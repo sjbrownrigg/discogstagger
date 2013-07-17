@@ -233,3 +233,26 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert taggerutils.create_file_from_template("/info.txt", create_file)
 
         assert os.path.exists(create_file)
+
+        assert taggerutils.create_nfo(self.target_dir)
+
+        # copy file to source directory and rename it
+        for i in range(1, 18):
+            target_file_name = "%.2d-song.flac" % i
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.m3u"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.cue"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "id.txt"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
+                                  self.config, self.album)
+
+        taggerutils._get_target_list()
+        assert self.album.discs[0].tracks[0].new_file == "01-yonderboi-intro.flac"
+        assert taggerutils.create_m3u(self.target_dir)
