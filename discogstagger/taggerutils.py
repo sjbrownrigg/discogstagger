@@ -123,6 +123,33 @@ class TaggerUtils(object):
 
         return format
 
+    def _set_target_discs_and_tracks(self, filetype):
+        """
+            set the target names of the disc and tracks in the discnumber
+            based on the configuration settings and the name of the disc
+            or track
+            these can be calculated without knowing the source (well, the
+            filetype seems to be a different calibre)
+        """
+
+        for disc in self.album.discs:
+            if not self.album.has_multi_disc:
+                disc.target_dir = None
+            else:
+                disc.target_dir = self.get_clean_filename(self._value_from_tag_format(self.disc_folder_name, disc.discnumber))
+
+            for track in disc.tracks:
+                # special handling for Various Artists discs
+                if self.album.artist == "Various":
+                    newfile = self._value_from_tag(self.va_song_format, disc.discnumber,
+                                               track.tracknumber, 1, filetype)
+                else:
+                    newfile = self._value_from_tag(self.song_format, disc.discnumber,
+                                               track.tracknumber, 1, filetype)
+
+                track.new_file = self.get_clean_filename(newfile)
+
+
     def _get_target_list(self):
         """
             fetches a list of files with the defined file_type
@@ -158,11 +185,6 @@ class TaggerUtils(object):
                 if disc_source_dir == None:
                     disc_source_dir = self.album.sourcedir
 
-                if not self.album.has_multi_disc:
-                    disc.target_dir = None
-                else:
-                    disc.target_dir = self.get_clean_filename(self._value_from_tag_format(self.disc_folder_name, disc.discnumber))
-
                 logger.debug("discno: %d" % disc.discnumber)
                 logger.debug("sourcedir: %s" % disc.sourcedir)
 
@@ -192,15 +214,7 @@ class TaggerUtils(object):
 
                     filetype = os.path.splitext(filename)[1]
 
-                    # special handling for Various Artists discs
-                    if self.album.artists[0] == "Various":
-                        newfile = self._value_from_tag(self.va_song_format, disc.discnumber,
-                                                   track.tracknumber, position, filetype)
-                    else:
-                        newfile = self._value_from_tag(self.song_format, disc.discnumber,
-                                                   track.tracknumber, position, filetype)
-
-                    track.new_file = self.get_clean_filename(newfile)
+            self._set_target_discs_and_tracks(filetype)
 
         except OSError, e:
             if e.errno == errno.EEXIST:
