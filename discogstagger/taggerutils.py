@@ -13,6 +13,8 @@ from mako.lookup import TemplateLookup
 from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.album import Album, Disc, Track
 
+from ext.mediafile import MediaFile
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -31,9 +33,27 @@ class TagHandler(object):
         tags (album)
     """
 
-    def __init__(self, album):
+    def __init__(self, album, config):
         self.album = album
+        self.config = config
 
+    def copy_files(self):
+        return False
+
+    def tag_album(self):
+        for disc in self.album.discs:
+            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+            for track in self.tracks:
+                self.tag_single_track(target_folder, track, track.new_file)
+
+    def tag_single_track(self, target_folder, track, new_file):
+# !TODO make it also possible to tag already exisiting files, not just copied
+# ones
+        # load metadata information
+        metadata = MediaFile(os.path.join(target_folder, track.new_file))
+
+
+        return False
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.

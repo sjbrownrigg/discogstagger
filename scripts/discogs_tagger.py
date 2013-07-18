@@ -9,7 +9,7 @@ import imghdr
 import glob
 import ConfigParser
 from optparse import OptionParser
-from discogstagger.ext.mediafile import MediaFile
+from ext.mediafile import MediaFile
 from discogstagger.taggerutils import (
     TaggerUtils,
     create_nfo,

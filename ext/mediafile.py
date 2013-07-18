@@ -44,7 +44,7 @@ import imghdr
 import os
 import logging
 import traceback
-from discogstagger.ext.enumeration import enum
+from ext.enumeration import enum
 
 __all__ = ['UnreadableFileError', 'FileTypeError', 'MediaFile']
 
