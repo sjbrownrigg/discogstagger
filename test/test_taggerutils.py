@@ -44,7 +44,7 @@ class TestTaggerUtils(TaggerUtilsBase):
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
                                   self.config, self.album)
 
-        format = taggerutils._value_from_tag_format("%DISCNO%", 1, 1, 1, ".mp3")
+        format = taggerutils._value_from_tag_format("%DISCNO%", 1, 1, ".mp3")
         assert format == "1"
 
         format = taggerutils._value_from_tag_format("%ALBARTIST%-%ALBTITLE%")
@@ -56,7 +56,7 @@ class TestTaggerUtils(TaggerUtilsBase):
         format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
         assert format == "01-Gigi D'Agostino-La Passion (Radio Cut).mp3"
 
-        format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, 1, ".flac")
+        format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, ".flac")
         assert format == "01-Gigi D'Agostino-La Passion (Radio Cut)"
 
     def test_value_from_tag(self):
@@ -72,7 +72,7 @@ class TestTaggerUtils(TaggerUtilsBase):
         format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
         assert format == "01-gigi_dagostino-la_passion_(radio_cut).mp3"
 
-        format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, 1, ".flac")
+        format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%", 1, 1, ".flac")
         assert format == "01-gigi_dagostino-la_passion_(radio_cut)"
 
     def test_dest_dir_name(self):

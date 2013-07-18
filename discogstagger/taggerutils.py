@@ -26,6 +26,15 @@ class TagOpener(FancyURLopener, object):
         FancyURLopener.__init__(self)
 
 
+class TagHandler(object):
+    """ Uses the album (taggerutils) and tags all given files using the given
+        tags (album)
+    """
+
+    def __init__(self, album):
+        self.album = album
+
+
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
         TaggerUtils returns a the corresponding metadata information , in which
@@ -85,7 +94,7 @@ class TaggerUtils(object):
         # add template functionality ;-)
         self.template_lookup = TemplateLookup(directories=["templates"])
 
-    def _value_from_tag_format(self, format, discno=1, trackno=1, position=1, filetype=".mp3"):
+    def _value_from_tag_format(self, format, discno=1, trackno=1, filetype=".mp3"):
         """ Fill in the used variables using the track information
             Transform all variables and use them in the given format string, make this
             slightly more flexible to be able to add variables easier
@@ -112,11 +121,11 @@ class TaggerUtils(object):
 
         return format
 
-    def _value_from_tag(self, format, discno=1, trackno=1, position=1, filetype=".mp3"):
+    def _value_from_tag(self, format, discno=1, trackno=1, filetype=".mp3"):
         """ Generates the filename tagging map
             avoid usage of file extension here already, could lead to problems
         """
-        format = self._value_from_tag_format(format, discno, trackno, position, filetype)
+        format = self._value_from_tag_format(format, discno, trackno, filetype)
         format = self.get_clean_filename(format)
 
         logger.debug("output: %s" % format)
@@ -142,10 +151,10 @@ class TaggerUtils(object):
                 # special handling for Various Artists discs
                 if self.album.artist == "Various":
                     newfile = self._value_from_tag(self.va_song_format, disc.discnumber,
-                                               track.tracknumber, 1, filetype)
+                                               track.tracknumber, filetype)
                 else:
                     newfile = self._value_from_tag(self.song_format, disc.discnumber,
-                                               track.tracknumber, 1, filetype)
+                                               track.tracknumber, filetype)
 
                 track.new_file = self.get_clean_filename(newfile)
 
