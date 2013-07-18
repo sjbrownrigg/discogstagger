@@ -1,15 +1,15 @@
 # discogstagger
 
- [![Build Status](https://travis-ci.org/triplem/discogstagger.png?branch=version2)](http://travis-ci.org/triplem/discogstagger) ![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
+ [![Build Status](https://travis-ci.org/triplem/discogstagger.png?branch=version2)](http://travis-ci.org/triplem/discogstagger) [![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
 
 
 ## What is it
 
-discogstagger is a console based audio meta-data tagger. Artist profile data is 
+discogstagger is a console based audio meta-data tagger. Artist profile data is
 retrieved via the discogs.com API.
 
 Simply provide the script with a destination directory name, that contains an
-album consisting of either FLAC or MP3 media files and the discogs.com 
+album consisting of either FLAC or MP3 media files and the discogs.com
 release-id. discogstagger calls out to the discogs.com API and updates the
 audio meta-data accordingly.
 
@@ -18,7 +18,7 @@ If no release-id is given, the application checks, if a file "id.txt" exists
 contains a specific property (id_tag). If both is true the release-id from this
 file is used. This is useful for batch processing.
 
-During the process, all album images (if present) are retrieved from the API. 
+During the process, all album images (if present) are retrieved from the API.
 As well, a play-list (.m3u) and an information file (.nfo) are generated per
 each release.
 
@@ -26,15 +26,15 @@ Optionally discogstagger will embed the found album art into the file meta data
 
 ## Requirements
 
-* Mutagen 
-* discogs-client 
+* Mutagen
+* discogs-client
 * requests
 
 I am also packaging/reusing the MediaFile library from the "beets" project. This
 will be packaged with discogs tagger until MediaFile is split out to its own
 package.
 
-## Installation 
+## Installation
 
 Fetch the repo from github
 ```
@@ -51,20 +51,20 @@ Run through set-up script
 sudo python setup.py install
 ```
 
-## Configuration 
+## Configuration
 
 DiscogsTagger searches for the configuration file at the default location of
-/etc/discogstagger/discogs_tagger.conf, at run-time. Or you're able to specify the config 
+/etc/discogstagger/discogs_tagger.conf, at run-time. Or you're able to specify the config
 location with the '-c' switch.
 
-The configuration file must be present to execute the script. The default 
+The configuration file must be present to execute the script. The default
 settings (as shipped), should work without any modifications.
 
-Note that you may wish to modify the following default configuration options. 
+Note that you may wish to modify the following default configuration options.
 The defaults are shipped as such in attempt to be as non destructive as possible
 
 ```
-# True/False : leaves a copy of the original audio files on disk, untouched after 
+# True/False : leaves a copy of the original audio files on disk, untouched after
 keep_original=True
 # Embed cover art. Include album art from discogs.com in the metadata tags
 embed_coverart=False
@@ -83,9 +83,9 @@ Genre = Electronic
 use_style=True
 ```
 
-To keep already existing tags, you can include these tags in the configuration as well. 
+To keep already existing tags, you can include these tags in the configuration as well.
 Usually Rippers (e.g. RubyRipper) do include the freedb_id, which could be kept using
-the following configuration. The list of all tags could be taken from the file 
+the following configuration. The list of all tags could be taken from the file
 discogstagger/ext/mediafile.py.
 
 ```
