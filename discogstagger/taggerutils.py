@@ -41,19 +41,89 @@ class TagHandler(object):
         return False
 
     def tag_album(self):
+# !TODO make it also possible to tag already exisiting files, not just copied
+# ones
         for disc in self.album.discs:
             target_folder = os.path.join(self.album.target_dir, disc.target_dir)
             for track in self.tracks:
                 self.tag_single_track(target_folder, track, track.new_file)
 
     def tag_single_track(self, target_folder, track, new_file):
-# !TODO make it also possible to tag already exisiting files, not just copied
-# ones
         # load metadata information
-        metadata = MediaFile(os.path.join(target_folder, track.new_file))
+        metadata = MediaFile(os.path.join(target_folder, new_file))
 
+        # read already existing (and still wanted) properties
+        keepTags = {}
+        for name in keep_tags.split(","):
+            if getattr(metadata, name):
+                keepTags[name] = getattr(metadata, name)
 
-        return False
+        # remove current metadata
+        metadata.delete()
+
+        # set album metadata
+        metadata.album = self.album.title
+        metadata.composer = self.album.artist
+        metadata.albumartist = self.album.artist
+
+# !TODO really, or should we generate this using a specific method?
+        metadata.albumartist_sort = self.album.sort_artist
+
+# !TODO should be joined
+        metadata.label = self.album.labels[0]
+
+        metadata.year = self.album.year
+        metadata.country = self.album.country
+        metadata.url = self.album.url
+
+        # add styles to the grouping tag (right now, we can just use one)
+        metadata.grouping = self.album.styles[0]
+
+        # adding two as there is no standard. discogstagger pre v1
+        # used (TXXX desc="Catalog #")
+        # mediafile uses TXXX desc="CATALOGNUMBER"
+        metadata.catalognum = self.album.catnumbers[0]
+        metadata.catalognumber = self.album.catnumbers[0]
+
+        # use the correct genre field, on config use the first style
+# !TODO should be joined?
+        genre = self.album.genres[0]
+        if use_style:
+            genre = self.album.styles[0]
+
+        metadata.genre = genre
+
+# !TODO this should be slightly more dynamic to support different sources ;-)
+        metadata.discogs_id = self.album.id
+
+        if len(self.album.discs) > 1:
+            logger.info("writing disctotal and discnumber")
+            metadata.disc = track.discnumber
+            metadata.disctotal = len(self.album.discs)
+
+        if self.album.is_compilation:
+            metadata.comp = True
+
+        metadata.comments = self.album.note
+
+# !TODO add
+        # encoder
+        if encoder_tag is not None:
+            metadata.encoder = encoder_tag
+
+        # set track metadata
+        metadata.title = track.title
+# !TODO artists should be joined using the discogs API (feat.), otherwise just show the first one
+        metadata.artist = track.artist
+
+# !TODO take care about sortartist ;-)
+        metadata.artist_sort = track.sortartist
+        metadata.track = track.tracknumber
+
+        # the following value will be wrong, if the disc has a name or is a multi
+        # disc release --> fix it
+        metadata.tracktotal = len(self.album.disc(track.discnumber).tracks)
+
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
