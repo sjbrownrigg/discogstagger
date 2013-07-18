@@ -68,7 +68,7 @@ class TaggerUtils(object):
         self.use_lower = config.getboolean("details", "use_lower_filenames")
 
 #        self.first_image_name = "folder.jpg"
-        self.copy_other_files = config.getboolean("file-formatting", "copy_other_files")
+        self.copy_other_files = config.getboolean("details", "copy_other_files")
 
         self.sourcedir = sourcedir
         self.destdir = destdir
