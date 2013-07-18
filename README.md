@@ -1,5 +1,8 @@
 # discogstagger
 
+ [![Build Status](https://travis-ci.org/triplem/discogstagger.png?branch=version2)](http://travis-ci.org/triplem/discogstagger) ![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
+
+
 ## What is it
 
 discogstagger is a console based audio meta-data tagger. Artist profile data is 
