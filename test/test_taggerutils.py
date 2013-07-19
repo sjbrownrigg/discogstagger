@@ -285,5 +285,3 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.comp
         assert metadata.encoder == ""
         assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
-
-        shutil.copyfile(os.path.join(self.source_dir, self.target_file_name), os.path.join("/home/triplem", "test.flac"))
