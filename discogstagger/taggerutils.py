@@ -33,16 +33,9 @@ class TagHandler(object):
         tags (album)
     """
 
-    def __init__(self, album, config):
+    def __init__(self, album, tagger_config):
         self.album = album
-        self.config = config
-
-    @property
-    def id_tag_name(self):
-        source_name = self.config.get("source", "name")
-        id_tag_name = self.config.get("source", source_name)
-
-        return id_tag_name
+        self.config = tagger_config
 
     def copy_files(self):
         return False
@@ -72,7 +65,7 @@ class TagHandler(object):
         metadata.album = self.album.title
         metadata.composer = self.album.artist
 
-        join_artists = self.config.get("details", "join_artists")
+        join_artists = self.config.get_without_quotation("details", "join_artists")
         metadata.albumartist = join_artists.join(self.album.artists)
 
 # !TODO really, or should we generate this using a specific method?
@@ -94,7 +87,7 @@ class TagHandler(object):
         # add styles to the grouping tag (right now, we can just use one)
         metadata.grouping = self.album.style
 
-        join_genres = self.config.get("details", "join_genres_and_styles")
+        join_genres = self.config.get_without_quotation("details", "join_genres_and_styles")
         use_style = self.config.getboolean("details", "use_style")
         genre = join_genres.join(self.album.genres)
         if use_style:
@@ -102,7 +95,7 @@ class TagHandler(object):
 
         metadata.genre = genre
 
-        setattr(metadata, self.id_tag_name, self.album.id)
+        setattr(metadata, self.config.id_tag_name, self.album.id)
 
         metadata.disc = track.discnumber
 
@@ -117,7 +110,8 @@ class TagHandler(object):
 
         # encoder
         encoder_tag = self.config.get("tags", "encoder")
-        metadata.encoder = encoder_tag
+        if not encoder_tag == None:
+            metadata.encoder = encoder_tag
 
         # set track metadata
         metadata.title = track.title
@@ -159,24 +153,24 @@ class TaggerUtils(object):
     # supported file types.
     FILE_TYPE = (".mp3", ".flac",)
 
-    def __init__(self, sourcedir, destdir, ogsrelid, config, album=None):
-        self.config = config
+    def __init__(self, sourcedir, destdir, ogsrelid, tagger_config, album=None):
+        self.config = tagger_config
 
 # !TODO should we define those in here or in each method (where needed) or in a separate method
 # doing the "mapping"?
-        self.dir_format = config.get("file-formatting", "dir")
-        self.song_format = config.get("file-formatting", "song")
-        self.va_song_format = config.get("file-formatting", "va_song")
-        self.images_format = config.get("file-formatting", "images")
-        self.m3u_format = config.get("file-formatting", "m3u")
-        self.nfo_format = config.get("file-formatting", "nfo")
+        self.dir_format = self.config.get("file-formatting", "dir")
+        self.song_format = self.config.get("file-formatting", "song")
+        self.va_song_format = self.config.get("file-formatting", "va_song")
+        self.images_format = self.config.get("file-formatting", "images")
+        self.m3u_format = self.config.get("file-formatting", "m3u")
+        self.nfo_format = self.config.get("file-formatting", "nfo")
 
-        self.disc_folder_name = config.get("file-formatting", "discs")
+        self.disc_folder_name = self.config.get("file-formatting", "discs")
 
-        self.use_lower = config.getboolean("details", "use_lower_filenames")
+        self.use_lower = self.config.getboolean("details", "use_lower_filenames")
 
 #        self.first_image_name = "folder.jpg"
-        self.copy_other_files = config.getboolean("details", "copy_other_files")
+        self.copy_other_files = self.config.getboolean("details", "copy_other_files")
 
         self.sourcedir = sourcedir
         self.destdir = destdir

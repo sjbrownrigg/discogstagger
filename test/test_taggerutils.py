@@ -28,8 +28,7 @@ class TaggerUtilsBase(object):
         self.ogsrelid = "1448190"
 
         # construct config with only default values
-        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
-        self.config = tagger_config.config
+        self.tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
         dummy_response = DummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
@@ -37,6 +36,7 @@ class TaggerUtilsBase(object):
 
     def tearDown(self):
         self.ogsrelid = None
+        self.tagger_config = None
         self.config = None
         self.album = None
 
@@ -44,7 +44,7 @@ class TestTaggerUtils(TaggerUtilsBase):
 
     def test_value_from_tag_format(self):
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
 
         format = taggerutils._value_from_tag_format("%DISCNO%", 1, 1, ".mp3")
         assert format == "1"
@@ -63,7 +63,7 @@ class TestTaggerUtils(TaggerUtilsBase):
 
     def test_value_from_tag(self):
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
 
         format = taggerutils._value_from_tag("%ALBARTIST%-%ALBTITLE%")
         assert format == "various-megahits_2001_die_erste"
@@ -79,19 +79,19 @@ class TestTaggerUtils(TaggerUtilsBase):
 
     def test_dest_dir_name(self):
         taggerutils = TaggerUtils("dummy_source_dir", "./dummy_dest_dir", self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
         assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-2001"
 
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
         assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-2001"
 
         taggerutils = TaggerUtils("dummy_source_dir", "/dummy_dest_dir", self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
         assert taggerutils.dest_dir_name == "/dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-2001"
 
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
         taggerutils.dir_format = "%GENRE%/%ALBARTIST%/%ALBTITLE%-(%CATNO%)-%YEAR%"
         assert taggerutils.dest_dir_name == "dummy_dest_dir/electronic/various/megahits_2001_die_erste-(560_938-2)-2001"
 
@@ -138,7 +138,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
 
         taggerutils._get_target_list()
 
@@ -197,7 +197,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
 
         taggerutils._get_target_list()
 
@@ -229,7 +229,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         self.album = discogs_album.map()
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
 
         create_file = os.path.join(self.target_dir, "info.nfo")
         assert taggerutils.create_file_from_template("/info.txt", create_file)
@@ -253,7 +253,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
-                                  self.config, self.album)
+                                  self.tagger_config, self.album)
 
         taggerutils._get_target_list()
         assert self.album.discs[0].tracks[0].new_file == "01-yonderboi-intro.flac"
@@ -271,7 +271,7 @@ class TestTagHandler(TestTaggerUtilFiles):
     def test_tag_single_track(self):
         shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
 
-        testTagHandler = TagHandler(self.album, self.config)
+        testTagHandler = TagHandler(self.album, self.tagger_config)
 
         testTagHandler.tag_single_track(self.source_dir, self.album.disc(1).track(1), self.target_file_name)
 
@@ -281,4 +281,9 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.albumartist == "Various"
         assert metadata.discogs_id == self.ogsrelid
         assert metadata.year == 2001
+        assert metadata.disctotal == 2
+        assert metadata.comp
+        assert metadata.encoder == ""
+        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
 
+        shutil.copyfile(os.path.join(self.source_dir, self.target_file_name), os.path.join("/home/triplem", "test.flac"))
