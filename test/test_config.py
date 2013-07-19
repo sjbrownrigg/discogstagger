@@ -52,3 +52,15 @@ def test_get():
 
 # if the value is emtpy in the config file, it is returned as None
     assert config.get("tags", "encoder") == None
+
+def test_overload_config():
+
+    config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+
+    assert config.getboolean("details", "use_style")
+    assert config.get("tags", "encoder") == None
+
+    config.add_config(os.path.join(parentdir, "test/track_values.conf"))
+
+    assert config.getboolean("details", "use_style")
+    assert config.get("tags", "encoder") == "myself"

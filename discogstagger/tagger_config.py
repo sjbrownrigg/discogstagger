@@ -38,3 +38,6 @@ class TaggerConfig(object):
 
     def getboolean(self, section, name):
         return self.config.getboolean(section, name)
+
+    def add_config(self, config_file):
+        self.config.read(config_file)
