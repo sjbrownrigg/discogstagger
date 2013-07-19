@@ -283,5 +283,10 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.year == 2001
         assert metadata.disctotal == 2
         assert metadata.comp
-        assert metadata.encoder == ""
         assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+        shutil.copyfile(os.path.join(self.source_dir, self.target_file_name), os.path.join("/home/triplem", "test.flac"))
