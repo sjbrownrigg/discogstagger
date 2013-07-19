@@ -37,6 +37,13 @@ class TagHandler(object):
         self.album = album
         self.config = config
 
+    @property
+    def id_tag_name(self):
+        source_name = self.config.get("source", "name")
+        id_tag_name = self.config.get("source", source_name)
+
+        return id_tag_name
+
     def copy_files(self):
         return False
 
@@ -53,10 +60,10 @@ class TagHandler(object):
         metadata = MediaFile(os.path.join(target_folder, new_file))
 
         # read already existing (and still wanted) properties
-        keepTags = {}
-        for name in keep_tags.split(","):
-            if getattr(metadata, name):
-                keepTags[name] = getattr(metadata, name)
+#        keepTags = {}
+#        for name in keep_tags.split(","):
+#            if getattr(metadata, name):
+#                keepTags[name] = getattr(metadata, name)
 
         # remove current metadata
         metadata.delete()
@@ -64,7 +71,9 @@ class TagHandler(object):
         # set album metadata
         metadata.album = self.album.title
         metadata.composer = self.album.artist
-        metadata.albumartist = self.album.artist
+
+        join_artists = self.config.get("details", "join_artists")
+        metadata.albumartist = join_artists.join(self.album.artists)
 
 # !TODO really, or should we generate this using a specific method?
         metadata.albumartist_sort = self.album.sort_artist
@@ -76,40 +85,39 @@ class TagHandler(object):
         metadata.country = self.album.country
         metadata.url = self.album.url
 
-        # add styles to the grouping tag (right now, we can just use one)
-        metadata.grouping = self.album.styles[0]
-
         # adding two as there is no standard. discogstagger pre v1
         # used (TXXX desc="Catalog #")
         # mediafile uses TXXX desc="CATALOGNUMBER"
         metadata.catalognum = self.album.catnumbers[0]
         metadata.catalognumber = self.album.catnumbers[0]
 
-        # use the correct genre field, on config use the first style
-# !TODO should be joined?
-        genre = self.album.genres[0]
+        # add styles to the grouping tag (right now, we can just use one)
+        metadata.grouping = self.album.style
+
+        join_genres = self.config.get("details", "join_genres_and_styles")
+        use_style = self.config.getboolean("details", "use_style")
+        genre = join_genres.join(self.album.genres)
         if use_style:
-            genre = self.album.styles[0]
+            genre = join_genres.join(self.album.style)
 
         metadata.genre = genre
 
-# !TODO this should be slightly more dynamic to support different sources ;-)
-        metadata.discogs_id = self.album.id
+        setattr(metadata, self.id_tag_name, self.album.id)
+
+        metadata.disc = track.discnumber
 
         if len(self.album.discs) > 1:
             logger.info("writing disctotal and discnumber")
-            metadata.disc = track.discnumber
             metadata.disctotal = len(self.album.discs)
 
         if self.album.is_compilation:
             metadata.comp = True
 
-        metadata.comments = self.album.note
+#        metadata.comments = self.album.notes
 
-# !TODO add
         # encoder
-        if encoder_tag is not None:
-            metadata.encoder = encoder_tag
+        encoder_tag = self.config.get("tags", "encoder")
+        metadata.encoder = encoder_tag
 
         # set track metadata
         metadata.title = track.title
@@ -117,13 +125,14 @@ class TagHandler(object):
         metadata.artist = track.artist
 
 # !TODO take care about sortartist ;-)
-        metadata.artist_sort = track.sortartist
+#        metadata.artist_sort = track.sort_artist
         metadata.track = track.tracknumber
 
         # the following value will be wrong, if the disc has a name or is a multi
         # disc release --> fix it
         metadata.tracktotal = len(self.album.disc(track.discnumber).tracks)
 
+        metadata.save()
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.

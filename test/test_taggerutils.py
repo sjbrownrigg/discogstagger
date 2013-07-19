@@ -4,6 +4,8 @@ import os, sys
 import shutil
 from nose.tools import *
 
+from ext.mediafile import MediaFile
+
 import logging
 
 logging.basicConfig(level=10)
@@ -18,7 +20,7 @@ from _common_test import DummyResponse, DummyDiscogsAlbum
 
 from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum
-from discogstagger.taggerutils import TaggerUtils
+from discogstagger.taggerutils import TaggerUtils, TagHandler
 
 class TaggerUtilsBase(object):
 
@@ -51,7 +53,7 @@ class TestTaggerUtils(TaggerUtilsBase):
         assert format == "Various-Megahits 2001 Die Erste"
 
         format = taggerutils._value_from_tag_format("%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%")
-        assert format == "Various-Megahits 2001 Die Erste-(560 938-2)-Germany"
+        assert format == "Various-Megahits 2001 Die Erste-(560 938-2)-2001"
 
         format = taggerutils._value_from_tag_format("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
         assert format == "01-Gigi D'Agostino-La Passion (Radio Cut).mp3"
@@ -67,7 +69,7 @@ class TestTaggerUtils(TaggerUtilsBase):
         assert format == "various-megahits_2001_die_erste"
 
         format = taggerutils._value_from_tag("%ALBARTIST%-%ALBTITLE%-(%CATNO%)-%YEAR%")
-        assert format == "various-megahits_2001_die_erste-(560_938-2)-germany"
+        assert format == "various-megahits_2001_die_erste-(560_938-2)-2001"
 
         format = taggerutils._value_from_tag("%TRACKNO%-%ARTIST%-%TITLE%%TYPE%")
         assert format == "01-gigi_dagostino-la_passion_(radio_cut).mp3"
@@ -78,20 +80,20 @@ class TestTaggerUtils(TaggerUtilsBase):
     def test_dest_dir_name(self):
         taggerutils = TaggerUtils("dummy_source_dir", "./dummy_dest_dir", self.ogsrelid,
                                   self.config, self.album)
-        assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+        assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-2001"
 
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
                                   self.config, self.album)
-        assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+        assert taggerutils.dest_dir_name == "dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-2001"
 
         taggerutils = TaggerUtils("dummy_source_dir", "/dummy_dest_dir", self.ogsrelid,
                                   self.config, self.album)
-        assert taggerutils.dest_dir_name == "/dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-germany"
+        assert taggerutils.dest_dir_name == "/dummy_dest_dir/various-megahits_2001_die_erste-(560_938-2)-2001"
 
         taggerutils = TaggerUtils("dummy_source_dir", "dummy_dest_dir", self.ogsrelid,
                                   self.config, self.album)
         taggerutils.dir_format = "%GENRE%/%ALBARTIST%/%ALBTITLE%-(%CATNO%)-%YEAR%"
-        assert taggerutils.dest_dir_name == "dummy_dest_dir/electronic/various/megahits_2001_die_erste-(560_938-2)-germany"
+        assert taggerutils.dest_dir_name == "dummy_dest_dir/electronic/various/megahits_2001_die_erste-(560_938-2)-2001"
 
 
 class TestTaggerUtilFiles(TaggerUtilsBase):
@@ -256,3 +258,27 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         taggerutils._get_target_list()
         assert self.album.discs[0].tracks[0].new_file == "01-yonderboi-intro.flac"
         assert taggerutils.create_m3u(self.target_dir)
+
+class TestTagHandler(TestTaggerUtilFiles):
+
+    def setUp(self):
+        TestTaggerUtilFiles.setUp(self)
+        self.target_file_name = "test.flac"
+
+    def tearDown(self):
+        TestTaggerUtilFiles.tearDown(self)
+
+    def test_tag_single_track(self):
+        shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
+
+        testTagHandler = TagHandler(self.album, self.config)
+
+        testTagHandler.tag_single_track(self.source_dir, self.album.disc(1).track(1), self.target_file_name)
+
+        metadata = MediaFile(os.path.join(self.source_dir, self.target_file_name))
+
+        assert metadata.artist == "Gigi D'Agostino"
+        assert metadata.albumartist == "Various"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2001
+

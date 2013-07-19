@@ -81,22 +81,8 @@ def test_map_multidisc():
 # special character handling
     track = album.discs[1].tracks[18]
 
-    logger.debug("track.artists: %s" % track.artists[1])
-    assert track.artists[1] == u"Eißfeldt"
-
-#    logger.debug("album.labels: %s" % album.labels[0])
-#    logger.debug("album.catnumbers: %s" % album.catnumbers)
-#    logger.debug("album.images %s" % album.images)
-#    logger.debug("album.artists %s" % album.artists)
-#    logger.debug("album.title %s" % album.title)
-#    logger.debug("album.genres %s" % album.genres)
-#    logger.debug("album.styles %s" % album.styles)
-#    logger.debug("album.discs %s" % len(album.discs))
-#    logger.debug("album.discs[0].tracks %s" % len(album.discs[0].tracks))
-#    logger.debug("album.discs[1].tracks %s" % len(album.discs[1].tracks))
-#    logger.debug("track.title %s" % track.title)
-
-#   assert false
+    logger.debug("track.artists: %s" % track.artists[0])
+    assert track.artists[0] == u"D-Flame Feat. Eißfeldt"
 
 def test_map_multidisc_with_disctitle():
     ogsrelid = "288308"
@@ -174,7 +160,7 @@ def test_map_multidisc_with_disctitle():
     assert track.discnumber == 2
     assert track.title == "Somebody To Love"
     assert track.discsubtitle == "For The Feet"
-    assert track.artists[0] == "George Michael"
+    assert track.artists[0] == "George Michael With Queen"
 
 def test_map_multidisc_with_disctitle_for_tracks():
     ogsrelid = "282923"

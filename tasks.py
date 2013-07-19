@@ -6,4 +6,4 @@ def clean():
 
 @task('clean')
 def test():
-    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=75")
+    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=85")

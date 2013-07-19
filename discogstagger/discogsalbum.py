@@ -59,7 +59,7 @@ class DiscogsAlbum(object):
         album.year = self.year
         album.genres = self.release.data["genres"]
         album.styles = self.release.data["styles"]
-        album.year = self.release.data["country"]
+        album.country = self.release.data["country"]
         if "notes" in self.release.data:
             album.notes = self.release.data["notes"]
         album.disctotal = self.disctotal
@@ -130,15 +130,20 @@ class DiscogsAlbum(object):
     def artists(self, artist_data):
         """ obtain the artists (normalized using clean_name). """
         artists = []
-        for x in artist_data:
-# !TODO
-            if isinstance(x, basestring):
-                logger.debug("artist is string (join) - need to implement: %s " % x)
-# append the previous artist with the next one
-# can we just easily join the whole list?????
-            else:
-                artists.append(self.clean_name(x.name))
+        last_artist = None
 
+        for x in artist_data:
+            if isinstance(x, basestring):
+                last_artist = last_artist + " " + x
+            else:
+                if not last_artist == None:
+                    last_artist = last_artist + " " + self.clean_name(x.name)
+                    artists.append(last_artist)
+                    last_artist = None
+                else:
+                    last_artist = self.clean_name(x.name)
+
+        artists.append(last_artist)
 
         return artists
 
