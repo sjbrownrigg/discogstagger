@@ -289,4 +289,4 @@ class TestTagHandler(TestTaggerUtilFiles):
         # empty anyway, no need to check this then...
         assert metadata.encoder == ""
 
-        shutil.copyfile(os.path.join(self.source_dir, self.target_file_name), os.path.join("/home/triplem", "test.flac"))
+#        shutil.copyfile(os.path.join(self.source_dir, self.target_file_name), os.path.join("/home/triplem", "test.flac"))
