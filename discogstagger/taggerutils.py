@@ -37,6 +37,8 @@ class TagHandler(object):
         self.album = album
         self.config = tagger_config
 
+        self.keep_tags = self.config.get("details", "keep_tags")
+
     def copy_files(self):
         return False
 
@@ -53,10 +55,9 @@ class TagHandler(object):
         metadata = MediaFile(os.path.join(target_folder, new_file))
 
         # read already existing (and still wanted) properties
-#        keepTags = {}
-#        for name in keep_tags.split(","):
-#            if getattr(metadata, name):
-#                keepTags[name] = getattr(metadata, name)
+        for name in self.keep_tags.split(","):
+            if getattr(metadata, name):
+                self.keepTags[name] = getattr(metadata, name)
 
         # remove current metadata
         metadata.delete()
@@ -95,6 +96,8 @@ class TagHandler(object):
 
         metadata.genre = genre
 
+        # this assumes, that there is a metadata-tag with the id_tag_name in the
+        # metadata object
         setattr(metadata, self.config.id_tag_name, self.album.id)
 
         metadata.disc = track.discnumber
@@ -122,8 +125,6 @@ class TagHandler(object):
 #        metadata.artist_sort = track.sort_artist
         metadata.track = track.tracknumber
 
-        # the following value will be wrong, if the disc has a name or is a multi
-        # disc release --> fix it
         metadata.tracktotal = len(self.album.disc(track.discnumber).tracks)
 
         metadata.save()
