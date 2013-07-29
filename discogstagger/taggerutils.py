@@ -106,7 +106,7 @@ class TagHandler(object):
         if self.album.is_compilation:
             metadata.comp = True
 
-#        metadata.comments = self.album.notes
+        metadata.comments = self.album.notes
 
         # encoder
         encoder_tag = self.config.get("tags", "encoder")
@@ -428,7 +428,8 @@ def write_file(filecontents, filename):
     return True
 
 def get_images(images, dest_dir_name, images_format, first_image_name):
-    """ Download and store any available images
+    """
+        Download and store any available images
         we need http access here as well (see discogsalbum), and therefore the
         user-agent, we should be able to put this into a common object, ....
     """

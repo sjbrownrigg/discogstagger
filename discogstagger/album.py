@@ -67,3 +67,6 @@ class Album(BaseObject):
     @property
     def style(self):
         return self.styles[0]
+
+    def __getattr__(self, name):
+        return None
