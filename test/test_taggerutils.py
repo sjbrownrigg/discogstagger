@@ -285,6 +285,10 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.comp
         assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
 
+        # there is no value to reuse
+        logger.debug("freedb_id: %s " % metadata.freedb_id)
+        assert metadata.freedb_id == "4711"
+
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
         assert metadata.encoder == ""

@@ -55,9 +55,11 @@ class TagHandler(object):
         metadata = MediaFile(os.path.join(target_folder, new_file))
 
         # read already existing (and still wanted) properties
+        keepTags = {}
         for name in self.keep_tags.split(","):
+            logger.debug("name %s" % name)
             if getattr(metadata, name):
-                self.keepTags[name] = getattr(metadata, name)
+                keepTags[name] = getattr(metadata, name)
 
         # remove current metadata
         metadata.delete()
@@ -126,6 +128,10 @@ class TagHandler(object):
         metadata.track = track.tracknumber
 
         metadata.tracktotal = len(self.album.disc(track.discnumber).tracks)
+
+        if not keepTags is None:
+            for name in keepTags:
+                setattr(metadata, name, keepTags[name])
 
         metadata.save()
 
