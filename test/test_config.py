@@ -72,3 +72,12 @@ def test_get_character_exceptions():
     assert len(config.get_character_exceptions) == 10
     assert config.get_character_exceptions[" "] == "_"
     assert config.get_character_exceptions["\xc3\xb6"] == "oe"
+
+
+    config = TaggerConfig(os.path.join(parentdir, "test/track_values.conf"))
+
+    logger.debug("config: %s" % config.get_character_exceptions)
+
+    assert len(config.get_character_exceptions) == 11
+    assert config.get_character_exceptions["\xc3\xa2"] == "a"
+
