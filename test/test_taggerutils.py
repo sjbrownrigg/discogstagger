@@ -285,12 +285,31 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.comp
         assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
 
-        # there is no value to reuse
-        logger.debug("freedb_id: %s " % metadata.freedb_id)
         assert metadata.freedb_id == "4711"
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
         assert metadata.encoder == ""
 
-#        shutil.copyfile(os.path.join(self.source_dir, self.target_file_name), os.path.join("/home/triplem", "test.flac"))
+        shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
+
+        testTagHandler = TagHandler(self.album, self.tagger_config)
+
+        testTagHandler.tag_single_track(self.source_dir, self.album.disc(2).track(19), self.target_file_name)
+
+        metadata = MediaFile(os.path.join(self.source_dir, self.target_file_name))
+
+        logger.debug("artist: %s" % metadata.artist_sort)
+        assert metadata.artist == "D-Flame Feat. Eißfeldt"
+        assert metadata.artist_sort == ""
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2001
+        assert metadata.disctotal == 2
+        assert metadata.disc == 2
+        assert metadata.track == 19
+        assert metadata.comp
+        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""

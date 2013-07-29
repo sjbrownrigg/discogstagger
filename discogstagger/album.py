@@ -23,6 +23,9 @@ class Track(BaseObject):
     def artist(self):
         return self.artists[0]
 
+    def __getattr__(self, name):
+        return None
+
 class Disc(BaseObject):
     """ An album has one or more discs, each disc has a number and
         could have also a disctitle, furthermore several tracks

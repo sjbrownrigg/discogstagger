@@ -120,11 +120,10 @@ class TagHandler(object):
 
         # set track metadata
         metadata.title = track.title
-# !TODO artists should be joined using the discogs API (feat.), otherwise just show the first one
         metadata.artist = track.artist
 
 # !TODO take care about sortartist ;-)
-#        metadata.artist_sort = track.sort_artist
+        metadata.artist_sort = track.sort_artist
         metadata.track = track.tracknumber
 
         metadata.tracktotal = len(self.album.disc(track.discnumber).tracks)
