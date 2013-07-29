@@ -242,7 +242,7 @@ class DiscogsAlbum(object):
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 
-            track.sortartists = sort_artist
+            track.sort_artist = sort_artist
 
             if track.discnumber != disc.discnumber:
                 disc_list.append(disc)

@@ -291,6 +291,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         # empty anyway, no need to check this then...
         assert metadata.encoder == ""
 
+        # use a different file to check other metadata handling (e.g. artist)
         shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
 
         testTagHandler = TagHandler(self.album, self.tagger_config)
@@ -301,7 +302,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         logger.debug("artist: %s" % metadata.artist_sort)
         assert metadata.artist == "D-Flame Feat. Eißfeldt"
-        assert metadata.artist_sort == ""
+        assert metadata.artist_sort == "D-Flame"
         assert metadata.discogs_id == self.ogsrelid
         assert metadata.year == 2001
         assert metadata.disctotal == 2
