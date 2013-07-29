@@ -51,6 +51,7 @@ def test_get():
     config = TaggerConfig(os.path.join(parentdir, "test/emtpy.conf"))
 
 # if the value is emtpy in the config file, it is returned as None
+    logger.debug("tags: %s" % config.get("tags", "encoder"))
     assert config.get("tags", "encoder") == None
 
 def test_overload_config():
@@ -64,3 +65,13 @@ def test_overload_config():
 
     assert config.getboolean("details", "use_style")
     assert config.get("tags", "encoder") == "myself"
+
+def test_get_character_exceptions():
+
+    config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+
+    logger.debug("ocnifg: %s" % config.get_character_exceptions)
+
+    assert len(config.get_character_exceptions) == 10
+    assert config.get_character_exceptions[" "] == "_"
+    assert config.get_character_exceptions["\xc3\xb6"] == "oe"

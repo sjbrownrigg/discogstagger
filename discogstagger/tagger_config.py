@@ -41,3 +41,26 @@ class TaggerConfig(object):
 
     def add_config(self, config_file):
         self.config.read(config_file)
+
+    @property
+    def get_character_exceptions(self):
+        """ placeholders for special characters within character exceptions. """
+
+        exceptions = self.config._sections["character_exceptions"]
+
+        KEYS = {
+            "{space}": " ",
+        }
+
+        try:
+            del exceptions["__name__"]
+        except KeyError:
+            pass
+
+        for k in KEYS:
+            try:
+                exceptions[KEYS[k]] = exceptions.pop(k)
+            except KeyError:
+                pass
+
+        return exceptions

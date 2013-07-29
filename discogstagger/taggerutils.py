@@ -137,19 +137,6 @@ class TaggerUtils(object):
         The class also provides a few methods that create supplimental files,
         relvant to a given album (m3u, nfo file and album art grabber.)"""
 
-    CHAR_EXCEPTIONS = {
-        "&": "and",
-        " ": "_",
-        "ö": "oe",
-        "Ö": "Oe",
-        "Ä": "Ae",
-        "ä": "ae",
-        "Ü": "Ue",
-        "ü": "ue",
-        ".": "_",
-        "+": "_and_",
-    }
-
     # supported file types.
     FILE_TYPE = (".mp3", ".flac",)
 
@@ -171,6 +158,7 @@ class TaggerUtils(object):
 
 #        self.first_image_name = "folder.jpg"
         self.copy_other_files = self.config.getboolean("details", "copy_other_files")
+        self.char_exceptions = self.config.get_character_exceptions
 
         self.sourcedir = sourcedir
         self.destdir = destdir
@@ -379,7 +367,7 @@ class TaggerUtils(object):
 
         a = unicode(filename, "utf-8")
 
-        for k, v in TaggerUtils.CHAR_EXCEPTIONS.iteritems():
+        for k, v in self.char_exceptions.iteritems():
             a = a.replace(k, v)
 
         a = normalize("NFKD", a).encode("ascii", "ignore")
