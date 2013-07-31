@@ -12,12 +12,17 @@ sys.path.append(parentdir)
 logger.debug("parentdir: %s" % parentdir)
 
 from _common_test import DummyResponse, DummyDiscogsAlbum
+from discogstagger.tagger_config import TaggerConfig
+
 
 def test_map_multidisc():
     ogsrelid = "1448190"
 
+    # construct config with only default values
+    tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
@@ -53,6 +58,7 @@ def test_map_multidisc():
     assert track.discnumber == 1
     assert track.title == "La Passion (Radio Cut)"
     assert track.artists[0] == "Gigi D'Agostino"
+    assert track.non_existent_tag == None
 
 # last track on first disc
     track = album.discs[0].tracks[19]
@@ -61,6 +67,7 @@ def test_map_multidisc():
     assert track.discnumber == 1
     assert track.title == "Last Resort (Album Version Explizit)"
     assert track.artists[0] == "Papa Roach"
+    assert track.non_existent_tag == None
 
 # first track on second disc
     track = album.discs[1].tracks[0]
@@ -69,6 +76,7 @@ def test_map_multidisc():
     assert track.discnumber == 2
     assert track.title == "Ich Will, Dass Du Mich Liebst (Radio Edit)"
     assert track.artists[0] == "Die 3. Generation"
+    assert track.non_existent_tag == None
 
 # last track on first disc
     track = album.discs[1].tracks[19]
@@ -77,6 +85,7 @@ def test_map_multidisc():
     assert track.discnumber == 2
     assert track.title == "I Just Wanna Love U (Give It 2 Me) (Radio Edit)"
     assert track.artists[0] == "Jay-Z"
+    assert track.non_existent_tag == None
 
 # special character handling
     track = album.discs[1].tracks[18]
@@ -87,8 +96,11 @@ def test_map_multidisc():
 def test_map_multidisc_with_disctitle():
     ogsrelid = "288308"
 
+    # construct config with only default values
+    tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
@@ -131,6 +143,7 @@ def test_map_multidisc_with_disctitle():
     assert track.discsubtitle == "For The Heart"
     assert track.title == "Jesus To A Child"
     assert track.artists[0] == "George Michael"
+    assert track.non_existent_tag == None
 
 # last track on first disc
     track = album.discs[0].tracks[13]
@@ -140,6 +153,7 @@ def test_map_multidisc_with_disctitle():
     assert track.discsubtitle == "For The Heart"
     assert track.title == "A Different Corner"
     assert track.artists[0] == "George Michael"
+    assert track.non_existent_tag == None
 
 # first track on second disc
     track = album.discs[1].tracks[0]
@@ -149,6 +163,7 @@ def test_map_multidisc_with_disctitle():
     assert track.title == "Outside"
     assert track.discsubtitle == "For The Feet"
     assert track.artists[0] == "George Michael"
+    assert track.non_existent_tag == None
     logger.debug("1discsubtitle: %s " % track.discsubtitle)
 
 # last track on first disc
@@ -161,12 +176,16 @@ def test_map_multidisc_with_disctitle():
     assert track.title == "Somebody To Love"
     assert track.discsubtitle == "For The Feet"
     assert track.artists[0] == "George Michael With Queen"
+    assert track.non_existent_tag == None
 
 def test_map_multidisc_with_disctitle_for_tracks():
     ogsrelid = "282923"
 
+    # construct config with only default values
+    tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
@@ -203,6 +222,7 @@ def test_map_multidisc_with_disctitle_for_tracks():
     assert not track.discsubtitle
     assert track.title == "Colour-Ize"
     assert track.artists[0] == "Deine Lakaien"
+    assert track.non_existent_tag == None
 
 # first track on second disc
     track = album.discs[1].tracks[0]
@@ -212,6 +232,7 @@ def test_map_multidisc_with_disctitle_for_tracks():
     assert track.title == "Silence In Your Eyes"
     assert track.discsubtitle == None
     assert track.artists[0] == "Deine Lakaien"
+    assert track.non_existent_tag == None
 
 # last track without disctitle on second disc
     track = album.discs[1].tracks[10]
@@ -221,6 +242,7 @@ def test_map_multidisc_with_disctitle_for_tracks():
     assert track.title == "Sometimes"
     assert track.discsubtitle == None
     assert track.artists[0] == "Deine Lakaien"
+    assert track.non_existent_tag == None
 
 # first track with disctitle on second disc
     track = album.discs[1].tracks[11]
@@ -230,12 +252,16 @@ def test_map_multidisc_with_disctitle_for_tracks():
     assert track.title == "Stupid"
     assert track.discsubtitle == "Bonustracks"
     assert track.artists[0] == "Deine Lakaien"
+    assert track.non_existent_tag == None
 
 def test_map_singledisc():
     ogsrelid = "3083"
 
+    # construct config with only default values
+    tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 2
@@ -270,6 +296,7 @@ def test_map_singledisc():
     assert track.discnumber == 1
     assert track.title == "Intro"
     assert track.artists[0] == "Yonderboi"
+    assert track.non_existent_tag == None
 
 # last track on first disc
     track = album.discs[0].tracks[16]
@@ -278,3 +305,4 @@ def test_map_singledisc():
     assert track.discnumber == 1
     assert track.title == "Outro"
     assert track.artists[0] == "Yonderboi"
+    assert track.non_existent_tag == None

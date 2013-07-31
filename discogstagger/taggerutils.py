@@ -22,9 +22,10 @@ logger = logging.getLogger(__name__)
 
 class TagOpener(FancyURLopener, object):
 
-    version = "discogstagger +http://github.com/jesseward"
+    version = "discogstagger"
 
-    def __init__(self):
+    def __init__(self, user_agent):
+        self.version = user_agent
         FancyURLopener.__init__(self)
 
 
@@ -38,17 +39,18 @@ class TagHandler(object):
         self.config = tagger_config
 
         self.keep_tags = self.config.get("details", "keep_tags")
+        self.user_agent = self.config.get("common", "user-agent")
 
     def copy_files(self):
         return False
 
-    def tag_album(self):
-# !TODO make it also possible to tag already exisiting files, not just copied
-# ones
-        for disc in self.album.discs:
-            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
-            for track in self.tracks:
-                self.tag_single_track(target_folder, track, track.new_file)
+#    def tag_album(self):
+## !TODO make it also possible to tag already exisiting files, not just copied
+## ones
+#        for disc in self.album.discs:
+#            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+#            for track in self.tracks:
+#                self.tag_single_track(target_folder, track, track.new_file)
 
     def tag_single_track(self, target_folder, track, new_file):
         # load metadata information
@@ -103,10 +105,7 @@ class TagHandler(object):
         setattr(metadata, self.config.id_tag_name, self.album.id)
 
         metadata.disc = track.discnumber
-
-        if len(self.album.discs) > 1:
-            logger.info("writing disctotal and discnumber")
-            metadata.disctotal = len(self.album.discs)
+        metadata.disctotal = len(self.album.discs)
 
         if self.album.is_compilation:
             metadata.comp = True
@@ -134,6 +133,20 @@ class TagHandler(object):
 
         metadata.save()
 
+class FileHandler(object):
+
+    def __init__(self):
+        pass
+
+    def mkdir_p(path):
+        try:
+            os.makedirs(path)
+        except OSError as exc: # Python >2.5
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else: raise
+
+
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
         TaggerUtils returns a the corresponding metadata information , in which
@@ -154,7 +167,7 @@ class TaggerUtils(object):
         self.dir_format = self.config.get("file-formatting", "dir")
         self.song_format = self.config.get("file-formatting", "song")
         self.va_song_format = self.config.get("file-formatting", "va_song")
-        self.images_format = self.config.get("file-formatting", "images")
+        self.images_format = self.config.get("file-formatting", "image")
         self.m3u_format = self.config.get("file-formatting", "m3u")
         self.nfo_format = self.config.get("file-formatting", "nfo")
 
@@ -169,6 +182,8 @@ class TaggerUtils(object):
         self.sourcedir = sourcedir
         self.destdir = destdir
 
+# !TODO remove this, the album should always be determined from the outside,
+# there should be no relationship to discogs in this class ;-)
         if not album == None:
             self.album = album
         else:
@@ -345,7 +360,6 @@ class TaggerUtils(object):
 
         return dir_name
 
-# !TODO use templates for the following methods, to be able to define different files
     @property
     def m3u_filename(self):
         """ generates the m3u file name """
@@ -416,6 +430,34 @@ class TaggerUtils(object):
             Taken from http://forums.winamp.com/showthread.php?s=&threadid=65772"""
         return self.create_file_from_template("m3u.txt", self.m3u_filename)
 
+    def get_images(self, dest_dir_name):
+        """
+            Download and store any available images
+            we need http access here as well (see discogsalbum), and therefore the
+            user-agent, we should be able to put this into a common object, ....
+        """
+        if self.album.images:
+            images = self.album.images
+
+            image_format = self.config.get("file-formatting", "image")
+            use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
+
+            for i, image in enumerate(images, 0):
+                logger.debug("Downloading image '%s'" % image)
+                try:
+                    url_fh = TagOpener(self.user_agent)
+
+                    picture_name = ""
+                    if i == 0 and use_folder_jpg:
+                        picture_name = "folder.jpg"
+                    else:
+                        picture_name = images_format + "-%.2d.jpg" % i
+
+                    url_fh.retrieve(image, os.path.join(dest_dir_name, picture_name))
+                except Exception as e:
+                    logger.error("Unable to download image '%s', skipping." % image)
+                    print e
+
 
 def write_file(filecontents, filename):
     """ writes a string of data to disk """
@@ -432,28 +474,3 @@ def write_file(filecontents, filename):
         logger.error("Unable to write file '%s'" % filename)
 
     return True
-
-def get_images(images, dest_dir_name, images_format, first_image_name):
-    """
-        Download and store any available images
-        we need http access here as well (see discogsalbum), and therefore the
-        user-agent, we should be able to put this into a common object, ....
-    """
-
-    if images:
-        for i, image in enumerate(images, 0):
-            logger.debug("Downloading image '%s'" % image)
-            try:
-                url_fh = TagOpener()
-
-                picture_name = ""
-                if i == 0:
-                    picture_name = first_image_name
-                else:
-                    picture_name = images_format + "-%.2d.jpg" % i
-
-                url_fh.retrieve(image, os.path.join(dest_dir_name, picture_name))
-            except Exception as e:
-                logger.error("Unable to download image '%s', skipping."
-                              % image)
-                print e

@@ -31,7 +31,7 @@ class TaggerUtilsBase(object):
         self.tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
         dummy_response = DummyResponse(self.ogsrelid)
-        discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
+        discogs_album = DummyDiscogsAlbum(self.ogsrelid, self.tagger_config, dummy_response)
         self.album = discogs_album.map()
 
     def tearDown(self):
@@ -179,7 +179,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         self.config = tagger_config.config
 
         dummy_response = DummyResponse(self.ogsrelid)
-        discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
+        discogs_album = DummyDiscogsAlbum(self.ogsrelid, tagger_config, dummy_response)
         self.album = discogs_album.map()
 
         # copy file to source directory and rename it
@@ -225,7 +225,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         self.config = tagger_config.config
 
         dummy_response = DummyResponse(self.ogsrelid)
-        discogs_album = DummyDiscogsAlbum(self.ogsrelid, dummy_response)
+        discogs_album = DummyDiscogsAlbum(self.ogsrelid, tagger_config, dummy_response)
         self.album = discogs_album.map()
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,

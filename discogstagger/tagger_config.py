@@ -8,6 +8,7 @@ from optparse import OptionParser
 
 logger = logging.getLogger(__name__)
 
+# !TODO This could be made slightly easier by extending the original ConfigParser
 class TaggerConfig(object):
     """ provides the configuration mechanisms for the discogstagger """
 

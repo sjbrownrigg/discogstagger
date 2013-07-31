@@ -42,8 +42,9 @@ class DiscogsAlbum(object):
         [ 04 ] Blunted Dummies - House For All (J. Acquaviva's Mix)
         [ 05 ] Blunted Dummies - House For All (Ruby Fruit Jungle Mix) """
 
-    def __init__(self, releaseid):
-        discogs.user_agent = "discogstagger +http://github.com/jesseward"
+    def __init__(self, releaseid, tagger_config):
+        self.config = tagger_config
+        discogs.user_agent = tagger_config.get("common", "user-agent")
         self.release = discogs.Release(releaseid)
 
     def map(self):

@@ -19,7 +19,7 @@ def test_default_values():
     assert not config.getboolean("details", "use_style")
     assert config.getboolean("details", "use_lower_filenames")
 
-    assert config.get("file-formatting", "images") == "image"
+    assert config.get("file-formatting", "image") == "image"
 
 def test_set_values():
 

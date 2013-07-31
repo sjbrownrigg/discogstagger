@@ -19,20 +19,11 @@ from discogstagger.tagger_config import TaggerConfig
 
 import os, errno
 
-# !TODO move this to taggerutils - this class should handle basically the whole
-# logic, not in here
-def mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc: # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else: raise
 
 p = OptionParser()
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The discogs.com release id of the target album")
-p.add_option("-s", "--source", action="store", dest="sdir",
+p.add_option("-s", "--source", action="store", dest="sourcedir",
              help="The directory that you wish to tag")
 p.add_option("-d", "--destination", action="store", dest="destdir",
              help="The (base) directory to copy the tagged files to")
@@ -42,7 +33,7 @@ p.add_option("-c", "--conf", action="store", dest="conffile",
 p.set_defaults(conffile="/etc/discogstagger/discogs_tagger.conf")
 (options, args) = p.parse_args()
 
-if not options.sdir or not os.path.exists(options.sdir):
+if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
 
 tagger_config = TaggerConfig()
@@ -58,7 +49,7 @@ dir_format_batch = "dir"
 dir_format = None
 
 # read tags from batch file if available
-tagger_config.read(os.path.join(options.sdir, id_file))
+tagger_config.read(os.path.join(options.sourcedir, id_file))
 
 if config.get("source", "id"):
     releaseid = config.get("source", "id").strip()
@@ -79,49 +70,18 @@ else:
 
 logger.info("Using destination directory: %s", destdir)
 
-# some config options, which are not "overwritable" through release-tags
-keep_original = config.getboolean("details", "keep_original")
-embed_coverart = config.getboolean("details", "embed_coverart")
-use_lower_filenames = config.getboolean("details", "use_lower_filenames")
-use_folder_jpg = config.getboolean("details", "use_folder_jpg")
-copy_other_files = config.getboolean("details", "copy_other_files")
+discogs_album = DiscogsAlbum(self.ogsrelid, tagger_config)
+album = discogs_album.map()
 
-user_agent = config.get("common", "user-agent")
+taggerutils = TaggerUtils(options.sourcedir, options.destdir, releaseid,
+                          tagger_config, album)
 
-# config options "overwritable" through release-tags
-keep_tags = config.get("details", "keep_tags")
-
-enocder_tag = None
-encoder_tag = config.get("tags", "encoder")
-
-use_style = config.getboolean("details", "use_style")
-split_discs_folder = config.getboolean("details", "split_discs_folder")
-split_discs = config.getboolean("details", "split_discs")
-if split_discs:
-    split_discs_extension = config.get("details", "split_discs_extension").strip('"')
-split_artists = config.get("details", "split_artists").strip('"')
-split_genres_and_styles = config.get("details", "split_genres_and_styles").strip('"')
-
-release = TaggerUtils(options.sdir, destdir, releaseid, config)
-release.disc_folder_name = disc_folder_name
-release.group_name = group_name
-
-first_image_name = "folder.jpg"
-
-if not use_folder_jpg:
-    first_image_name = images_format + "-01.jpg"
-
+# !TODO - make this a check during the taggerutils run
 # ensure we were able to map the release appropriately.
-if not release.tag_map:
-    logger.error("Unable to match file list to discogs release '%s'" %
-                  releaseid)
-    sys.exit()
-
-#
-# start tagging actions. --> put this out of here into its own object
-#
-artist = split_artists.join(release.album.artists)
-artist = release.album.clean_name(artist)
+#if not release.tag_map:
+#    logger.error("Unable to match file list to discogs release '%s'" %
+#                  releaseid)
+#    sys.exit()
 
 logger.info("Tagging album '%s - %s'" % (artist, release.album.title))
 
@@ -135,12 +95,11 @@ else:
     mkdir_p(dest_dir_name)
 
 logger.info("Downloading and storing images")
-get_images(release.album.images, dest_dir_name, images_format, first_image_name)
+taggerutils.get_images(dest_dir_name)
 
 # !TODO remove all the following stuff, should be done in the taggerutils (rename
 # to taghandler?) or in a new class, this wrapper should just provide all needed
 # information for the real tagging and thats it.
-
 disc_names = dict()
 folder_names = dict()
 if release.album.disctotal > 1 and split_discs_folder:
@@ -181,76 +140,15 @@ for track in release.tag_map:
     # load metadata information
     metadata = MediaFile(os.path.join(target_folder, track.new_file))
 
-    # read already existing (and still wanted) properties
-    keepTags = {}
-    for name in keep_tags.split(","):
-        if getattr(metadata, name):
-            keepTags[name] = getattr(metadata, name)
-
-    # remove current metadata
-    metadata.delete()
-
-    # set album metadata
-    metadata.album = release.album.title
-
-    if split_discs_folder and release.album.disctotal > 1:
-        # the fileext should be stored on the album/track as well
-        fileext = os.path.splitext(track.orig_file)[1]
-        disc_title_extension = release._value_from_tag_format(split_discs_extension, 
-            track.tracknumber, track.position - 1, fileext)
-        metadata.album = "%s%s" % (metadata.album, disc_title_extension)
-
-    metadata.composer = artist
-    metadata.albumartist = artist
-    metadata.albumartist_sort = release.album.sort_artist
-    metadata.label = release.album.label
-    metadata.year = release.album.year
-    metadata.country = release.album.country
-    metadata.url = release.album.url
-    # add styles to the grouping tag (right now, we can just use one)
-    metadata.grouping = release.album.styles
-
-    # adding two as there is no standard. discogstagger pre v1
-    # used (TXXX desc="Catalog #")
-    # mediafile uses TXXX desc="CATALOGNUMBER"
-    metadata.catalognum = release.album.catno
-    metadata.catalognumber = release.album.catno
-
-    # use the correct genre field, on config use the first style
-    genre = release.album.genres
-    if use_style:
-        genre = release.album.style
-
-    metadata.genre = genre
-    metadata.discogs_id = releaseid
-
-    if release.album.disctotal and release.album.disctotal > 1 and track.discnumber:
-        logger.info("writing disctotal and discnumber")
-        metadata.disc = track.discnumber
-        metadata.disctotal = release.album.disctotal
-
-    if release.album.is_compilation:
-        metadata.comp = True
-
-    metadata.comments = release.album.note
-
-    # encoder
-    if encoder_tag is not None:
-        metadata.encoder = encoder_tag
+#    if split_discs_folder and release.album.disctotal > 1:
+#        # the fileext should be stored on the album/track as well
+#        fileext = os.path.splitext(track.orig_file)[1]
+#        disc_title_extension = release._value_from_tag_format(split_discs_extension, 
+#            track.tracknumber, track.position - 1, fileext)
+#        metadata.album = "%s%s" % (metadata.album, disc_title_extension)
 
 #    if track.discsubtotal:
 #        metadata.discsubtotal = track.discsubtotal
-
-    # set track metadata
-    metadata.title = track.title
-    metadata.artist = track.artist
-    metadata.artist_sort = track.sortartist
-    metadata.track = track.tracknumber
-
-    # the following value will be wrong, if the disc has a name or is a multi
-    # disc release --> fix it
-    metadata.tracktotal = release.album.tracktotal_on_disc(track.discnumber)
-
 
     # it does not make sense to store this in the "common" configuration, but only in the 
     # id.txt. we use a special naming convention --> most probably we should reuse the 
@@ -273,12 +171,6 @@ for track in release.tag_map:
         if imgtype in ("jpeg", "png"):
             logger.info("Embedding album art.")
             metadata.art = imgdata
-
-    if not keepTags is None:
-        for name in keepTags:
-            setattr(metadata, name, keepTags[name])
-
-    metadata.save()
 
 #
 # start supplementary actions

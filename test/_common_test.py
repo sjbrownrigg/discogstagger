@@ -18,9 +18,9 @@ class DummyResponse(object):
 
 
 class DummyDiscogsAlbum(DiscogsAlbum):
-    def __init__(self, releaseid, dummy_response):
+    def __init__(self, releaseid, tagger_config, dummy_response):
         self.releaseid = releaseid
         self.dummy_response = dummy_response
-        DiscogsAlbum.__init__(self, releaseid)
+        DiscogsAlbum.__init__(self, releaseid, tagger_config)
 
         self.release._cached_response = self.dummy_response
