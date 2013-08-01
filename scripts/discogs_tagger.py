@@ -97,28 +97,28 @@ else:
 logger.info("Downloading and storing images")
 taggerutils.get_images(dest_dir_name)
 
-# !TODO remove all the following stuff, should be done in the taggerutils (rename
-# to taghandler?) or in a new class, this wrapper should just provide all needed
-# information for the real tagging and thats it.
-disc_names = dict()
-folder_names = dict()
-if release.album.disctotal > 1 and split_discs_folder:
-    logger.debug("Creating disc structure")
-    for i in range(1, release.album.disctotal + 1):
-        folder_name = "%s%.d" % (release.album_folder_name, i)
-        disc_dir_name = os.path.join(dest_dir_name, folder_name)
-        mkdir_p(disc_dir_name)
-#This is duplicate, remove one of the following statements
-        disc_names[i] = disc_dir_name
-        folder_names[i] = folder_name
-else:
-    folder_names[1] = ""
-#        # copy only if necessary (on request) - otherwise attach original
-#        for filename in glob.glob(os.path.join(dest_dir_name, '*.jpg')):
-#            shutil.copy(filename, disc_dir_name)
-#    # delete only on request
-#    for filename in glob.glob(os.path.join(dest_dir_name, '*.jpg')):
-#        os.remove(os.path.join(dest_dir_name, filename))
+## !TODO remove all the following stuff, should be done in the taggerutils (rename
+## to taghandler?) or in a new class, this wrapper should just provide all needed
+## information for the real tagging and thats it.
+#disc_names = dict()
+#folder_names = dict()
+#if release.album.disctotal > 1 and split_discs_folder:
+#    logger.debug("Creating disc structure")
+#    for i in range(1, release.album.disctotal + 1):
+#        folder_name = "%s%.d" % (release.album_folder_name, i)
+#        disc_dir_name = os.path.join(dest_dir_name, folder_name)
+#        mkdir_p(disc_dir_name)
+##This is duplicate, remove one of the following statements
+#        disc_names[i] = disc_dir_name
+#        folder_names[i] = folder_name
+#else:
+#    folder_names[1] = ""
+##        # copy only if necessary (on request) - otherwise attach original
+##        for filename in glob.glob(os.path.join(dest_dir_name, '*.jpg')):
+##            shutil.copy(filename, disc_dir_name)
+##    # delete only on request
+##    for filename in glob.glob(os.path.join(dest_dir_name, '*.jpg')):
+##        os.remove(os.path.join(dest_dir_name, filename))
 
 for track in release.tag_map:
     # copy old file into new location

@@ -43,6 +43,7 @@ class TaggerConfig(object):
     def add_config(self, config_file):
         self.config.read(config_file)
 
+# !TODO cache the following, to not recreate it on every call
     @property
     def get_character_exceptions(self):
         """ placeholders for special characters within character exceptions. """
@@ -65,3 +66,19 @@ class TaggerConfig(object):
                 pass
 
         return exceptions
+
+# !TODO cache the following, to not recreate it on every call
+    @property
+    def get_configured_tags(self):
+        """
+            return all configured tags to be able to overwrite certain
+            tags via a configuration file (e.g. id.txt)
+        """
+        tags = self.config._sections["tags"]
+
+        try:
+            del tags["__name__"]
+        except KeyError:
+            pass
+
+        return tags
