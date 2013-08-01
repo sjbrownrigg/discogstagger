@@ -272,8 +272,9 @@ class TestTagHandler(TestTaggerUtilFiles):
         shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
 
         testTagHandler = TagHandler(self.album, self.tagger_config)
+        self.album.disc(1).track(1).new_file = self.target_file_name
 
-        testTagHandler.tag_single_track(self.source_dir, self.album.disc(1).track(1), self.target_file_name)
+        testTagHandler.tag_single_track(self.source_dir, self.album.disc(1).track(1))
 
         metadata = MediaFile(os.path.join(self.source_dir, self.target_file_name))
 
@@ -295,8 +296,9 @@ class TestTagHandler(TestTaggerUtilFiles):
         shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
 
         testTagHandler = TagHandler(self.album, self.tagger_config)
+        self.album.disc(2).track(19).new_file = self.target_file_name
 
-        testTagHandler.tag_single_track(self.source_dir, self.album.disc(2).track(19), self.target_file_name)
+        testTagHandler.tag_single_track(self.source_dir, self.album.disc(2).track(19))
 
         metadata = MediaFile(os.path.join(self.source_dir, self.target_file_name))
 
@@ -308,6 +310,60 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.disctotal == 2
         assert metadata.disc == 2
         assert metadata.track == 19
+        assert metadata.comp
+        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+    def test_tag_album(self):
+        for dir in range(1, 3):
+            dir_name = "disc%d" % dir
+            multi_source_dir = os.path.join(self.source_dir, dir_name)
+            logger.debug("multi source dir: %s" % multi_source_dir)
+            os.mkdir(multi_source_dir)
+
+            for i in range(1, 21):
+                target_file_name = "%.2d-song.flac" % i
+                shutil.copyfile(self.source_file, os.path.join(multi_source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.ogsrelid,
+                                  self.tagger_config, self.album)
+
+        taggerutils._get_target_list()
+
+        testTagHandler = TagHandler(self.album, self.tagger_config)
+
+        testTagHandler.tag_album()
+
+        target_dir = os.path.join(self.target_dir, self.album.target_dir, self.album.disc(1).target_dir)
+        metadata = MediaFile(os.path.join(target_dir, "01-gigi_dagostino-la_passion_(radio_cut).flac"))
+
+        assert metadata.artist == "Gigi D'Agostino"
+        assert metadata.albumartist == "Various"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2001
+        assert metadata.disctotal == 2
+        assert metadata.comp
+        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+
+        assert metadata.freedb_id == "4711"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+        metadata = MediaFile(os.path.join(target_dir, "20-papa_roach-last_resort_(album_version_explizit).flac"))
+
+        logger.debug("artist: %s" % metadata.artist_sort)
+        assert metadata.artist == "Papa Roach"
+        assert metadata.artist_sort == "Papa Roach"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2001
+        assert metadata.disctotal == 2
+        assert metadata.disc == 1
+        assert metadata.track == 20
         assert metadata.comp
         assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
 

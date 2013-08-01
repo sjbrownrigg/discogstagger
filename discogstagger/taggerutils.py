@@ -5,6 +5,8 @@ import os
 import re
 import sys
 import logging
+import shutil
+
 from unicodedata import normalize
 
 from mako.template import Template
@@ -44,17 +46,31 @@ class TagHandler(object):
     def copy_files(self):
         return False
 
-#    def tag_album(self):
-## !TODO make it also possible to tag already exisiting files, not just copied
-## ones
-#        for disc in self.album.discs:
-#            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
-#            for track in self.tracks:
-#                self.tag_single_track(target_folder, track, track.new_file)
+    def tag_album(self):
+        for disc in self.album.discs:
+            source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
+            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
 
-    def tag_single_track(self, target_folder, track, new_file):
+            copy_needed = False
+            if not source_folder == target_folder:
+                if not os.path.exists(target_folder):
+                    fileHandler = FileHandler()
+                    fileHandler.mkdir_p(target_folder)
+                copy_needed = True
+
+            for track in disc.tracks:
+                logger.debug("source_folder: %s" % source_folder)
+                logger.debug("target_folder: %s" % target_folder)
+                logger.debug("new_file: %s" % track.new_file)
+                if copy_needed:
+                    shutil.copyfile(os.path.join(source_folder, track.orig_file),
+                        os.path.join(target_folder, track.new_file))
+
+                self.tag_single_track(target_folder, track)
+
+    def tag_single_track(self, target_folder, track):
         # load metadata information
-        metadata = MediaFile(os.path.join(target_folder, new_file))
+        metadata = MediaFile(os.path.join(target_folder, track.new_file))
 
         # read already existing (and still wanted) properties
         keepTags = {}
@@ -135,10 +151,7 @@ class TagHandler(object):
 
 class FileHandler(object):
 
-    def __init__(self):
-        pass
-
-    def mkdir_p(path):
+    def mkdir_p(self, path):
         try:
             os.makedirs(path)
         except OSError as exc: # Python >2.5
