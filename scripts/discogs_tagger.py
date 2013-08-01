@@ -160,17 +160,6 @@ for track in release.tag_map:
             setattr(metadata, name, value)
 
     first_image_name = release.first_image_name
-# this should be done in a cleaner way to avoid multiple images in different
-# folders (use the dest_dir again....)
-    if embed_coverart and os.path.exists(os.path.join(dest_dir_name,
-                                         first_image_name)):
-        imgdata = open(os.path.join(dest_dir_name,
-                       first_image_name)).read()
-        imgtype = imghdr.what(None, imgdata)
-
-        if imgtype in ("jpeg", "png"):
-            logger.info("Embedding album art.")
-            metadata.art = imgdata
 
 #
 # start supplementary actions
@@ -182,29 +171,6 @@ create_nfo(release.album.album_info, dest_dir_name, release.nfo_filename)
 # adopt for multi disc support
 logger.info("Generating .m3u file")
 create_m3u(release.tag_map, folder_names, dest_dir_name, release.m3u_filename)
-
-# copy "other files" on request
-if copy_other_files and len(release.copy_files) > 0:
-    logger.info("copying files from source directory")
-    copy_files = release.copy_files
-    dir_list = os.listdir(options.sdir)
-    logger.debug("start_dir: %s" % options.sdir)
-    logger.debug("dir list: %s" % dir_list)
-    file_list = [os.path.join(options.sdir, x) for x in dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE) 
-                                        and os.path.isfile(os.path.join(options.sdir, x))]
-    copy_files.extend(file_list)
-
-    for fname in copy_files:
-        if not fname.endswith(".m3u"):
-            logger.debug("source: %s" % fname)
-            logger.debug("target: %s" % os.path.join(dest_dir_name, os.path.basename(fname)))
-            shutil.copyfile(fname, os.path.join(dest_dir_name, os.path.basename(fname)))
-
-# remove source directory, if configured as such.
-if not keep_original:
-    logger.info("Deleting source directory '%s'" % options.sdir)
-    shutil.rmtree(options.sdir)
-
 
 
 logger.info("Tagging complete.")

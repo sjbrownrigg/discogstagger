@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from urllib import FancyURLopener
 import os
 import re
@@ -51,6 +50,8 @@ class TagHandler(object):
             source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
             target_folder = os.path.join(self.album.target_dir, disc.target_dir)
 
+# !TODO remove the following to another object, so that the file handling is done only in
+# this (FileHandler?) object
             copy_needed = False
             if not source_folder == target_folder:
                 if not os.path.exists(target_folder):
@@ -158,6 +159,43 @@ class FileHandler(object):
             if exc.errno == errno.EEXIST and os.path.isdir(path):
                 pass
             else: raise
+
+#    def remove_source_dir(self):
+#        # remove source directory, if configured as such.
+#        if not keep_original:
+#            logger.info("Deleting source directory '%s'" % options.sdir)
+#            shutil.rmtree(options.sdir)
+
+#    def copy_other_files(self):
+#        # copy "other files" on request
+#        # remove to file handler as well....
+#        if copy_other_files and len(release.copy_files) > 0:
+#            logger.info("copying files from source directory")
+#            copy_files = release.copy_files
+#            dir_list = os.listdir(options.sdir)
+#            logger.debug("start_dir: %s" % options.sdir)
+#            logger.debug("dir list: %s" % dir_list)
+#            file_list = [os.path.join(options.sdir, x) for x in dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE) 
+#                                                and os.path.isfile(os.path.join(options.sdir, x))]
+#            copy_files.extend(file_list)
+#
+#            for fname in copy_files:
+#                if not fname.endswith(".m3u"):
+#                    logger.debug("source: %s" % fname)
+#                    logger.debug("target: %s" % os.path.join(dest_dir_name, os.path.basename(fname)))
+#                    shutil.copyfile(fname, os.path.join(dest_dir_name, os.path.basename(fname)))
+
+#    def embed_coverart(self):
+#        if embed_coverart and os.path.exists(os.path.join(dest_dir_name,
+#                                             first_image_name)):
+#            imgdata = open(os.path.join(dest_dir_name,
+#                           first_image_name)).read()
+#            imgtype = imghdr.what(None, imgdata)
+#
+#            if imgtype in ("jpeg", "png"):
+#                logger.info("Embedding album art.")
+#                metadata.art = imgdata
+
 
 
 class TaggerUtils(object):
