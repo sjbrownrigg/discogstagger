@@ -24,15 +24,25 @@ each release.
 
 Optionally discogstagger will embed the found album art into the file meta data
 
+## Develop on discogstagger
+
+If you are developing on discogstagger, please do not forget to check, if the
+given tests (and you should add your own unit tests as well) are still running,
+by invoking
+
+```
+invoke test
+```
+
 ## Requirements
 
 * Mutagen
 * discogs-client
 * requests
 
-I am also packaging/reusing the MediaFile library from the "beets" project. This
-will be packaged with discogs tagger until MediaFile is split out to its own
-package.
+discogstagger is also packaging/reusing the MediaFile library from the "beets"
+project. This will be packaged with discogs tagger until MediaFile is split out
+to its own package.
 
 ## Installation
 
