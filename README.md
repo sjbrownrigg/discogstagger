@@ -36,9 +36,13 @@ invoke test
 
 ## Requirements
 
-* Mutagen
-* discogs-client
-* requests
+* Mutagen for easy accessing meta-tags
+* discogs-client for access to the discogs api
+* requests for access to the discogs api ;-)
+* nose for unit tests
+* mako for easy templating (e.g. nfo and m3u files) >=0.8.1
+* coverage for coverage reporting
+* invoke to make running tests easier
 
 discogstagger is also packaging/reusing the MediaFile library from the "beets"
 project. This will be packaged with discogs tagger until MediaFile is split out
