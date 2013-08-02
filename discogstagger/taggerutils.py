@@ -163,6 +163,9 @@ class FileHandler(object):
             copy an album and all its files to the new location, rename those
             files if necessary
         """
+        logger.debug("album sourcedir: %s" % self.album.sourcedir)
+        logger.debug("album targetdir: %s" % self.album.target_dir)
+
         for disc in self.album.discs:
             source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
             target_folder = os.path.join(self.album.target_dir, disc.target_dir)
@@ -170,8 +173,7 @@ class FileHandler(object):
             copy_needed = False
             if not source_folder == target_folder:
                 if not os.path.exists(target_folder):
-                    fileHandler = FileHandler()
-                    fileHandler.mkdir_p(target_folder)
+                    self.mkdir_p(target_folder)
                 copy_needed = True
 
             for track in disc.tracks:

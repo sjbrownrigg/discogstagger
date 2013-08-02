@@ -277,14 +277,14 @@ class TestFileHandler(TestTaggerUtilFiles):
 
         assert self.tagger_config.getboolean("details", "keep_original")
 
-        fileHandler = FileHandler(self.album, self.tagger_config)
+        testFileHandler = FileHandler(self.album, self.tagger_config)
 
         target_file = os.path.join(self.album.sourcedir, "id.txt")
         shutil.copyfile(self.source_copy_file, target_file)
 
         assert os.path.exists(target_file)
 
-        fileHandler.remove_source_dir()
+        testFileHandler.remove_source_dir()
 
         assert os.path.exists(self.album.sourcedir)
         assert os.path.exists(target_file)
@@ -294,11 +294,11 @@ class TestFileHandler(TestTaggerUtilFiles):
 
         assert not self.tagger_config.getboolean("details", "keep_original")
 
-        fileHandler = FileHandler(self.album, self.tagger_config)
+        testFileHandler = FileHandler(self.album, self.tagger_config)
 
         assert os.path.exists(target_file)
 
-        fileHandler.remove_source_dir()
+        testFileHandler.remove_source_dir()
 
         assert not os.path.exists(self.album.sourcedir)
         assert not os.path.exists(target_file)
@@ -379,6 +379,9 @@ class TestTagHandler(TestTaggerUtilFiles):
         taggerutils._get_target_list()
 
         testTagHandler = TagHandler(self.album, self.tagger_config)
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        testFileHandler.copy_files()
 
         testTagHandler.tag_album()
 
