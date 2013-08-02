@@ -46,27 +46,13 @@ class TagHandler(object):
         return False
 
     def tag_album(self):
+        """ tags all tracks in an album, the filenames are determined using
+            the given properties on the tracks
+        """
         for disc in self.album.discs:
-            source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
             target_folder = os.path.join(self.album.target_dir, disc.target_dir)
 
-# !TODO remove the following to another object, so that the file handling is done only in
-# this (FileHandler?) object
-            copy_needed = False
-            if not source_folder == target_folder:
-                if not os.path.exists(target_folder):
-                    fileHandler = FileHandler()
-                    fileHandler.mkdir_p(target_folder)
-                copy_needed = True
-
             for track in disc.tracks:
-                logger.debug("source_folder: %s" % source_folder)
-                logger.debug("target_folder: %s" % target_folder)
-                logger.debug("new_file: %s" % track.new_file)
-                if copy_needed:
-                    shutil.copyfile(os.path.join(source_folder, track.orig_file),
-                        os.path.join(target_folder, track.new_file))
-
                 self.tag_single_track(target_folder, track)
 
     def tag_single_track(self, target_folder, track):
@@ -151,6 +137,18 @@ class TagHandler(object):
         metadata.save()
 
 class FileHandler(object):
+    """ this class contains all file handling tasks for the tagger, 
+        it loops over the album and discs (see copy_files) to copy 
+        the files for each album. This could be done in the TagHandler
+        class, but this would mean a too strong relationship between
+        FileHandling and Tagging, which is not as nice for testing and
+        for future extensability.
+    """
+
+
+    def __init__(self, album, tagger_config):
+        self.config = tagger_config
+        self.album = album
 
     def mkdir_p(self, path):
         try:
@@ -160,11 +158,49 @@ class FileHandler(object):
                 pass
             else: raise
 
-#    def remove_source_dir(self):
-#        # remove source directory, if configured as such.
-#        if not keep_original:
-#            logger.info("Deleting source directory '%s'" % options.sdir)
-#            shutil.rmtree(options.sdir)
+    def copy_files(self):
+        """
+            copy an album and all its files to the new location, rename those
+            files if necessary
+        """
+        for disc in self.album.discs:
+            source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
+            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+
+            copy_needed = False
+            if not source_folder == target_folder:
+                if not os.path.exists(target_folder):
+                    fileHandler = FileHandler()
+                    fileHandler.mkdir_p(target_folder)
+                copy_needed = True
+
+            for track in disc.tracks:
+                logger.debug("source_folder: %s" % source_folder)
+                logger.debug("target_folder: %s" % target_folder)
+                logger.debug("new_file: %s" % track.new_file)
+
+                source_file = os.path.join(source_folder, track.orig_file)
+                target_file = os.path.join(target_folder, track.new_file)
+                if copy_needed and not os.path.exists(target_file):
+                    if not os.path.exists(source_file):
+                        logger.error("Source does not exists")
+                        # throw error
+                    shutil.copyfile(os.path.join(source_folder, track.orig_file),
+                        os.path.join(target_folder, track.new_file))
+
+    def remove_source_dir(self):
+        """
+            remove source directory, if configured as such (see config option
+            details:keep_original)
+        """
+        keep_original = self.config.getboolean("details", "keep_original")
+        source_dir = self.album.sourcedir
+
+        logger.debug("keep_original: %s" % keep_original)
+        logger.debug("going to remove directory....")
+        if not keep_original:
+            logger.warn("Deleting source directory '%s'" % source_dir)
+            shutil.rmtree(source_dir)
 
 #    def copy_other_files(self):
 #        # copy "other files" on request
@@ -175,7 +211,7 @@ class FileHandler(object):
 #            dir_list = os.listdir(options.sdir)
 #            logger.debug("start_dir: %s" % options.sdir)
 #            logger.debug("dir list: %s" % dir_list)
-#            file_list = [os.path.join(options.sdir, x) for x in dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE) 
+#            file_list = [os.path.join(options.sdir, x) for x in dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE)
 #                                                and os.path.isfile(os.path.join(options.sdir, x))]
 #            copy_files.extend(file_list)
 #

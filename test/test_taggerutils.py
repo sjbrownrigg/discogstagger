@@ -20,7 +20,7 @@ from _common_test import DummyResponse, DummyDiscogsAlbum
 
 from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum
-from discogstagger.taggerutils import TaggerUtils, TagHandler
+from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler
 
 class TaggerUtilsBase(object):
 
@@ -113,7 +113,10 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
     def tearDown(self):
         TaggerUtilsBase.tearDown(self)
 
-        shutil.rmtree(self.source_dir)
+        # we are removing this directory in one test (see FileHandler)
+        # therefor we need to be cautious ;-)
+        if os.path.exists(self.source_dir):
+            shutil.rmtree(self.source_dir)
         shutil.rmtree(self.target_dir)
 
     def test__get_target_list_multi_disc(self):
@@ -258,6 +261,48 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         taggerutils._get_target_list()
         assert self.album.discs[0].tracks[0].new_file == "01-yonderboi-intro.flac"
         assert taggerutils.create_m3u(self.target_dir)
+
+class TestFileHandler(TestTaggerUtilFiles):
+
+    def setUp(self):
+        TestTaggerUtilFiles.setUp(self)
+        self.target_file_name = "test.flac"
+
+    def tearDown(self):
+        TestTaggerUtilFiles.tearDown(self)
+        self.tagger_config = None
+
+    def test_remove_source_dir(self):
+        self.album.sourcedir = self.source_dir
+
+        assert self.tagger_config.getboolean("details", "keep_original")
+
+        fileHandler = FileHandler(self.album, self.tagger_config)
+
+        target_file = os.path.join(self.album.sourcedir, "id.txt")
+        shutil.copyfile(self.source_copy_file, target_file)
+
+        assert os.path.exists(target_file)
+
+        fileHandler.remove_source_dir()
+
+        assert os.path.exists(self.album.sourcedir)
+        assert os.path.exists(target_file)
+
+        # construct config with only default values
+        self.tagger_config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+
+        assert not self.tagger_config.getboolean("details", "keep_original")
+
+        fileHandler = FileHandler(self.album, self.tagger_config)
+
+        assert os.path.exists(target_file)
+
+        fileHandler.remove_source_dir()
+
+        assert not os.path.exists(self.album.sourcedir)
+        assert not os.path.exists(target_file)
+
 
 class TestTagHandler(TestTaggerUtilFiles):
 
