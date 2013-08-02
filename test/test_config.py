@@ -81,3 +81,12 @@ def test_get_character_exceptions():
     assert len(config.get_character_exceptions) == 11
     assert config.get_character_exceptions["\xc3\xa2"] == "a"
 
+def test_get_configured_tags():
+
+    config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+
+    logger.debug("config.get_configured_tags %s" % config.get_configured_tags)
+    assert len(config.get_configured_tags) == 3
+    assert config.get_configured_tags["year"] == "1901"
+    assert config.get_configured_tags["title"] == "Title"
+    assert config.get_configured_tags["encoder"] == ""
