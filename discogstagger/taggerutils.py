@@ -137,8 +137,8 @@ class TagHandler(object):
         metadata.save()
 
 class FileHandler(object):
-    """ this class contains all file handling tasks for the tagger, 
-        it loops over the album and discs (see copy_files) to copy 
+    """ this class contains all file handling tasks for the tagger,
+        it loops over the album and discs (see copy_files) to copy
         the files for each album. This could be done in the TagHandler
         class, but this would mean a too strong relationship between
         FileHandling and Tagging, which is not as nice for testing and
@@ -204,37 +204,38 @@ class FileHandler(object):
             logger.warn("Deleting source directory '%s'" % source_dir)
             shutil.rmtree(source_dir)
 
-#    def copy_other_files(self):
-#        # copy "other files" on request
-#        # remove to file handler as well....
-#        if copy_other_files and len(release.copy_files) > 0:
-#            logger.info("copying files from source directory")
-#            copy_files = release.copy_files
-#            dir_list = os.listdir(options.sdir)
-#            logger.debug("start_dir: %s" % options.sdir)
-#            logger.debug("dir list: %s" % dir_list)
-#            file_list = [os.path.join(options.sdir, x) for x in dir_list if not x.lower().endswith(TaggerUtils.FILE_TYPE)
-#                                                and os.path.isfile(os.path.join(options.sdir, x))]
-#            copy_files.extend(file_list)
-#
-#            for fname in copy_files:
-#                if not fname.endswith(".m3u"):
-#                    logger.debug("source: %s" % fname)
-#                    logger.debug("target: %s" % os.path.join(dest_dir_name, os.path.basename(fname)))
-#                    shutil.copyfile(fname, os.path.join(dest_dir_name, os.path.basename(fname)))
+    def copy_other_files(self):
+        # copy "other files" on request
+        copy_other_files = self.config.getboolean("details", "copy_other_files")
+
+        if copy_other_files:
+            logger.info("copying files from source directory")
+            copy_files = self.album.copy_files
+
+            for fname in copy_files:
+                shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
+
+            for disc in self.album.discs:
+                copy_files = disc.copy_files
+
+                for fname in copy_files:
+                    if not fname.endswith(".m3u"):
+                        source_path = os.path.join(self.album.sourcedir, disc.sourcedir)
+                        target_path = os.path.join(self.album.target_dir, disc.target_dir)
+                        if not os.path.exists(target_path):
+                            self.mkdir_p(target_path)
+                        shutil.copyfile(os.path.join(source_path, fname), os.path.join(target_path, fname))
 
 #    def embed_coverart(self):
 #        if embed_coverart and os.path.exists(os.path.join(dest_dir_name,
-#                                             first_image_name)):
+#                                            first_image_name)):
 #            imgdata = open(os.path.join(dest_dir_name,
 #                           first_image_name)).read()
-#            imgtype = imghdr.what(None, imgdata)
+#            imgtype = imghdr.what(None, imgdata)#
 #
 #            if imgtype in ("jpeg", "png"):
 #                logger.info("Embedding album art.")
 #                metadata.art = imgdata
-
-
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
