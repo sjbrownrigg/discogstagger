@@ -363,20 +363,27 @@ class TaggerUtils(object):
         sourcedir = self.album.sourcedir
 
         logger.debug("target_dir: %s" % self.album.target_dir)
+        logger.debug("source_dir: %s" % sourcedir)
 
         try:
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
 
             if self.album.has_multi_disc:
+                logger.debug("is multi disc album, looping discs")
                 self.album.copy_files = []
 
+                logger.debug("dir_list: %s" % dir_list)
                 for i, y in enumerate(dir_list):
+                    logger.debug("using dir no %s = %s" % (i, y))
                     if os.path.isdir(os.path.join(sourcedir, y)):
+                        logger.debug("Setting disc(%s) sourcedir to: %s" % (i, y))
                         self.album.discs[i].sourcedir = y
                     else:
+                        logger.debug("Setting copy_files instead of sourcedir")
                         self.album.copy_files.append(y)
             else:
+                logger.debug("Setting disc sourcedir to none")
                 self.album.discs[0].sourcedir = None
 
             for disc in self.album.discs:

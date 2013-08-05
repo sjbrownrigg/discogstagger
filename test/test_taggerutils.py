@@ -303,6 +303,54 @@ class TestFileHandler(TestTaggerUtilFiles):
         assert not os.path.exists(self.album.sourcedir)
         assert not os.path.exists(target_file)
 
+    def test_copy_files(self):
+        assert self.tagger_config.getboolean("details", "keep_original")
+
+        testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
+                self.ogsrelid, self.tagger_config, self.album)
+
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+# !TODO refactor this into its own method ;-)
+        for dir in range(1, 3):
+            dir_name = "disc%d" % dir
+            self.album.disc(dir).sourcedir = dir_name
+            multi_source_dir = os.path.join(self.source_dir, dir_name)
+            logger.debug("multi source dir: %s" % multi_source_dir)
+            os.mkdir(multi_source_dir)
+
+            for i in range(1, 21):
+                target_file_name = "%.2d-song.flac" % i
+                shutil.copyfile(self.source_file, os.path.join(multi_source_dir, target_file_name))
+
+        testTagUtils._get_target_list()
+
+        testFileHandler.copy_files()
+
+        assert os.path.exists(self.album.sourcedir)
+        assert os.path.exists(self.album.target_dir)
+
+        disc_dir = os.path.join(self.album.target_dir, self.album.disc(1).target_dir)
+        assert os.path.exists(disc_dir)
+
+        disc_dir = os.path.join(self.album.target_dir, self.album.disc(2).target_dir)
+        assert os.path.exists(disc_dir)
+
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(1).target_dir, self.album.disc(1).track(1).new_file)
+        assert os.path.exists(track_file)
+
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(1).target_dir, self.album.disc(1).track(20).new_file)
+        assert os.path.exists(track_file)
+
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(2).target_dir, self.album.disc(2).track(1).new_file)
+        assert os.path.exists(track_file)
+
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(2).target_dir, self.album.disc(2).track(20).new_file)
+        assert os.path.exists(track_file)
 
 class TestTagHandler(TestTaggerUtilFiles):
 
@@ -363,6 +411,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.encoder == ""
 
     def test_tag_album(self):
+# !TODO refactor this into its own method ;-)
         for dir in range(1, 3):
             dir_name = "disc%d" % dir
             multi_source_dir = os.path.join(self.source_dir, dir_name)
