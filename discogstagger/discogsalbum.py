@@ -44,7 +44,7 @@ class DiscogsAlbum(object):
 
     def __init__(self, releaseid, tagger_config):
         self.config = tagger_config
-        discogs.user_agent = tagger_config.get("common", "user-agent")
+        discogs.user_agent = self.config.get("common", "user_agent")
         self.release = discogs.Release(releaseid)
 
     def map(self):

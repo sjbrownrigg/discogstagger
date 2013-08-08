@@ -40,7 +40,7 @@ class TagHandler(object):
         self.config = tagger_config
 
         self.keep_tags = self.config.get("details", "keep_tags")
-        self.user_agent = self.config.get("common", "user-agent")
+        self.user_agent = self.config.get("common", "user_agent")
 
     def copy_files(self):
         return False
@@ -225,6 +225,39 @@ class FileHandler(object):
                         if not os.path.exists(target_path):
                             self.mkdir_p(target_path)
                         shutil.copyfile(os.path.join(source_path, fname), os.path.join(target_path, fname))
+
+    def get_images(self):
+        """
+            Download and store any available images
+            The images are all copied into the album directory, on multi-disc
+            albums the first image (mostly folder.jpg) is copied into the
+            disc directory also to make it available to mp3 players (e.g. deadbeef)
+
+            we need http access here as well (see discogsalbum), and therefore the
+            user-agent
+        """
+        if self.album.images:
+            images = self.album.images
+
+            image_format = self.config.get("file-formatting", "image")
+            use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
+
+            for i, image in enumerate(images, 0):
+                logger.debug("Downloading image '%s'" % image)
+                try:
+                    user_agent = self.config.get("common", "user_agent")
+                    url_fh = TagOpener(user_agent)
+
+                    picture_name = ""
+                    if i == 0 and use_folder_jpg:
+                        picture_name = "folder.jpg"
+                    else:
+                        picture_name = images_format + "-%.2d.jpg" % i
+
+                    url_fh.retrieve(image, os.path.join(dest_dir_name, picture_name))
+                except Exception as e:
+                    logger.error("Unable to download image '%s', skipping." % image)
+                    print e
 
 #    def embed_coverart(self):
 #        if embed_coverart and os.path.exists(os.path.join(dest_dir_name,
@@ -526,34 +559,6 @@ class TaggerUtils(object):
 
             Taken from http://forums.winamp.com/showthread.php?s=&threadid=65772"""
         return self.create_file_from_template("m3u.txt", self.m3u_filename)
-
-    def get_images(self, dest_dir_name):
-        """
-            Download and store any available images
-            we need http access here as well (see discogsalbum), and therefore the
-            user-agent, we should be able to put this into a common object, ....
-        """
-        if self.album.images:
-            images = self.album.images
-
-            image_format = self.config.get("file-formatting", "image")
-            use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
-
-            for i, image in enumerate(images, 0):
-                logger.debug("Downloading image '%s'" % image)
-                try:
-                    url_fh = TagOpener(self.user_agent)
-
-                    picture_name = ""
-                    if i == 0 and use_folder_jpg:
-                        picture_name = "folder.jpg"
-                    else:
-                        picture_name = images_format + "-%.2d.jpg" % i
-
-                    url_fh.retrieve(image, os.path.join(dest_dir_name, picture_name))
-                except Exception as e:
-                    logger.error("Unable to download image '%s', skipping." % image)
-                    print e
 
 
 def write_file(filecontents, filename):
