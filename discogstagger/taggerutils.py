@@ -245,6 +245,7 @@ class FileHandler(object):
             logger.debug("image-format: %s" % image_format)
             logger.debug("use_folder_jpg: %s" % use_folder_jpg)
 
+            no = 0
             for i, image in enumerate(images, 0):
                 logger.debug("Downloading image '%s'" % image)
                 try:
@@ -255,7 +256,8 @@ class FileHandler(object):
                     if i == 0 and use_folder_jpg:
                         picture_name = "folder.jpg"
                     else:
-                        picture_name = image_format + "-%.2d.jpg" % i
+                        no = no + 1
+                        picture_name = image_format + "-%.2d.jpg" % no
 
                     url_fh.retrieve(image, os.path.join(self.album.target_dir, picture_name))
                 except Exception as e:

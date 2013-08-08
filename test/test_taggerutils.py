@@ -4,6 +4,10 @@ import os, sys
 import shutil
 from nose.tools import *
 
+# for debugging only
+from os import listdir
+from os.path import isfile, join
+
 from ext.mediafile import MediaFile
 
 import logging
@@ -418,8 +422,38 @@ class TestFileHandler(TestTaggerUtilFiles):
         testFileHandler.get_images()
 
         assert os.path.exists(os.path.join(self.album.target_dir, "folder.jpg"))
+        assert os.path.exists(os.path.join(self.album.target_dir, "image-01.jpg"))
+        assert os.path.exists(os.path.join(self.album.target_dir, "image-02.jpg"))
+        assert os.path.exists(os.path.join(self.album.target_dir, "image-03.jpg"))
+
+    def test_get_images_wo_folderjpg(self):
+        """ This test needs network connection, see how we can handle this,
+            if there is None
+        """
+        testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
+                self.ogsrelid, self.tagger_config, self.album)
+
+        self.copy_files(self.album)
+
+        testTagUtils._get_target_list()
+
+        # construct config with only default values
+        self.tagger_config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        testFileHandler.get_images()
+
+        onlyfiles = [ f for f in listdir(self.album.target_dir) if isfile(join(self.album.target_dir, f))]
+        logger.debug("files: %s " % onlyfiles)
+
+        assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-01.jpg"))
+        assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-02.jpg"))
+        assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-03.jpg"))
+        assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-04.jpg"))
 
     test_get_images.needs_network = True
+    test_get_images_wo_folderjpg.needs_network = True
 
 class TestTagHandler(TestTaggerUtilFiles):
 

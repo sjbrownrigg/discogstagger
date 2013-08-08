@@ -28,7 +28,7 @@ def test_set_values():
     assert not config.getboolean("details", "keep_original")
     assert config.getboolean("details", "use_style")
 
-    assert config.get("file-formatting", "images") == "XXIMGXX"
+    assert config.get("file-formatting", "image") == "XXIMGXX"
 
     # not overwritten value should stay the same
     assert config.getboolean("details", "use_lower_filenames")
