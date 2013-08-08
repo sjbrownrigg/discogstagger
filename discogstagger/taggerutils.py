@@ -242,6 +242,9 @@ class FileHandler(object):
             image_format = self.config.get("file-formatting", "image")
             use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
 
+            logger.debug("image-format: %s" % image_format)
+            logger.debug("use_folder_jpg: %s" % use_folder_jpg)
+
             for i, image in enumerate(images, 0):
                 logger.debug("Downloading image '%s'" % image)
                 try:
@@ -252,9 +255,9 @@ class FileHandler(object):
                     if i == 0 and use_folder_jpg:
                         picture_name = "folder.jpg"
                     else:
-                        picture_name = images_format + "-%.2d.jpg" % i
+                        picture_name = image_format + "-%.2d.jpg" % i
 
-                    url_fh.retrieve(image, os.path.join(dest_dir_name, picture_name))
+                    url_fh.retrieve(image, os.path.join(self.album.target_dir, picture_name))
                 except Exception as e:
                     logger.error("Unable to download image '%s', skipping." % image)
                     print e
