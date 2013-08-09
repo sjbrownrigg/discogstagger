@@ -90,6 +90,12 @@ fileHandler.copy_other_files()
 logger.info("Downloading and storing images")
 fileHandler.get_images()
 
+logger.info("Generate m3u")
+taggerUtils.create_m3u(album.target_dir)
+
+logger.info("Generate nfo")
+taggerUtils.create_nfo(album.target_dir)
+
 
 # !TODO - make this a check during the taggerutils run
 # ensure we were able to map the release appropriately.
