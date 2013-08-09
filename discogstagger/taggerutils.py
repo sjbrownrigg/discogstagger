@@ -54,6 +54,9 @@ class TagHandler(object):
 
     def tag_single_track(self, target_folder, track):
         # load metadata information
+        logger.debug("target_folder: %s" % target_folder)
+        logger.debug("track: %s" % track)
+
         metadata = MediaFile(os.path.join(target_folder, track.new_file))
 
         # read already existing (and still wanted) properties

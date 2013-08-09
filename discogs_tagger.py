@@ -55,7 +55,7 @@ if not releaseid:
     p.error("Please specify the discogs.com releaseid ('-r')")
 
 # read destination directory
-# !TODO if both are the same, we are not copying anything, 
+# !TODO if both are the same, we are not copying anything,
 # this should be "configurable"
 if not options.destdir:
     destdir = options.sourcedir
@@ -78,6 +78,8 @@ tagHandler = TagHandler(album, tagger_config)
 fileHandler = FileHandler(album, tagger_config)
 
 taggerUtils._get_target_list()
+
+fileHandler.copy_files()
 
 logger.info("Tagging files")
 tagHandler.tag_album()
@@ -107,8 +109,8 @@ fileHandler.get_images()
 #    logger.info("Creating destination directory '%s'" % dest_dir_name)
 #    mkdir_p(dest_dir_name)
 
-    # it does not make sense to store this in the "common" configuration, but only in the 
-    # id.txt. we use a special naming convention --> most probably we should reuse the 
+    # it does not make sense to store this in the "common" configuration, but only in the
+    # id.txt. we use a special naming convention --> most probably we should reuse the
     # configuration parser for this one as well, no?
 # !TODO --- do not forget about this one
 #    for name, value in release_tags.items():
