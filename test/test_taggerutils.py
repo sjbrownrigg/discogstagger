@@ -72,6 +72,16 @@ class TaggerUtilsBase(object):
         logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
+        # use multiple files previous in the list to the used disc name
+        target_file_name = "a1.txt"
+        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        # use multiple files previous in the list to the used disc name
+        target_file_name = "a2.txt"
+        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
 class TestTaggerUtils(TaggerUtilsBase):
 
     def test_value_from_tag_format(self):
@@ -163,7 +173,9 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
 
         taggerutils._get_target_list()
 
-        assert self.album.copy_files[0] == "id.txt"
+        assert self.album.copy_files[0] == "a1.txt"
+        assert self.album.copy_files[1] == "a2.txt"
+        assert self.album.copy_files[2] == "id.txt"
 
         assert self.album.sourcedir == self.source_dir
         assert self.album.discs[0].sourcedir == "disc1"

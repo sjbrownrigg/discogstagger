@@ -42,9 +42,6 @@ class TagHandler(object):
         self.keep_tags = self.config.get("details", "keep_tags")
         self.user_agent = self.config.get("common", "user_agent")
 
-    def copy_files(self):
-        return False
-
     def tag_album(self):
         """ tags all tracks in an album, the filenames are determined using
             the given properties on the tracks
@@ -413,11 +410,13 @@ class TaggerUtils(object):
                 self.album.copy_files = []
 
                 logger.debug("dir_list: %s" % dir_list)
-                for i, y in enumerate(dir_list):
-                    logger.debug("using dir no %s = %s" % (i, y))
+                dirno = 0
+                for y in dir_list:
+                    logger.debug("is it a dir? %s" % y)
                     if os.path.isdir(os.path.join(sourcedir, y)):
-                        logger.debug("Setting disc(%s) sourcedir to: %s" % (i, y))
-                        self.album.discs[i].sourcedir = y
+                        logger.debug("Setting disc(%s) sourcedir to: %s" % (dirno, y))
+                        self.album.discs[dirno].sourcedir = y
+                        dirno = dirno + 1
                     else:
                         logger.debug("Setting copy_files instead of sourcedir")
                         self.album.copy_files.append(y)

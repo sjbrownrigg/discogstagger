@@ -175,10 +175,6 @@ class DiscogsAlbum(object):
         logging.error("Unable to match multi-disc track/position")
         return False
 
-    def tracktotal_on_disc(self, discnumber):
-        logger.debug("discs: %s" % self.discs)
-        return self.discs[discnumber]
-
     @property
     def is_compilation(self):
         if self.release.data["artists"][0]["name"] == "Various":
