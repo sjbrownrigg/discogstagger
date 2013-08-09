@@ -60,7 +60,7 @@ def test_overload_config():
     assert config.getboolean("details", "use_style")
     assert config.get("tags", "encoder") == None
 
-    config.add_config(os.path.join(parentdir, "test/track_values.conf"))
+    config.read(os.path.join(parentdir, "test/track_values.conf"))
 
     assert config.getboolean("details", "use_style")
     assert config.get("tags", "encoder") == "myself"

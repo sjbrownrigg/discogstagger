@@ -3,52 +3,56 @@ import logging
 
 import inspect
 
-import ConfigParser
-from optparse import OptionParser
+from ConfigParser import RawConfigParser
 
 logger = logging.getLogger(__name__)
 
-# !TODO This could be made slightly easier by extending the original ConfigParser
-class TaggerConfig(object):
+class memoized_property(object):
+
+    def __init__(self, fget, doc=None):
+        self.fget = fget
+        self.__doc__ = doc or fget.__doc__
+        self.__name__ = fget.__name__
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+        obj.__dict__[self.__name__] = result = self.fget(obj)
+        return result
+
+class TaggerConfig(RawConfigParser):
     """ provides the configuration mechanisms for the discogstagger """
 
     def __init__(self, config_file):
-        self.config = ConfigParser.ConfigParser()
-        self.config.read(os.path.join("conf", "default.conf"))
-
-        self.config.read(config_file)
+        RawConfigParser.__init__(self)
+        self.read(os.path.join("conf", "default.conf"))
+        self.read(config_file)
 
     @property
     def id_tag_name(self):
-        source_name = self.config.get("source", "name")
-        id_tag_name = self.config.get("source", source_name)
+        source_name = self.get("source", "name")
+        id_tag_name = self.get("source", source_name)
 
         return id_tag_name
 
     def get_without_quotation(self, section, name):
-        config_value = self.config.get(section, name)
+        config_value = self.get(section, name)
         return config_value.replace("\"", "")
 
     def get(self, section, name):
-        config_value = self.config.get(section, name)
+        config_value = RawConfigParser.get(self, section, name)
 
         if config_value == "":
           config_value = None
 
         return config_value
 
-    def getboolean(self, section, name):
-        return self.config.getboolean(section, name)
-
-    def add_config(self, config_file):
-        self.config.read(config_file)
-
 # !TODO cache the following, to not recreate it on every call
-    @property
+    @memoized_property
     def get_character_exceptions(self):
         """ placeholders for special characters within character exceptions. """
 
-        exceptions = self.config._sections["character_exceptions"]
+        exceptions = self._sections["character_exceptions"]
 
         KEYS = {
             "{space}": " ",
@@ -68,13 +72,13 @@ class TaggerConfig(object):
         return exceptions
 
 # !TODO cache the following, to not recreate it on every call
-    @property
+    @memoized_property
     def get_configured_tags(self):
         """
             return all configured tags to be able to overwrite certain
             tags via a configuration file (e.g. id.txt)
         """
-        tags = self.config._sections["tags"]
+        tags = self._sections["tags"]
 
         try:
             del tags["__name__"]
