@@ -47,7 +47,6 @@ class TaggerConfig(RawConfigParser):
 
         return config_value
 
-# !TODO cache the following, to not recreate it on every call
     @memoized_property
     def get_character_exceptions(self):
         """ placeholders for special characters within character exceptions. """
@@ -71,7 +70,6 @@ class TaggerConfig(RawConfigParser):
 
         return exceptions
 
-# !TODO cache the following, to not recreate it on every call
     @memoized_property
     def get_configured_tags(self):
         """
