@@ -274,16 +274,28 @@ class FileHandler(object):
                     logger.error("Unable to download image '%s', skipping." % image)
                     print e
 
-#    def embed_coverart(self):
-#        if embed_coverart and os.path.exists(os.path.join(dest_dir_name,
-#                                            first_image_name)):
-#            imgdata = open(os.path.join(dest_dir_name,
-#                           first_image_name)).read()
-#            imgtype = imghdr.what(None, imgdata)#
-#
-#            if imgtype in ("jpeg", "png"):
-#                logger.info("Embedding album art.")
-#                metadata.art = imgdata
+    def embed_coverart(self):
+        """
+            Embed cover art into the album files
+        """
+        embed_coverart = self.config.getboolean("details", "embed_coverart")
+        image_format = self.config.get("file-formatting", "image")
+        use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
+
+        if use_folder_jpg:
+            first_image_name = "folder.jpg"
+        else:
+            first_image_name = image_format + "-01.jpg"
+
+        image_file = os.path.join(self.album.target_dir, first_image_name)
+
+        if embed_coverart and os.path.exists(image_file):
+            imgdata = open(image_file).read()
+            imgtype = imghdr.what(None, imgdata)#
+
+            if imgtype in ("jpeg", "png"):
+                logger.info("Embedding album art.")
+                metadata.art = imgdata
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
