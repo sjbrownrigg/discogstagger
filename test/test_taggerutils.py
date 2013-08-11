@@ -181,7 +181,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert self.album.discs[0].sourcedir == "disc1"
         assert self.album.discs[1].sourcedir == "disc2"
 
-        assert self.album.target_dir == self.target_dir
+        assert self.album.target_dir == os.path.join(self.target_dir, "various-megahits_2001_die_erste-(560_938-2)-2001")
 
         assert self.album.discs[0].target_dir == "megahits_2001_die_erste-disc1"
         assert self.album.discs[1].target_dir == "megahits_2001_die_erste-disc2"
@@ -236,7 +236,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert self.album.sourcedir == self.source_dir
         assert self.album.discs[0].sourcedir == None
 
-        assert self.album.target_dir == self.target_dir
+        assert self.album.target_dir == os.path.join(self.target_dir, "yonderboi-shallow_and_profound-(molecd023-2)-2000")
         assert self.album.discs[0].target_dir == None
 
         assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
@@ -429,6 +429,9 @@ class TestFileHandler(TestTaggerUtilFiles):
         testFileHandler = FileHandler(self.album, self.tagger_config)
 
         testFileHandler.get_images()
+
+        onlyfiles = [ f for f in listdir(self.album.target_dir) if isfile(join(self.album.target_dir, f))]
+        logger.debug("files: %s " % onlyfiles)
 
         assert os.path.exists(os.path.join(self.album.target_dir, "folder.jpg"))
         assert os.path.exists(os.path.join(self.album.target_dir, "image-01.jpg"))

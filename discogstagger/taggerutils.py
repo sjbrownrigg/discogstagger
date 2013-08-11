@@ -158,6 +158,10 @@ class FileHandler(object):
                 pass
             else: raise
 
+    def create_album_dir(self):
+        if not os.path.exists(self.album.target_dir):
+            self.mkdir_p(self.album.target_dir)
+
     def copy_files(self):
         """
             copy an album and all its files to the new location, rename those
@@ -210,6 +214,10 @@ class FileHandler(object):
 
         if copy_other_files:
             logger.info("copying files from source directory")
+
+            if not os.path.exists(self.album.target_dir):
+                self.mkdir_p(self.album.target_dir)
+
             copy_files = self.album.copy_files
 
             for fname in copy_files:
@@ -244,6 +252,8 @@ class FileHandler(object):
 
             logger.debug("image-format: %s" % image_format)
             logger.debug("use_folder_jpg: %s" % use_folder_jpg)
+
+            self.create_album_dir()
 
             no = 0
             for i, image in enumerate(images, 0):
@@ -319,7 +329,9 @@ class TaggerUtils(object):
             self.album = discogs_album.map()
 
         self.album.sourcedir = sourcedir
-        self.album.target_dir = self.destdir
+        # the album is stored in a directory beneath the destination directory
+        # and following the given dir_format
+        self.album.target_dir = self.dest_dir_name
 
         # add template functionality ;-)
         self.template_lookup = TemplateLookup(directories=["templates"])
