@@ -43,45 +43,6 @@ class TaggerUtilsBase(object):
         self.tagger_config = None
         self.album = None
 
-    def copy_files(self, album):
-        for i, disc in enumerate(album.discs):
-            discno = i + 1
-            disc = album.disc(discno)
-
-            dir_name = "disc%d" % discno
-            self.album.disc(discno).sourcedir = dir_name
-            multi_source_dir = os.path.join(self.source_dir, dir_name)
-            logger.debug("multi source dir: %s" % multi_source_dir)
-            if not os.path.exists(multi_source_dir):
-                os.mkdir(multi_source_dir)
-
-            for i, track in enumerate(disc.tracks):
-                trackno = i + 1
-                target_file_name = "%.2d-song.flac" % trackno
-                shutil.copyfile(self.source_file, os.path.join(multi_source_dir, target_file_name))
-
-            target_file_name = "album.m3u"
-            logger.debug("copy to %s" % os.path.join(multi_source_dir, target_file_name))
-            shutil.copyfile(self.source_copy_file, os.path.join(multi_source_dir, target_file_name))
-
-            target_file_name = "album.cue"
-            logger.debug("copy to %s" % os.path.join(multi_source_dir, target_file_name))
-            shutil.copyfile(self.source_copy_file, os.path.join(multi_source_dir, target_file_name))
-
-        target_file_name = "id.txt"
-        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        # use multiple files previous in the list to the used disc name
-        target_file_name = "a1.txt"
-        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        # use multiple files previous in the list to the used disc name
-        target_file_name = "a2.txt"
-        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
 class TestTaggerUtils(TaggerUtilsBase):
 
     def test_value_from_tag_format(self):
@@ -160,6 +121,45 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         if os.path.exists(self.source_dir):
             shutil.rmtree(self.source_dir)
         shutil.rmtree(self.target_dir)
+
+    def copy_files(self, album):
+        for i, disc in enumerate(album.discs):
+            discno = i + 1
+            disc = album.disc(discno)
+
+            dir_name = "disc%d" % discno
+            self.album.disc(discno).sourcedir = dir_name
+            multi_source_dir = os.path.join(self.source_dir, dir_name)
+            logger.debug("multi source dir: %s" % multi_source_dir)
+            if not os.path.exists(multi_source_dir):
+                os.mkdir(multi_source_dir)
+
+            for i, track in enumerate(disc.tracks):
+                trackno = i + 1
+                target_file_name = "%.2d-song.flac" % trackno
+                shutil.copyfile(self.source_file, os.path.join(multi_source_dir, target_file_name))
+
+            target_file_name = "album.m3u"
+            logger.debug("copy to %s" % os.path.join(multi_source_dir, target_file_name))
+            shutil.copyfile(self.source_copy_file, os.path.join(multi_source_dir, target_file_name))
+
+            target_file_name = "album.cue"
+            logger.debug("copy to %s" % os.path.join(multi_source_dir, target_file_name))
+            shutil.copyfile(self.source_copy_file, os.path.join(multi_source_dir, target_file_name))
+
+        target_file_name = "id.txt"
+        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        # use multiple files previous in the list to the used disc name
+        target_file_name = "a1.txt"
+        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        # use multiple files previous in the list to the used disc name
+        target_file_name = "a2.txt"
+        logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
     def test__get_target_list_multi_disc(self):
         # copy file to source directory and rename it
@@ -367,6 +367,74 @@ class TestFileHandler(TestTaggerUtilFiles):
         track_file = os.path.join(self.album.target_dir,
             self.album.disc(2).target_dir, self.album.disc(2).track(20).new_file)
         assert os.path.exists(track_file)
+
+    def test_embed_coverart_track(self):
+        testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
+                self.ogsrelid, self.tagger_config, self.album)
+
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        self.copy_files(self.album)
+
+        testTagUtils._get_target_list()
+
+        testFileHandler.copy_files()
+
+        assert os.path.exists(self.album.sourcedir)
+        assert os.path.exists(self.album.target_dir)
+
+        track = self.album.disc(1).track(1)
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(1).target_dir, track.new_file)
+
+        source_file = "test/files/cover.jpeg"
+        target_dir = os.path.join(self.album.target_dir, self.album.disc(1).target_dir)
+        image_file = os.path.join(target_dir, "cover.jpeg")
+        shutil.copyfile(source_file, image_file)
+        imgdata = open(image_file).read()
+
+        testFileHandler.embed_coverart_track(self.album.disc(1), track, imgdata)
+
+        assert os.path.exists(track_file)
+
+        metadata = MediaFile(track_file)
+
+        assert not metadata.art == None
+
+        track = self.album.disc(1).track(2)
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(1).target_dir, track.new_file)
+        metadata = MediaFile(track_file)
+
+        assert metadata.art == None
+
+    def test_embed_coverart_album(self):
+        testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
+                self.ogsrelid, self.tagger_config, self.album)
+
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        self.copy_files(self.album)
+
+        testTagUtils._get_target_list()
+
+        testFileHandler.copy_files()
+
+        assert os.path.exists(self.album.sourcedir)
+        assert os.path.exists(self.album.target_dir)
+
+        source_file = "test/files/cover.jpeg"
+        image_file = os.path.join(self.album.target_dir, "folder.jpg")
+        shutil.copyfile(source_file, image_file)
+
+        testFileHandler.embed_coverart_album()
+
+        track = self.album.disc(1).track(1)
+        track_file = os.path.join(self.album.target_dir,
+            self.album.disc(1).target_dir, track.new_file)
+        metadata = MediaFile(track_file)
+
+        assert not metadata.art == None
 
     def test_copy_other_files(self):
         assert not self.tagger_config.getboolean("details", "copy_other_files")

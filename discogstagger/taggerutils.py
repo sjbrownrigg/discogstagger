@@ -5,6 +5,7 @@ import re
 import sys
 import logging
 import shutil
+import imghdr
 
 from unicodedata import normalize
 
@@ -274,9 +275,9 @@ class FileHandler(object):
                     logger.error("Unable to download image '%s', skipping." % image)
                     print e
 
-    def embed_coverart(self):
+    def embed_coverart_album(self):
         """
-            Embed cover art into the album files
+            Embed cover art into all album files
         """
         embed_coverart = self.config.getboolean("details", "embed_coverart")
         image_format = self.config.get("file-formatting", "image")
@@ -289,13 +290,28 @@ class FileHandler(object):
 
         image_file = os.path.join(self.album.target_dir, first_image_name)
 
+        logger.debug("Start to embed coverart (on request)...")
+
         if embed_coverart and os.path.exists(image_file):
+            logger.debug("embed_coverart and image_file")
             imgdata = open(image_file).read()
             imgtype = imghdr.what(None, imgdata)#
 
             if imgtype in ("jpeg", "png"):
-                logger.info("Embedding album art.")
-                metadata.art = imgdata
+                logger.info("Embedding album art...")
+                for disc in self.album.discs:
+                    for track in disc.tracks:
+                        self.embed_coverart_track(disc, track, imgdata)
+
+    def embed_coverart_track(self, disc, track, imgdata):
+        """
+            Embed cover art into a single file
+        """
+        track_dir = os.path.join(self.album.target_dir, disc.target_dir)
+        track_file = os.path.join(track_dir, track.new_file)
+        metadata = MediaFile(track_file)
+        metadata.art = imgdata
+        metadata.save()
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.

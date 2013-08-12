@@ -5,7 +5,6 @@ import errno
 import shutil
 import logging
 import sys
-import imghdr
 import glob
 
 from optparse import OptionParser
