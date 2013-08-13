@@ -112,6 +112,8 @@ for source_dir in source_dirs:
     logger.info("Embedding Albumart")
     fileHandler.embed_coverart_album()
 
+# !TODO make this more generic to use different templates and files,
+# furthermore adopt to reflect multi-disc-albums
     logger.info("Generate m3u")
     taggerUtils.create_m3u(album.target_dir)
 
@@ -126,36 +128,11 @@ for source_dir in source_dirs:
     #                  releaseid)
     #    sys.exit()
 
-
-    #dest_dir_name = album.dest_dir_name
-
-    # !TODO this needs to get "fixed" to allow tagging already existing files
-    #if os.path.exists(dest_dir_name):
-    #    logger.error("Destination already exists %s" % dest_dir_name)
-    #    sys.exit("%s directory already exists, aborting." % dest_dir_name)
-    #else:
-    #    logger.info("Creating destination directory '%s'" % dest_dir_name)
-    #    mkdir_p(dest_dir_name)
-
-        # it does not make sense to store this in the "common" configuration, but only in the
-        # id.txt. we use a special naming convention --> most probably we should reuse the
-        # configuration parser for this one as well, no?
-    # !TODO --- do not forget about this one
+# !TODO add custom tags, if needed
     #    for name, value in release_tags.items():
     #        if name.startswith("tag:"):
     #            name = name.split(":")
     #            name = name[1]
     #            setattr(metadata, name, value)
-
-    #
-    # start supplementary actions
-    #
-    # adopt for multi disc support (copy to disc folder, add disc number, ...)
-    #logger.info("Generating .nfo file")
-    #create_nfo(release.album.album_info, dest_dir_name, release.nfo_filename)
-
-    # adopt for multi disc support
-    #logger.info("Generating .m3u file")
-    #create_m3u(release.tag_map, folder_names, dest_dir_name, release.m3u_filename)
 
 logger.info("Tagging complete.")
