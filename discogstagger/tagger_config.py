@@ -43,7 +43,9 @@ class TaggerConfig(RawConfigParser):
         config_value = RawConfigParser.get(self, section, name)
 
         if config_value == "":
-          config_value = None
+            config_value = None
+        else:
+            config_value = config_value.strip()
 
         return config_value
 
