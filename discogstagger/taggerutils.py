@@ -116,10 +116,12 @@ class TagHandler(object):
 
         metadata.comments = self.album.notes
 
-# !TODO - encoder -- add other tags (custom) as well
-        encoder_tag = self.config.get("tags", "encoder")
-        if not encoder_tag == None:
-            metadata.encoder = encoder_tag
+        tags = self.config.get_configured_tags
+        logger.debug("tags: %s" % tags)
+        for name in tags:
+            value = self.config.get("tags", name)
+            if not value == None:
+                setattr(metadata, name, value)
 
         # set track metadata
         metadata.title = track.title
