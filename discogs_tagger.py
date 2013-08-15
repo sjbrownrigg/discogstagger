@@ -68,6 +68,14 @@ else:
     source_dirs = [options.sourcedir]
 
 for source_dir in source_dirs:
+    if os.path.exists(os.path.join(source_dir, tagger_config.get("details", "done_file"))
+        and not options.forceUpdate:
+        continue
+
+    # reread config to make sure, that the album specific options are reset for each
+    # album
+    tagger_config = TaggerConfig(options.conffile)
+
     releaseid = read_id_file(source_dir, id_file, options)
 
     if not releaseid:
