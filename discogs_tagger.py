@@ -68,8 +68,10 @@ else:
     source_dirs = [options.sourcedir]
 
 for source_dir in source_dirs:
-    if os.path.exists(os.path.join(source_dir, tagger_config.get("details", "done_file"))
-        and not options.forceUpdate:
+    done_file = tagger_config.get("details", "done_file")
+    done_file_path = os.path.join(source_dir, done_file)
+    if os.path.exists(done_file_path) and not options.forceUpdate:
+        logger.info("Do not read %s, because %s exists and forceUpdate is false" % (source_dir, done_file))
         continue
 
     # reread config to make sure, that the album specific options are reset for each
