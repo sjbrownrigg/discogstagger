@@ -483,6 +483,20 @@ class TestFileHandler(TestTaggerUtilFiles):
         disc_target_dir = os.path.join(album_target_dir, self.album.disc(2).target_dir)
         assert os.path.exists(os.path.join(disc_target_dir, "album.cue"))
 
+    def test_create_done_file(self):
+        testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
+                self.ogsrelid, self.tagger_config, self.album)
+
+        self.copy_files(self.album)
+
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        assert not os.path.exists(os.path.join(self.album.sourcedir, "dt.done"))
+
+        testFileHandler.create_done_file()
+
+        assert os.path.exists(os.path.join(self.album.sourcedir, "dt.done"))
+
     def test_get_images(self):
         """ This test needs network connection, see how we can handle this,
             if there is None

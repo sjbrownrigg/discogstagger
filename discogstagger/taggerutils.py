@@ -161,6 +161,12 @@ class FileHandler(object):
                 pass
             else: raise
 
+    def create_done_file(self):
+        # could be, that the directory does not exist anymore ;-)
+        if os.path.exists(self.album.sourcedir):
+            done_file = os.path.join(self.album.sourcedir, 'dt.done')
+            open(done_file, "w")
+
     def create_album_dir(self):
         if not os.path.exists(self.album.target_dir):
             self.mkdir_p(self.album.target_dir)

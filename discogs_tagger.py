@@ -120,6 +120,7 @@ for source_dir in source_dirs:
     logger.info("Generate nfo")
     taggerUtils.create_nfo(album.target_dir)
 
+    fileHandler.create_done_file()
 
     # !TODO - make this a check during the taggerutils run
     # ensure we were able to map the release appropriately.
@@ -127,12 +128,5 @@ for source_dir in source_dirs:
     #    logger.error("Unable to match file list to discogs release '%s'" %
     #                  releaseid)
     #    sys.exit()
-
-# !TODO add custom tags, if needed
-    #    for name, value in release_tags.items():
-    #        if name.startswith("tag:"):
-    #            name = name.split(":")
-    #            name = name[1]
-    #            setattr(metadata, name, value)
 
 logger.info("Tagging complete.")
