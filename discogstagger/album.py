@@ -69,7 +69,10 @@ class Album(BaseObject):
 
     @property
     def style(self):
-        return self.styles[0]
+        try:
+            return self.styles[0]
+        except KeyError:
+            return None
 
     def __getattr__(self, name):
         return None
