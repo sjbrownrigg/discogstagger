@@ -63,7 +63,7 @@ class DiscogsAlbum(object):
     def url(self):
         """ returns the discogs url of this release """
 
-        return "http://www.discogs.com/release/%s" % self.release._id
+        return "http://www.discogs.com/release/{1}".format(self.release._id)
 
     @property
     def labels_and_numbers(self):
@@ -94,7 +94,7 @@ class DiscogsAlbum(object):
     def disctotal(self):
         """ Obtain the number of discs for the given release. """
 
-        # allows tagging of digital releases. 
+        # allows tagging of digital releases.
         # sample format <format name="File" qty="2" text="320 kbps">
         # assumes all releases of name=File is 1 disc.
         if self.release.data["formats"][0]["name"] == "File":
@@ -222,7 +222,7 @@ class DiscogsAlbum(object):
             track.tracknumber = int(pos["tracknumber"])
             track.discnumber = int(pos["discnumber"])
 
-#            logger.debug("discsubtitle: %s " % discsubtitle)
+#            logger.debug("discsubtitle: {1}".format(discsubtitle))
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 
@@ -257,8 +257,6 @@ class DiscogsAlbum(object):
         clean_target = self.clean_duplicate_handling(clean_target)
 
         for regex in groups:
-            if re.search(r"%s" % regex, clean_target):
-                clean_target = "%s %s" % (groups[regex],
-                                          re.search("%s" % regex,
-                                          clean_target).group(1))
+             clean_target = re.sub(regex[0], regex[1], clean_target)
+
         return clean_target
