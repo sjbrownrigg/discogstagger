@@ -63,7 +63,7 @@ class DiscogsAlbum(object):
     def url(self):
         """ returns the discogs url of this release """
 
-        return "http://www.discogs.com/release/{1}".format(self.release._id)
+        return "http://www.discogs.com/release/{}".format(self.release._id)
 
     @property
     def labels_and_numbers(self):
@@ -222,7 +222,7 @@ class DiscogsAlbum(object):
             track.tracknumber = int(pos["tracknumber"])
             track.discnumber = int(pos["discnumber"])
 
-#            logger.debug("discsubtitle: {1}".format(discsubtitle))
+#            logger.debug("discsubtitle: {0}".format(discsubtitle))
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 
@@ -235,6 +235,7 @@ class DiscogsAlbum(object):
             disc.tracks.append(track)
 
         disc_list.append(disc)
+
         return disc_list
 
     def clean_duplicate_handling(self, clean_target):
@@ -251,12 +252,12 @@ class DiscogsAlbum(object):
             Accepts a string to clean, returns a cleansed version """
 
         groups = {
-            "(.*),\sThe$": "The",
+            ("(.*),\sThe$", "The \g<1>"),
         }
 
         clean_target = self.clean_duplicate_handling(clean_target)
 
         for regex in groups:
-             clean_target = re.sub(regex[0], regex[1], clean_target)
+            clean_target = re.sub(regex[0], regex[1], clean_target)
 
         return clean_target
