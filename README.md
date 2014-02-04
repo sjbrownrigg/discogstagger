@@ -5,11 +5,11 @@
 
 ## What is it
 
-discogstagger is a console based audio meta-data tagger. Artist profile data is
+discogstagger is a console based audio meta-data tagger. Release data is
 retrieved via the discogs.com API.
 
-Simply provide the script with a destination directory name, that contains an
-album consisting of either FLAC or MP3 media files and the discogs.com
+Simply provide the script with a base directory, that contains an album
+consisting of either FLAC or MP3 media files and the discogs.com
 release-id. discogstagger calls out to the discogs.com API and updates the
 audio meta-data accordingly.
 
@@ -18,6 +18,8 @@ If no release-id is given, the application checks, if a file "id.txt" exists
 contains a specific property (id_tag). If both is true the release-id from this
 file is used. This is useful for batch processing.
 
+
+WARNING: The following is not working currently...
 During the process, all album images (if present) are retrieved from the API.
 As well, a play-list (.m3u) and an information file (.nfo) are generated per
 each release.
@@ -41,6 +43,7 @@ invoke test
 * requests for access to the discogs api ;-)
 * nose for unit tests
 * mako for easy templating (e.g. nfo and m3u files) >=0.8.1
+* rauth for oauth authentication to discogs
 * coverage for coverage reporting
 * invoke to make running tests easier
 
@@ -68,8 +71,8 @@ sudo python setup.py install
 ## Configuration
 
 DiscogsTagger searches for the configuration file at the default location of
-/etc/discogstagger/discogs_tagger.conf, at run-time. Or you're able to specify the config
-location with the '-c' switch.
+/etc/discogstagger/discogs_tagger.conf, at run-time. Or you're able to specify
+the config location with the '-c' switch.
 
 The configuration file must be present to execute the script. The default
 settings (as shipped), should work without any modifications.
@@ -114,6 +117,8 @@ Furthermore you can use lowercase directory and filenames using the following co
 use_lower_filenames=True
 ```
 
+
+###### NEEEDDDDDSSSSS ADOPTION............
 For batch-mode tagging, it is not necessary anymore to provide the release-id via the
 '-r' parameter on the commandline. The same is possible by using a file (by default: id.txt)
 with the key/value pair 'discogs_id'. This can be configured in the configuration via the

@@ -39,6 +39,18 @@ def test_id_tag_name():
 
     assert config.id_tag_name == "discogs_id"
 
+    config = TaggerConfig(os.path.join(parentdir, "test/files/discogs_id.txt"))
+
+    assert config.get("source", "name") == "discogs"
+    assert config.id_tag_name == "discogs_id"
+    assert config.get("source", config.id_tag_name) == "4712"
+
+    config = TaggerConfig(os.path.join(parentdir, "test/files/multiple_id.txt"))
+
+    assert config.get("source", "name") == "amg"
+    assert config.id_tag_name == "amg_id"
+    assert config.get("source", config.id_tag_name) == "4711"
+
 def test_get_without_quotation():
 
     config = TaggerConfig(os.path.join(parentdir, "test/emtpy.conf"))

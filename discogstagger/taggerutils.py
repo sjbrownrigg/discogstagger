@@ -48,7 +48,10 @@ class TagHandler(object):
             the given properties on the tracks
         """
         for disc in self.album.discs:
-            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+            if disc.target_dir != None:
+                target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+            else:
+                target_folder = self.album.target_dir
 
             for track in disc.tracks:
                 self.tag_single_track(target_folder, track)
@@ -180,8 +183,18 @@ class FileHandler(object):
         logger.debug("album targetdir: %s" % self.album.target_dir)
 
         for disc in self.album.discs:
-            source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
-            target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+            logger.debug("disc.sourcedir: %s" % disc.sourcedir)
+            logger.debug("disc.target_dir: %s" % disc.target_dir)
+
+            if disc.sourcedir != None:
+                source_folder = os.path.join(self.album.sourcedir, disc.sourcedir)
+            else:
+                source_folder = self.album.sourcedir
+
+            if disc.target_dir != None:
+                target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+            else:
+                target_folder = self.album.target_dir
 
             copy_needed = False
             if not source_folder == target_folder:
@@ -229,16 +242,25 @@ class FileHandler(object):
 
             copy_files = self.album.copy_files
 
-            for fname in copy_files:
-                shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
+            if copy_files != None:
+                for fname in copy_files:
+                    shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
 
             for disc in self.album.discs:
                 copy_files = disc.copy_files
 
                 for fname in copy_files:
                     if not fname.endswith(".m3u"):
-                        source_path = os.path.join(self.album.sourcedir, disc.sourcedir)
-                        target_path = os.path.join(self.album.target_dir, disc.target_dir)
+                        if disc.sourcedir != None:
+                            source_path = os.path.join(self.album.sourcedir, disc.sourcedir)
+                        else:
+                            source_path = self.album.sourcedir
+
+                        if disc.target_dir != None:
+                            target_path = os.path.join(self.album.target_dir, disc.target_dir)
+                        else:
+                            target_path = self.album.target_dir
+
                         if not os.path.exists(target_path):
                             self.mkdir_p(target_path)
                         shutil.copyfile(os.path.join(source_path, fname), os.path.join(target_path, fname))
@@ -315,7 +337,11 @@ class FileHandler(object):
         """
             Embed cover art into a single file
         """
-        track_dir = os.path.join(self.album.target_dir, disc.target_dir)
+        if disc.target_dir != None:
+            track_dir = os.path.join(self.album.target_dir, disc.target_dir)
+        else:
+            track_dir = self.album.target_dir
+
         track_file = os.path.join(track_dir, track.new_file)
         metadata = MediaFile(track_file)
         metadata.art = imgdata
@@ -456,9 +482,10 @@ class TaggerUtils(object):
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
 
+            self.album.copy_files = []
+
             if self.album.has_multi_disc:
                 logger.debug("is multi disc album, looping discs")
-                self.album.copy_files = []
 
                 logger.debug("dir_list: %s" % dir_list)
                 dirno = 0

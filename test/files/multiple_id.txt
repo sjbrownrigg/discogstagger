@@ -1,0 +1,4 @@
+[source]
+name=amg
+amg_id=4711
+discogs_id=4713

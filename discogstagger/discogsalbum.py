@@ -1,9 +1,12 @@
 import logging
 import re
+import os
 
 import inspect
 
 import discogs_client as discogs
+
+from rauth import OAuth1Service
 
 from album import Album, Disc, Track
 
@@ -33,6 +36,36 @@ class DiscogsAlbum(object):
         self.config = tagger_config
         discogs.user_agent = self.config.get("common", "user_agent")
         self.release = discogs.Release(releaseid)
+
+        # allow authentication to be able to download images (use key and secret from config options)
+        consumer_key = tagger_config.get("discogs", "consumer_key")
+        consumer_secret = tagger_config.get("discogs", "consumer_secret")
+
+        # allow config override thru env variables
+        if os.environ.has_key("DISCOGS_CONSUMER_KEY"):
+            consumer_key = os.environ.get('DISCOGS_CONSUMER_KEY')
+        if os.environ.has_key("DISCOGS_CONSUMER_SECRET"):
+            consumer_secret = os.environ.get("DISCOGS_CONSUMER_SECRET")
+
+        if consumer_key and consumer_secret:
+            logger.debug('authenticating at discogs using consumer key %s' % consumer_key)
+
+            self.discogs_auth = OAuth1Service(
+                consumer_key=consumer_key,
+                consumer_secret=consumer_secret,
+                name="discogs",
+                access_token_url='http://api.discogs.com/oauth/access_token',
+                authorize_url='http://www.discogs.com/oauth/authorize',
+                request_token_url='http://api.discogs.com/oauth/request_token',
+                base_url='http://api.discogs.com'
+            )
+        else:
+            logger.warn('cannot authenticate on discogs (no image download possible) - set consumer_key and consumer_secret')
+            self.discogs_auth = None
+
+        self.request_token = None
+        self.request_token_secret = None
+
 
     def map(self):
         """ map the retrieved information to the tagger specific objects """
@@ -261,3 +294,17 @@ class DiscogsAlbum(object):
             clean_target = re.sub(regex[0], regex[1], clean_target)
 
         return clean_target
+
+    def fetch_images(self):
+        if self.discogs_auth:
+            logger.debug('discogs authenticated')
+            if not self.request_token and not self.request_token_secret:
+                logger.debug('no request_token and request_token_secret, fetch them')
+                request_token, request_token_secret = self.discogs_auth.get_request_token()
+                self.request_token = request_token
+                self.request_token_secret = request_token_secret
+
+                authorize_url = self.discogs_auth.get_authorize_url(self.request_token)
+
+                logger.debug('authorize_url: %s' % authorize_url)
+                variable = raw_input('%s input something!: ' % authorize_url)

@@ -10,11 +10,14 @@ from optparse import OptionParser
 logging.basicConfig(level=10)
 logger = logging.getLogger(__name__)
 
-
 def find_files(basepath, name):
 		result = []
 
-		for root, dirs, files in os.walk(basepath):
+		logging.debug('migration starts in %s for files %s' % (basepath, name))
+
+		base = os.path.expanduser(basepath)
+
+		for root, dirs, files in os.walk(base):
 				if name in files:
 						result.append(os.path.join(root, name))
 						logger.debug("added file: %s" % name)
@@ -41,7 +44,10 @@ p.add_option("-b", "--basedir", action="store", dest="basedir",
 (options, args) = p.parse_args()
 
 
+logging.debug('starting migration')
 files = find_files(options.basedir, "id.txt")
+
+logging.debug('migrate %d files' % len(files))
 
 for filename in files:
 		copy_file(filename)

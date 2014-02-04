@@ -51,8 +51,6 @@ p.set_defaults(forceUpdate=False)
 if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
 
-print 'conffile: ' + options.conffile
-
 tagger_config = TaggerConfig(options.conffile)
 
 logging.basicConfig(level=tagger_config.getint("logging", "level"))

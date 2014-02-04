@@ -1,0 +1,3 @@
+[source]
+name=discogs
+discogs_id=4712
