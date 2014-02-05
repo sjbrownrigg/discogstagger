@@ -4,6 +4,8 @@ import os
 
 import inspect
 
+import time
+
 import discogs_client as discogs
 
 from rauth import OAuth1Service
@@ -11,6 +13,160 @@ from rauth import OAuth1Service
 from album import Album, Disc, Track
 
 logger = logging.getLogger(__name__)
+
+class RateLimit(object):
+    pass
+
+class DiscogsConnector(object):
+    """ central class to connect to the discogs api server.
+        this should be a singleton, to allow the usage of authentication and rate-limiting
+        encapsules all discogs information retrieval
+    """
+
+    def __init__(self, tagger_config):
+        self.config = tagger_config
+        discogs.user_agent = self.config.get("common", "user_agent")
+
+        self.discogs_auth = None
+        self.discogs_session = None
+        self.rate_limit_pool = {}
+
+        self.initialize_auth()
+        self.authenticate()
+
+    def initialize_auth(self):
+        """ initializes the authentication against the discogs api
+            this method checks for the consumer_key and consumer_secret in the config
+            and then in the environment variables, to allow overriding these values on the
+            command line
+        """
+        # allow authentication to be able to download images (use key and secret from config options)
+        consumer_key = self.config.get("discogs", "consumer_key")
+        consumer_secret = self.config.get("discogs", "consumer_secret")
+
+        # allow config override thru env variables
+        if os.environ.has_key("DISCOGS_CONSUMER_KEY"):
+            consumer_key = os.environ.get('DISCOGS_CONSUMER_KEY')
+        if os.environ.has_key("DISCOGS_CONSUMER_SECRET"):
+            consumer_secret = os.environ.get("DISCOGS_CONSUMER_SECRET")
+
+        if consumer_key and consumer_secret:
+            logger.debug('authenticating at discogs using consumer key %s' % consumer_key)
+
+            self.discogs_auth = OAuth1Service(
+                consumer_key=consumer_key,
+                consumer_secret=consumer_secret,
+                name="discogs",
+                access_token_url='http://api.discogs.com/oauth/access_token',
+                authorize_url='http://www.discogs.com/oauth/authorize',
+                request_token_url='http://api.discogs.com/oauth/request_token',
+                base_url='http://api.discogs.com'
+            )
+        else:
+            logger.warn('cannot authenticate on discogs (no image download possible) - set consumer_key and consumer_secret')
+
+    def fetch_release(self, release_id):
+        """ fetches the metadata for the given release_id from the discogs api server
+            (no authentication necessary, specific rate-limit implemented on this one)
+        """
+        rate_limit_type = 'metadata'
+
+        if rate_limit_type in self.rate_limit_pool:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+                logger.warn('Waiting one second to allow rate limiting...')
+                time.sleep(1)
+
+        rl = RateLimit()
+        rl.lastcall = time.time()
+
+        self.rate_limit_pool[rate_limit_type] = rl
+
+        return discogs.Release(release_id)
+
+    def authenticate(self):
+        """ Authenticates the user on the discogs api via oauth 1.0a
+            Since we are running a command line application, a prompt will ask the user for a
+            request_token_secret (pin), which the user can get from the authorize_url, which
+            needs to get called manually.
+        """
+        if self.discogs_auth and not self.discogs_session:
+            logger.debug('discogs authenticated')
+            logger.debug('no request_token and request_token_secret, fetch them')
+            request_token, request_token_secret = self.discogs_auth.get_request_token()
+
+            authorize_url = self.discogs_auth.get_authorize_url(request_token)
+
+            print 'Visit this URL in your browser: ' + authorize_url
+            pin = raw_input('Enter the PIN you got from the above url: ')
+
+            self.discogs_session = self.discogs_auth.get_auth_session(request_token, request_token_secret,
+                                                                      method='GET', data={'oauth_verifier': pin})
+
+            logger.debug('filled session....')
+
+    def fetch_images(self, image_dir, image_urls):
+        """ There is a need for authentication here, therefor before every call the authenticate method will
+            be called, to make sure, that the user is authenticated already. Furthermore, discogs restricts the
+            download of images to 1000 per day. This can be very low on huge volume collections ;-(
+        """
+        rate_limit_type = 'image'
+
+        image_format = self.config.get("file-formatting", "image")
+        use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
+
+        logger.debug("image-format: %s" % image_format)
+        logger.debug("use_folder_jpg: %s" % use_folder_jpg)
+
+        if not self.discogs_session:
+            logger.error('You are not authenticated, cannot download image - skipping')
+            return
+
+        if rate_limit_type in self.rate_limit_pool:
+            remaining = self.rate_limit_pool[rate_limit_type].remaining
+            reset = self.rate_limit_pool[rate_limit_type].reset
+            logger.debug('You have %s remaining downloads for the next %s seconds' % (remaining, reset))
+            if remaining < len(image_urls):
+                logger.error('Your download limit is reached, you cannot download the wanted pictures')
+                logger.error('Download can be started again in %d seconds' % self.rate_limit_pool[rate_limit_type].reset)
+                raise RuntimeError('Download limit reached for pool %s' % rate_limit_type)
+
+        no = 0
+        for i, image_url in enumerate(image_urls, 0):
+            logger.debug("Downloading image '%s'" % image_url)
+            try:
+                picture_name = ""
+                if i == 0 and use_folder_jpg:
+                    picture_name = "folder.jpg"
+                else:
+                    no = no + 1
+                    picture_name = image_format + "-%.2d.jpg" % no
+
+                path = os.path.join(image_dir, picture_name)
+
+                r = self.discogs_session.get(image_url, stream=True)
+                if r.status_code == 200:
+                    with open(path, 'wb') as f:
+                        for chunk in r.iter_content():
+                            f.write(chunk)
+                else:
+                    logger.error('Problem downloading (status code %s)' % r.status_code)
+
+                self.updateRateLimits(r)
+
+            except Exception as e:
+                logger.error("Unable to download image '%s', skipping." % image_url)
+                print e
+
+    def updateRateLimits(self, request):
+        type = request.headers['X-RateLimit-Type']
+
+        rl = RateLimit()
+        rl.limit = request.headers['X-RateLimit-Limit']
+        rl.remaining = request.headers['X-RateLimit-Remaining']
+        rl.reset = request.headers['X-RateLimit-Reset']
+
+        self.rate_limit_pool[type] = rl
+
 
 class DiscogsAlbum(object):
     """ Wraps the discogs-client-api script, abstracting the minimal set of
@@ -33,38 +189,7 @@ class DiscogsAlbum(object):
         [ 05 ] Blunted Dummies - House For All (Ruby Fruit Jungle Mix) """
 
     def __init__(self, releaseid, tagger_config):
-        self.config = tagger_config
-        discogs.user_agent = self.config.get("common", "user_agent")
         self.release = discogs.Release(releaseid)
-
-        # allow authentication to be able to download images (use key and secret from config options)
-        consumer_key = tagger_config.get("discogs", "consumer_key")
-        consumer_secret = tagger_config.get("discogs", "consumer_secret")
-
-        # allow config override thru env variables
-        if os.environ.has_key("DISCOGS_CONSUMER_KEY"):
-            consumer_key = os.environ.get('DISCOGS_CONSUMER_KEY')
-        if os.environ.has_key("DISCOGS_CONSUMER_SECRET"):
-            consumer_secret = os.environ.get("DISCOGS_CONSUMER_SECRET")
-
-        if consumer_key and consumer_secret:
-            logger.debug('authenticating at discogs using consumer key %s' % consumer_key)
-
-            self.discogs_auth = OAuth1Service(
-                consumer_key=consumer_key,
-                consumer_secret=consumer_secret,
-                name="discogs",
-                access_token_url='http://api.discogs.com/oauth/access_token',
-                authorize_url='http://www.discogs.com/oauth/authorize',
-                request_token_url='http://api.discogs.com/oauth/request_token',
-                base_url='http://api.discogs.com'
-            )
-        else:
-            logger.warn('cannot authenticate on discogs (no image download possible) - set consumer_key and consumer_secret')
-            self.discogs_auth = None
-
-        self.request_token = None
-        self.request_token_secret = None
 
 
     def map(self):
@@ -294,17 +419,3 @@ class DiscogsAlbum(object):
             clean_target = re.sub(regex[0], regex[1], clean_target)
 
         return clean_target
-
-    def fetch_images(self):
-        if self.discogs_auth:
-            logger.debug('discogs authenticated')
-            if not self.request_token and not self.request_token_secret:
-                logger.debug('no request_token and request_token_secret, fetch them')
-                request_token, request_token_secret = self.discogs_auth.get_request_token()
-                self.request_token = request_token
-                self.request_token_secret = request_token_secret
-
-                authorize_url = self.discogs_auth.get_authorize_url(self.request_token)
-
-                logger.debug('authorize_url: %s' % authorize_url)
-                variable = raw_input('%s input something!: ' % authorize_url)
