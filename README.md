@@ -1,6 +1,6 @@
 # discogstagger2
 
- [![Build Status](https://travis-ci.org/triplem/discogstagger.png?branch=master)](http://travis-ci.org/triplem/discogstagger) [![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
+ [![Build Status](https://travis-ci.org/triplem/discogstagger.png)](http://travis-ci.org/triplem/discogstagger) [![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
 
 
 ## What is it
