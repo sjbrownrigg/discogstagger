@@ -29,7 +29,7 @@ def walk_dir_tree(start_dir, id_file):
         if id_file in files:
             print(root)
 
-p = OptionParser()
+p = OptionParser(version="discogstagger2 0.9")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The release id of the target album")
 p.add_option("-s", "--source", action="store", dest="sourcedir",
@@ -46,6 +46,11 @@ p.add_option("-f", "--force", action="store_true", dest="forceUpdate",
 p.set_defaults(conffile="conf/empty.conf")
 p.set_defaults(recursive=False)
 p.set_defaults(forceUpdate=False)
+
+if len(sys.argv) == 1:
+    p.print_help()
+    sys.exit(1)
+
 (options, args) = p.parse_args()
 
 if not options.sourcedir or not os.path.exists(options.sourcedir):

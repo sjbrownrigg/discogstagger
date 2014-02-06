@@ -31,8 +31,9 @@
 - [x] Allow different sources, not only discogs for the metadata
 - [x] Add unit tests for different configuration in id.txt files
 - [x] Adopt migration script according to the multi source stuff
-- [ ] Show help if no options are given on command line on using discogs_tagger
+- [x] Show help if no options are given on command line on using discogs_tagger
 - [ ] Add progress bar for album art processing
+- [x] Rename discogs_tagger.py to discogstagger2.py (we are something different now)
 
 ### Later Versions (in no order)
 
