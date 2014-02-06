@@ -8,7 +8,7 @@ import sys
 from optparse import OptionParser
 
 from discogstagger.tagger_config import TaggerConfig
-from discogstagger.discogsalbum import DiscogsAlbum
+from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler
 
 import os, errno
@@ -93,13 +93,15 @@ for source_dir in source_dirs:
     logger.info("Using destination directory: %s", destdir)
 
     logger.info("starting tagging...")
-    discogs_album = DiscogsAlbum(releaseid, tagger_config)
+    discogs_connector = DiscogsConnector(tagger_config)
+    release = discogs_connector.fetch_release(releaseid)
+    discogs_album = DiscogsAlbum(release)
+
     album = discogs_album.map()
 
     logger.info("Tagging album '%s - %s'" % (album.artist, album.title))
 
-    taggerUtils = TaggerUtils(source_dir, destdir, releaseid,
-                              tagger_config, album)
+    taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
 
     tagHandler = TagHandler(album, tagger_config)
     fileHandler = FileHandler(album, tagger_config)
@@ -115,7 +117,7 @@ for source_dir in source_dirs:
     fileHandler.copy_other_files()
 
     logger.info("Downloading and storing images")
-    fileHandler.get_images()
+    fileHandler.get_images(discogs_connector)
 
     logger.info("Embedding Albumart")
     fileHandler.embed_coverart_album()

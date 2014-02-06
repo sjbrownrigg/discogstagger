@@ -3,6 +3,7 @@
 import os
 
 from discogstagger.discogsalbum import DiscogsAlbum
+import discogs_client as discogs
 
 class DummyResponse(object):
     def __init__(self, releaseid):
@@ -18,9 +19,10 @@ class DummyResponse(object):
 
 
 class DummyDiscogsAlbum(DiscogsAlbum):
-    def __init__(self, releaseid, tagger_config, dummy_response):
-        self.releaseid = releaseid
+    def __init__(self, dummy_response):
         self.dummy_response = dummy_response
-        DiscogsAlbum.__init__(self, releaseid, tagger_config)
-
+        self.release = discogs.Release(dummy_response.releaseid)
         self.release._cached_response = self.dummy_response
+
+        DiscogsAlbum.__init__(self, self.release)
+

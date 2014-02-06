@@ -172,9 +172,8 @@ class DiscogsAlbum(object):
         [ 04 ] Blunted Dummies - House For All (J. Acquaviva's Mix)
         [ 05 ] Blunted Dummies - House For All (Ruby Fruit Jungle Mix) """
 
-    def __init__(self, releaseid, tagger_config):
-        self.release = discogs.Release(releaseid)
-
+    def __init__(self, release):
+        self.release = release
 
     def map(self):
         """ map the retrieved information to the tagger specific objects """

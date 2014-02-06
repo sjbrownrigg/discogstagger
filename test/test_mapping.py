@@ -22,7 +22,7 @@ def test_map_multidisc():
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
@@ -100,7 +100,7 @@ def test_map_multidisc_with_disctitle():
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
@@ -185,7 +185,7 @@ def test_map_multidisc_with_disctitle_for_tracks():
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 1
@@ -261,7 +261,7 @@ def test_map_singledisc():
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
     dummy_response = DummyResponse(ogsrelid)
-    dummy_discogs_album = DummyDiscogsAlbum(ogsrelid, tagger_config, dummy_response)
+    dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
     assert len(album.labels) == 2

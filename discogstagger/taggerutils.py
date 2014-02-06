@@ -361,7 +361,7 @@ class TaggerUtils(object):
     # supported file types.
     FILE_TYPE = (".mp3", ".flac",)
 
-    def __init__(self, sourcedir, destdir, ogsrelid, tagger_config, album=None):
+    def __init__(self, sourcedir, destdir, tagger_config, album=None):
         self.config = tagger_config
 
 # !TODO should we define those in here or in each method (where needed) or in a separate method
@@ -389,8 +389,7 @@ class TaggerUtils(object):
         if not album == None:
             self.album = album
         else:
-            discogs_album = DiscogsAlbum(ogsrelid)
-            self.album = discogs_album.map()
+            raise RuntimeException('Cannot tag, no album given')
 
         self.album.sourcedir = sourcedir
         # the album is stored in a directory beneath the destination directory

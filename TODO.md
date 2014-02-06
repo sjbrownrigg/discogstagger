@@ -24,17 +24,17 @@
 
 ### Version 2.1
 
-- [ ] Provide authentication for downloading images
+- [x] Provide authentication for downloading images
 - [ ] Minor Refactoring to avoid multiple checking of disc.target_dir and
       disc.sourcedir != None (taggerutils.py)
 - [ ] Add unit-tests for single disc albums
-- [X] Allow different sources, not only discogs for the metadata
-- [X] Add unit tests for different configuration in id.txt files
-- [ ] Adopt migration script according to the multi source stuff
+- [x] Allow different sources, not only discogs for the metadata
+- [x] Add unit tests for different configuration in id.txt files
+- [x] Adopt migration script according to the multi source stuff
 - [ ] Show help if no options are given on command line on using discogs_tagger
 - [ ] Add progress bar for album art processing
 
 ### Later Versions (in no order)
 
-- [ ] Add Rate-Limiting functionality for discogs
+- [x] Add Rate-Limiting functionality for discogs
 - [ ] Add different tagging-sources (e.g. AMG)
