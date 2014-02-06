@@ -1,16 +1,16 @@
-# discogstagger
+# discogstagger2
 
  [![Build Status](https://travis-ci.org/triplem/discogstagger.png?branch=version2)](http://travis-ci.org/triplem/discogstagger) [![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
 
 
 ## What is it
 
-discogstagger is a console based audio meta-data tagger. Release data is
+discogstagger2 is a console based audio meta-data tagger. Release data is
 retrieved via the discogs.com API.
 
 Simply provide the script with a base directory, that contains an album
 consisting of either FLAC or MP3 media files and the discogs.com
-release-id. discogstagger calls out to the discogs.com API and updates the
+release-id. discogstagger2 calls out to the discogs.com API and updates the
 audio meta-data accordingly.
 
 If no release-id is given, the application checks, if a file "id.txt" exists
@@ -19,12 +19,16 @@ contains a specific property (id_tag). If both is true the release-id from this
 file is used. This is useful for batch processing.
 
 
-WARNING: The following is not working currently...
-During the process, all album images (if present) are retrieved from the API.
+During the process, album images (if present and if configured) are retrieved from the API.
+To avoid a huge damage to your RateLimit, you can configure, that only the cover image and not all
+are loaded from the Discogs servers.
 As well, a play-list (.m3u) and an information file (.nfo) are generated per
 each release.
 
 Optionally discogstagger will embed the found album art into the file meta data
+
+For detailed configuration options, take a look in the conf/default.conf file, there you will be
+able to see default values as well as a short explanation for each config option.
 
 ## Develop on discogstagger
 
@@ -55,7 +59,7 @@ to its own package.
 
 Fetch the repo from github
 ```
-git clone https://github.com/jesseward/discogstagger.git
+git clone https://github.com/triplem/discogstagger.git
 ```
 
 Install the script requirements
@@ -70,11 +74,10 @@ sudo python setup.py install
 
 ## Configuration
 
-DiscogsTagger searches for the configuration file at the default location of
-/etc/discogstagger/discogs_tagger.conf, at run-time. Or you're able to specify
-the config location with the '-c' switch.
+DiscogsTagger always loads the default options from the conf/default.conf file, furthermore, you are able to
+overwrite those using your own file, which can be given on the command line using the '-c' switch.
 
-The configuration file must be present to execute the script. The default
+The default configuration file must be present to execute the script. The default
 settings (as shipped), should work without any modifications.
 
 Note that you may wish to modify the following default configuration options.
@@ -117,25 +120,36 @@ Furthermore you can use lowercase directory and filenames using the following co
 use_lower_filenames=True
 ```
 
-
-###### NEEEDDDDDSSSSS ADOPTION............
 For batch-mode tagging, it is not necessary anymore to provide the release-id via the
 '-r' parameter on the commandline. The same is possible by using a file (by default: id.txt)
-with the key/value pair 'discogs_id'. This can be configured in the configuration via the
-following parameters as well:
+with the following structure:
+
+```
+[source]
+discogs_id=RELEASE_ID
+```
+
+The name of this file and the name of the id tag can be configured in your configuration file
+ as well.
 
 ```
 [batch]
+# batch
 # if no release id is given, the application checks if a file with the
 # name id_file (in this case id.txt) is in the source directory,
 # if it is there the id_tag is checked (discogs_id) and assigned to the
 # release id
 id_file=id.txt
-id_tag=discogs_id
+
+[source]
+# source
+# defines a mapping between the name of the source and the corresponding
+# id tag in the media file
+discogs=discogs_id
 ```
 
-Please note, that right now there is no error-handling, if there is no '-r' parameter
-and no id.txt file. The program will then just exit with an error message.
+All command line options are shown, if the program (discogstagger2.py) is called without any further command
+line options. Please note, that we are using python 2.7.
 
 The command line takes the following parameters:
 
