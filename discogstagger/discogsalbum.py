@@ -104,18 +104,13 @@ class DiscogsConnector(object):
 
             logger.debug('filled session....')
 
-    def fetch_images(self, image_dir, image_urls):
-        """ There is a need for authentication here, therefor before every call the authenticate method will
+    def fetch_image(self, image_dir, image_url):
+        """
+            There is a need for authentication here, therefor before every call the authenticate method will
             be called, to make sure, that the user is authenticated already. Furthermore, discogs restricts the
             download of images to 1000 per day. This can be very low on huge volume collections ;-(
         """
         rate_limit_type = 'image'
-
-        image_format = self.config.get("file-formatting", "image")
-        use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
-
-        logger.debug("image-format: %s" % image_format)
-        logger.debug("use_folder_jpg: %s" % use_folder_jpg)
 
         if not self.discogs_session:
             logger.error('You are not authenticated, cannot download image - skipping')
@@ -125,37 +120,26 @@ class DiscogsConnector(object):
             remaining = self.rate_limit_pool[rate_limit_type].remaining
             reset = self.rate_limit_pool[rate_limit_type].reset
             logger.debug('You have %s remaining downloads for the next %s seconds' % (remaining, reset))
-            if remaining < len(image_urls):
-                logger.error('Your download limit is reached, you cannot download the wanted pictures')
+            if remaining <= 1:
+                logger.error('Your download limit is reached, you cannot download the wanted picture today')
                 logger.error('Download can be started again in %d seconds' % self.rate_limit_pool[rate_limit_type].reset)
                 raise RuntimeError('Download limit reached for pool %s' % rate_limit_type)
 
-        no = 0
-        for i, image_url in enumerate(image_urls, 0):
-            logger.debug("Downloading image '%s'" % image_url)
-            try:
-                picture_name = ""
-                if i == 0 and use_folder_jpg:
-                    picture_name = "folder.jpg"
-                else:
-                    no = no + 1
-                    picture_name = image_format + "-%.2d.jpg" % no
 
-                path = os.path.join(image_dir, picture_name)
+        try:
+            r = self.discogs_session.get(image_url, stream=True)
+            if r.status_code == 200:
+                with open(image_dir, 'wb') as f:
+                    for chunk in r.iter_content():
+                        f.write(chunk)
+            else:
+                logger.error('Problem downloading (status code %s)' % r.status_code)
 
-                r = self.discogs_session.get(image_url, stream=True)
-                if r.status_code == 200:
-                    with open(path, 'wb') as f:
-                        for chunk in r.iter_content():
-                            f.write(chunk)
-                else:
-                    logger.error('Problem downloading (status code %s)' % r.status_code)
+            self.updateRateLimits(r)
+        except Exception as e:
+            logger.error("Unable to download image '%s', skipping." % image_url)
+            print e
 
-                self.updateRateLimits(r)
-
-            except Exception as e:
-                logger.error("Unable to download image '%s', skipping." % image_url)
-                print e
 
     def updateRateLimits(self, request):
         type = request.headers['X-RateLimit-Type']

@@ -56,7 +56,7 @@ class TestDiscogsAlbum(object):
 
         assert stop - start > 10
 
-    def test_download_images_wo_tokens(self):
+    def test_download_image_wo_tokens(self):
         """
             Test the downloads of images without a token, no download possible
             Not really a valid test, just watching, that the auth stuff is working ;-)
@@ -66,17 +66,20 @@ class TestDiscogsAlbum(object):
 
         discogs_connection = DiscogsConnector(self.tagger_config)
 
-        discogs_connection.fetch_images(self.dummy_dir, ["http://api.discogs.com/image/R-3083-1167766285.jpeg"])
+        discogs_connection.fetch_image(os.path.join(self.dummy_dir, 'folder.jpg'), "http://api.discogs.com/image/R-3083-1167766285.jpeg")
 
         assert not os.path.exists(os.path.join(self.dummy_dir, 'folder.jpg'))
 
-    def test_download_images_with_tokens(self):
+    def test_download_image_with_tokens(self):
         """
             test the download of images with authentification
 
             Because we would like to test this stuff on travis as well, we cannot store the tokens inside the
             usual "env" variables (otherwise the test test_download_images_wo_tokens would not work), as well
             as not in any config file. We do need to attache them from the travis environment to the tagger_config
+
+            for this test to work, you should set the below mentioned environment variables before running the tesst
+            with nosetests -s test/test_discogs.py
         """
         if os.environ.has_key("TRAVIS_DISCOGS_CONSUMER_KEY"):
             consumer_key = os.environ.get('TRAVIS_DISCOGS_CONSUMER_KEY')
@@ -91,17 +94,17 @@ class TestDiscogsAlbum(object):
         logger.debug('config %s' % config.get("discogs", "consumer_key"))
 
         discogs_connection = DiscogsConnector(config)
-        discogs_connection.fetch_images(self.dummy_dir, ["http://api.discogs.com/image/R-3083-1167766285.jpeg"])
+        discogs_connection.fetch_image(os.path.join(self.dummy_dir, 'folder.jpg'), "http://api.discogs.com/image/R-3083-1167766285.jpeg")
 
         assert os.path.exists(os.path.join(self.dummy_dir, 'folder.jpg'))
 
         os.remove(os.path.join(self.dummy_dir, 'folder.jpg'))
 
-        discogs_connection.fetch_images(self.dummy_dir, ["http://api.discogs.com/image/R-367882-1193559996.jpeg"])
+        discogs_connection.fetch_image(os.path.join(self.dummy_dir, 'folder.jpg'), "http://api.discogs.com/image/R-367882-1193559996.jpeg")
 
         assert os.path.exists(os.path.join(self.dummy_dir, 'folder.jpg'))
 
     test_download_release.needs_network = True
-    test_download_images_wo_tokens.needs_network = True
-    test_download_images_with_tokens.needs_network = True
-    test_download_images_with_tokens.needs_authentication = True
+    test_download_image_wo_tokens.needs_network = True
+    test_download_image_with_tokens.needs_network = True
+    test_download_image_with_tokens.needs_authentication = True

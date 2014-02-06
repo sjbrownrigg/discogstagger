@@ -23,7 +23,7 @@ logger.debug("parentdir: %s" % parentdir)
 from _common_test import DummyResponse, DummyDiscogsAlbum
 
 from discogstagger.tagger_config import TaggerConfig
-from discogstagger.discogsalbum import DiscogsAlbum
+from discogstagger.discogsalbum import DiscogsConnector
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler
 
 class TaggerUtilsBase(object):
@@ -498,8 +498,8 @@ class TestFileHandler(TestTaggerUtilFiles):
         assert os.path.exists(os.path.join(self.album.sourcedir, "dt.done"))
 
     def test_get_images(self):
-        """ This test needs network connection, see how we can handle this,
-            if there is None
+        """ It downloads only one image, since this is the default configuration
+            This test needs network connection, as well as authentication support
         """
         testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
                 self.ogsrelid, self.tagger_config, self.album)
@@ -508,38 +508,63 @@ class TestFileHandler(TestTaggerUtilFiles):
 
         testTagUtils._get_target_list()
 
-        testFileHandler = FileHandler(self.album, self.tagger_config)
+        # the following stuff is only needed in the test, since we cannot use
+        # a config option for these values ;-(
+        # we are unfortunately treated to login every time this method is called ;-(
 
-        testFileHandler.get_images()
+        if os.environ.has_key("TRAVIS_DISCOGS_CONSUMER_KEY"):
+            consumer_key = os.environ.get('TRAVIS_DISCOGS_CONSUMER_KEY')
+        if os.environ.has_key("TRAVIS_DISCOGS_CONSUMER_SECRET"):
+            consumer_secret = os.environ.get("TRAVIS_DISCOGS_CONSUMER_SECRET")
+
+        config = self.tagger_config
+        config.set("discogs", "consumer_key", consumer_key)
+        config.set("discogs", "consumer_secret", consumer_secret)
+
+        discogs_connection = DiscogsConnector(config)
+        testFileHandler = FileHandler(self.album, config)
+        testFileHandler.get_images(discogs_connection)
 
         onlyfiles = [ f for f in listdir(self.album.target_dir) if isfile(join(self.album.target_dir, f))]
         logger.debug("files: %s " % onlyfiles)
 
         assert os.path.exists(os.path.join(self.album.target_dir, "folder.jpg"))
-        assert os.path.exists(os.path.join(self.album.target_dir, "image-01.jpg"))
-        assert os.path.exists(os.path.join(self.album.target_dir, "image-02.jpg"))
-        assert os.path.exists(os.path.join(self.album.target_dir, "image-03.jpg"))
+        assert not os.path.exists(os.path.join(self.album.target_dir, "image-01.jpg"))
 
     def test_get_images_wo_folderjpg(self):
-        """ This test needs network connection, see how we can handle this,
-            if there is None
+        """ Downloads several images from discogs, using authentication
+            This test needs network connection, as well as authentication support
         """
+        # construct config with only default values
+        config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+
         testTagUtils = TaggerUtils(self.source_dir, self.target_dir,
-                self.ogsrelid, self.tagger_config, self.album)
+                self.ogsrelid, config, self.album)
 
         self.copy_files(self.album)
 
         testTagUtils._get_target_list()
 
-        # construct config with only default values
-        self.tagger_config = TaggerConfig(os.path.join(parentdir, "test/test_values.conf"))
+        # the following stuff is only needed in the test, since we cannot use
+        # a config option for these values ;-(
+        # we are unfortunately treated to login every time this method is called ;-(
 
-        testFileHandler = FileHandler(self.album, self.tagger_config)
+        if os.environ.has_key("TRAVIS_DISCOGS_CONSUMER_KEY"):
+            consumer_key = os.environ.get('TRAVIS_DISCOGS_CONSUMER_KEY')
+        if os.environ.has_key("TRAVIS_DISCOGS_CONSUMER_SECRET"):
+            consumer_secret = os.environ.get("TRAVIS_DISCOGS_CONSUMER_SECRET")
 
-        testFileHandler.get_images()
+        config.set("discogs", "consumer_key", consumer_key)
+        config.set("discogs", "consumer_secret", consumer_secret)
+
+        discogs_connection = DiscogsConnector(config)
+        testFileHandler = FileHandler(self.album, config)
+        testFileHandler.get_images(discogs_connection)
 
         onlyfiles = [ f for f in listdir(self.album.target_dir) if isfile(join(self.album.target_dir, f))]
         logger.debug("files: %s " % onlyfiles)
+
+        logger.debug('checking %s' % self.album.target_dir)
 
         assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-01.jpg"))
         assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-02.jpg"))
@@ -547,7 +572,9 @@ class TestFileHandler(TestTaggerUtilFiles):
         assert os.path.exists(os.path.join(self.album.target_dir, "XXIMGXX-04.jpg"))
 
     test_get_images.needs_network = True
+    test_get_images.needs_authentication = True
     test_get_images_wo_folderjpg.needs_network = True
+    test_get_images_wo_folderjpg.needs_authentication = True
 
 class TestTagHandler(TestTaggerUtilFiles):
 

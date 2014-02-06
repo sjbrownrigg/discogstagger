@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 class TagOpener(FancyURLopener, object):
 
-    version = "discogstagger"
+    version = "discogstagger2"
 
     def __init__(self, user_agent):
         self.version = user_agent
@@ -265,7 +265,7 @@ class FileHandler(object):
                             self.mkdir_p(target_path)
                         shutil.copyfile(os.path.join(source_path, fname), os.path.join(target_path, fname))
 
-    def get_images(self):
+    def get_images(self, conn_mgr):
         """
             Download and store any available images
             The images are all copied into the album directory, on multi-disc
@@ -280,6 +280,7 @@ class FileHandler(object):
 
             image_format = self.config.get("file-formatting", "image")
             use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
+            download_only_cover = self.config.getboolean("details", "download_only_cover")
 
             logger.debug("image-format: %s" % image_format)
             logger.debug("use_folder_jpg: %s" % use_folder_jpg)
@@ -287,12 +288,9 @@ class FileHandler(object):
             self.create_album_dir()
 
             no = 0
-            for i, image in enumerate(images, 0):
-                logger.debug("Downloading image '%s'" % image)
+            for i, image_url in enumerate(images, 0):
+                logger.debug("Downloading image '%s'" % image_url)
                 try:
-                    user_agent = self.config.get("common", "user_agent")
-                    url_fh = TagOpener(user_agent)
-
                     picture_name = ""
                     if i == 0 and use_folder_jpg:
                         picture_name = "folder.jpg"
@@ -300,9 +298,13 @@ class FileHandler(object):
                         no = no + 1
                         picture_name = image_format + "-%.2d.jpg" % no
 
-                    url_fh.retrieve(image, os.path.join(self.album.target_dir, picture_name))
+                    conn_mgr.fetch_image(os.path.join(self.album.target_dir, picture_name), image_url)
+
+                    if i == 0 and download_only_cover:
+                        break
+
                 except Exception as e:
-                    logger.error("Unable to download image '%s', skipping." % image)
+                    logger.error("Unable to download image '%s', skipping." % image_url)
                     print e
 
     def embed_coverart_album(self):

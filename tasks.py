@@ -14,4 +14,7 @@ def test_wo_net():
 
 @task('clean')
 def test_all():
-    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=86")
+    """
+    nocapture is needed, because the authentication needs an input from the user (the pin)
+    """
+    run("nosetests --nocapture --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=86")
