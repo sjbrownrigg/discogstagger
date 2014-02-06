@@ -35,7 +35,7 @@ def parse_file(name):
 				if "#Automatic migration from migrate_id_files" in line:
 						return
 				if "discogs_id=" in line:
-						line = line.replace("discogs_id=", "#Automatic migration from migrate_id_files\n[source]\nid=")
+						line = line.replace("discogs_id=", "#Automatic migration from migrate_id_files\n[source]\ndiscogs_id=")
 						sys.stdout.write(line)
 
 p = OptionParser()
