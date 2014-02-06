@@ -8,6 +8,8 @@
 discogstagger2 is a console based audio meta-data tagger. Release data is
 retrieved via the discogs.com API.
 
+discogstagger2 is based on the great work of [jesseward](https://github.com/jesseward/discogstagger).
+
 Simply provide the script with a base directory, that contains an album
 consisting of either FLAC or MP3 media files and the discogs.com
 release-id. discogstagger2 calls out to the discogs.com API and updates the
