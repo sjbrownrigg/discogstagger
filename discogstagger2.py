@@ -17,17 +17,25 @@ def read_id_file(dir, file_name, options):
     # read tags from batch file if available
     idfile = os.path.join(dir, file_name)
     if os.path.exists(idfile):
+        logger.debug("reading id file %s in %s" % (file_name, dir))
         tagger_config.read(idfile)
-        releaseid = tagger_config.get("source", "id")
+        source_type = tagger_config.get("source", "name")
+        id_tag_name = tagger_config.get("source", source_type)
+        releaseid = tagger_config.get("source", id_tag_name)
     elif options.releaseid:
         releaseid = options.releaseid
 
     return releaseid
 
 def walk_dir_tree(start_dir, id_file):
+    source_dirs = []
     for root, dirs, files in os.walk(start_dir):
         if id_file in files:
-            print(root)
+            logger.debug("found %s in %s" % (id_file, root))
+            source_dirs.append(root)
+
+    return source_dirs
+
 
 p = OptionParser(version="discogstagger2 0.9")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
@@ -65,11 +73,13 @@ logger = logging.getLogger(__name__)
 id_file = tagger_config.get("batch", "id_file")
 
 if options.recursive:
+    logger.debug("determine sourcedirs")
     source_dirs = walk_dir_tree(options.sourcedir, id_file)
 else:
     logger.debug("using sourcedir: %s" % options.sourcedir)
     source_dirs = [options.sourcedir]
 
+logger.debug("starting tagging")
 for source_dir in source_dirs:
     done_file = tagger_config.get("details", "done_file")
     done_file_path = os.path.join(source_dir, done_file)

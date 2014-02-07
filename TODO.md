@@ -34,6 +34,7 @@
 - [x] Show help if no options are given on command line on using discogs_tagger
 - [ ] Add progress bar for album art processing
 - [x] Rename discogs_tagger.py to discogstagger2.py (we are something different now)
+- [ ] Add error-handling to tagger_config, do not break execution, if empty id.txt file is read in tagger_config
 
 ### Later Versions (in no order)
 
