@@ -24,7 +24,7 @@ from _common_test import DummyResponse, DummyDiscogsAlbum
 
 from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsConnector
-from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler
+from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
 class TaggerUtilsBase(object):
 
@@ -240,6 +240,63 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert self.album.discs[0].copy_files[0] == "album.cue"
         assert self.album.discs[0].copy_files[1] == "album.m3u"
         assert self.album.discs[0].copy_files[2] == "id.txt"
+
+    def test__get_target_list_single_disc_with_subtracks(self):
+        """
+            Some releases do have "subtracks" (see 513904, track 15), which means that there
+            are two tracks assigned to one position (e.g. 15.1 and 15.2). This gets quite
+            complicated, because this is rather similar to the multi-disc handling
+        """
+        self.ogsrelid = "513904"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(dummy_response)
+        self.album = discogs_album.map()
+
+        # copy file to source directory and rename it
+        for i in range(1, 15):
+            target_file_name = "%.2d-song.flac" % i
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.m3u"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.cue"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "id.txt"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "513904.json"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
+
+
+        # assert self.album.sourcedir == self.source_dir
+        # assert self.album.discs[0].sourcedir == None
+        #
+        # assert self.album.target_dir == os.path.join(self.target_dir, "robbie_williams-swing_when_youre_winning-(7243_536826_2_0)-2001")
+        # assert self.album.discs[0].target_dir == None
+        #
+        # assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
+        # assert self.album.discs[0].tracks[0].new_file == "01-robbie_williams-i_will_talk_and_hollywood_will_listen.flac"
+        #
+        # assert self.album.discs[0].copy_files[0] == "513904.json"
+        # assert self.album.discs[0].copy_files[1] == "album.cue"
+        # assert self.album.discs[0].copy_files[2] == "album.m3u"
+        # assert self.album.discs[0].copy_files[3] == "id.txt"
+
+        try:
+            taggerutils._get_target_list()
+        except TaggerError as te:
+            assert True
+            return
+
+        assert False
 
     def test__create_file_from_template(self):
         self.ogsrelid = "3083"

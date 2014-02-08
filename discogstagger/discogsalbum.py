@@ -14,6 +14,15 @@ from album import Album, Disc, Track
 
 logger = logging.getLogger(__name__)
 
+class AlbumError(Exception):
+    """ A central exception for all errors happening during the album handling
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
 class RateLimit(object):
     pass
 
@@ -125,7 +134,6 @@ class DiscogsConnector(object):
                 logger.error('Download can be started again in %d seconds' % self.rate_limit_pool[rate_limit_type].reset)
                 raise RuntimeError('Download limit reached for pool %s' % rate_limit_type)
 
-
         try:
             r = self.discogs_session.get(image_url, stream=True)
             if r.status_code == 200:
@@ -187,7 +195,12 @@ class DiscogsAlbum(object):
         album.images = self.images
         album.year = self.year
         album.genres = self.release.data["genres"]
-        album.styles = self.release.data["styles"]
+
+        try:
+            album.styles = self.release.data["styles"]
+        except KeyError:
+            album.styles = [""]
+
         album.country = self.release.data["country"]
         if "notes" in self.release.data:
             album.notes = self.release.data["notes"]
@@ -229,6 +242,8 @@ class DiscogsAlbum(object):
         try:
             return good_year.match(str(self.release.data["year"])).group(0)
         except IndexError:
+            return "1900"
+        except AttributeError:
             return "1900"
 
     @property
@@ -299,7 +314,7 @@ class DiscogsAlbum(object):
             NUMBERING_SCHEMES = (
                 "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
                 "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
-                "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05
+                "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05 (this is not multi-disc but multi-tracks for one track)....
             )
 
             for scheme in NUMBERING_SCHEMES:
@@ -360,8 +375,13 @@ class DiscogsAlbum(object):
             track.position = i
 
             pos = self.disc_and_track_no(t["position"])
-            track.tracknumber = int(pos["tracknumber"])
-            track.discnumber = int(pos["discnumber"])
+            try:
+                track.tracknumber = int(pos["tracknumber"])
+                track.discnumber = int(pos["discnumber"])
+            except ValueError as ve:
+                msg = "cannot convert {0} to a valid track-/discnumber".format(t["position"])
+                logger.error(msg)
+                raise AlbumError(msg)
 
 #            logger.debug("discsubtitle: {0}".format(discsubtitle))
             if discsubtitle:

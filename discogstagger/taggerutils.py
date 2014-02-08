@@ -30,6 +30,14 @@ class TagOpener(FancyURLopener, object):
         self.version = user_agent
         FancyURLopener.__init__(self)
 
+class TaggerError(Exception):
+    """ A central exception for all errors happening during the tagging
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
 
 class TagHandler(object):
     """ Uses the album (taggerutils) and tags all given files using the given
@@ -384,8 +392,6 @@ class TaggerUtils(object):
         self.sourcedir = sourcedir
         self.destdir = destdir
 
-# !TODO remove this, the album should always be determined from the outside,
-# there should be no relationship to discogs in this class ;-)
         if not album == None:
             self.album = album
         else:
@@ -477,7 +483,7 @@ class TaggerUtils(object):
         sourcedir = self.album.sourcedir
 
         logger.debug("target_dir: %s" % self.album.target_dir)
-        logger.debug("source_dir: %s" % sourcedir)
+        logger.debug("sourcedir: %s" % sourcedir)
 
         try:
             dir_list = os.listdir(sourcedir)
@@ -504,7 +510,11 @@ class TaggerUtils(object):
                 self.album.discs[0].sourcedir = None
 
             for disc in self.album.discs:
-                disc_source_dir = disc.sourcedir
+                try:
+                    disc_source_dir = disc.sourcedir
+                except AttributeError:
+                    logger.error("there seems to be a problem in the meta-data, check if there are sub-tracks")
+                    raise TaggerError("no disc sourcedir defined, does this release contain sub-tracks?")
 
                 if disc_source_dir == None:
                     disc_source_dir = self.album.sourcedir
@@ -543,9 +553,9 @@ class TaggerUtils(object):
         except OSError, e:
             if e.errno == errno.EEXIST:
                 logger.error("No such directory '%s'", self.sourcedir)
-                raise IOError("No such directory '%s'", self.sourcedir)
+                raise TaggerError("No such directory '%s'", self.sourcedir)
             else:
-                raise IOError("General IO system error '%s'" % errno[e])
+                raise TaggerError("General IO system error '%s'" % errno[e])
 
     @property
     def dest_dir_name(self):
