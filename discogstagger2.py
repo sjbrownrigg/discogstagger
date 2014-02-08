@@ -166,8 +166,8 @@ for source_dir in source_dirs:
         taggerUtils.create_nfo(album.target_dir)
 
         fileHandler.create_done_file()
-    except:
-        msg = "Error during tagging ({0}), {1}".format(releaseid, source_dir)
+    except Exception as ex:
+        msg = "Error during tagging ({0}), {1}: {2}".format(releaseid, source_dir, ex)
         logger.error(msg)
         discs_with_errors.append(msg)
         continue
