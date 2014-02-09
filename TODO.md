@@ -37,8 +37,8 @@
 - [x] Add error-handling to tagger_config, do not break execution, if empty id.txt file is read in tagger_config
 - [x] Fix authentication problem - no need to authenticate every time
 - [ ] Recalculate remaining RateLimit seconds to hours and minutes (and seconds)
-- [ ] Adopt logging to show time as well
-- [ ] Adopt logging to use not only debug level, allow logging to file
+- [x] Adopt logging to show time as well
+- [x] Adopt logging to use not only debug level, allow logging to file
 - [x] Add error-handling for problems with disc (e.g. wrong source dir, like mentioned above), no need to
       break tagging, just report error
 - [x] handle multi disc recognition, furthermore handle multi tracks with different "subtracks"
