@@ -1,6 +1,7 @@
 import logging
 import re
 import os
+import datetime
 
 import inspect
 
@@ -12,7 +13,8 @@ from rauth import OAuth1Service
 
 from album import Album, Disc, Track
 
-logger = logging.getLogger(__name__)
+logger = logging
+#    .getLogger(__name__)
 
 class AlbumError(Exception):
     """ A central exception for all errors happening during the album handling
@@ -128,7 +130,7 @@ class DiscogsConnector(object):
         if rate_limit_type in self.rate_limit_pool:
             remaining = self.rate_limit_pool[rate_limit_type].remaining
             reset = self.rate_limit_pool[rate_limit_type].reset
-            logger.debug('You have %s remaining downloads for the next %s seconds' % (remaining, reset))
+            logger.debug('You have %s remaining downloads for the next %s hh:mm:ss' % (remaining, datetime.timedelta(seconds=int(reset))))
             if remaining <= 1:
                 logger.error('Your download limit is reached, you cannot download the wanted picture today')
                 logger.error('Download can be started again in %d seconds' % self.rate_limit_pool[rate_limit_type].reset)
@@ -145,9 +147,7 @@ class DiscogsConnector(object):
 
             self.updateRateLimits(r)
         except Exception as e:
-            logger.error("Unable to download image '%s', skipping." % image_url)
-            print e
-
+            logger.error("Unable to download image '%s', skipping. (%s)" % (image_url, e))
 
     def updateRateLimits(self, request):
         type = request.headers['X-RateLimit-Type']
@@ -287,7 +287,7 @@ class DiscogsAlbum(object):
 
         last_artist = None
         for x in artist_data:
-            logger.debug("album-x: %s" % x)
+            logger.debug("album-x: %s" % x.name)
             artists.append(self.clean_name(x.name))
 
         return artists
@@ -302,9 +302,10 @@ class DiscogsAlbum(object):
         last_artist = None
 
         for x in artist_data:
-            logger.debug("x: %s" % x)
+#            logger.debug("x: %s" % x)
 
             if isinstance(x, basestring):
+                logger.debug("x: %s" % x)
                 last_artist = last_artist + " " + x
             else:
                 if not last_artist == None:

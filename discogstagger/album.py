@@ -3,7 +3,8 @@ import re
 
 import discogs_client as discogs
 
-logger = logging.getLogger(__name__)
+logger = logging
+#.getLogger(__name__)
 
 class BaseObject(object):
 

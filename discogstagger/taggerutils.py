@@ -20,7 +20,8 @@ from ext.mediafile import MediaFile
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-logger = logging.getLogger(__name__)
+logger = logging
+#.getLogger(__name__)
 
 class TagOpener(FancyURLopener, object):
 
@@ -67,7 +68,7 @@ class TagHandler(object):
     def tag_single_track(self, target_folder, track):
         # load metadata information
         logger.debug("target_folder: %s" % target_folder)
-        logger.debug("track: %s" % track)
+#        logger.debug("track: %s" % track)
 
         metadata = MediaFile(os.path.join(target_folder, track.new_file))
 

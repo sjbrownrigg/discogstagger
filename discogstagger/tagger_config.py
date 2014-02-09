@@ -5,7 +5,8 @@ import inspect
 
 from ConfigParser import RawConfigParser
 
-logger = logging.getLogger(__name__)
+logger = logging
+#.getLogger(__name__)
 
 class memoized_property(object):
 
