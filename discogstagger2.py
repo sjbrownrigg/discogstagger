@@ -3,6 +3,7 @@
 import os
 import errno
 import logging
+import logging.config
 import sys
 
 from optparse import OptionParser
@@ -36,7 +37,6 @@ def walk_dir_tree(start_dir, id_file):
 
     return source_dirs
 
-
 p = OptionParser(version="discogstagger2 0.9")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The release id of the target album")
@@ -66,10 +66,10 @@ if not options.sourcedir or not os.path.exists(options.sourcedir):
 
 tagger_config = TaggerConfig(options.conffile)
 
-logging.basicConfig(
-    level=tagger_config.getint("logging", "level"),
-    format = "%(asctime)s [%(levelname)-8s] %(message)s"
-)
+# initialize logging
+logger_config_file = tagger_config.get("logging", "config_file")
+logging.config.fileConfig(logger_config_file)
+
 logger = logging.getLogger(__name__)
 
 # read necessary config options for batch processing
@@ -89,6 +89,8 @@ logger.info("start tagging")
 discs_with_errors = []
 
 converted_discs = 0
+
+releaseid = None
 
 for source_dir in source_dirs:
     try:
@@ -170,7 +172,10 @@ for source_dir in source_dirs:
 
         fileHandler.create_done_file()
     except Exception as ex:
-        msg = "Error during tagging ({0}), {1}: {2}".format(releaseid, source_dir, ex)
+        if releaseid:
+            msg = "Error during tagging ({0}), {1}: {2}".format(releaseid, source_dir, ex)
+        else:
+            msg = "Error during tagging (no relid) {0}: {1}".format(source_dir, ex)
         logger.error(msg)
         discs_with_errors.append(msg)
         continue

@@ -3,3 +3,5 @@
 cover
 discogs_tagger_triplem_new.conf
 *.iml
+*.log
+
