@@ -66,7 +66,10 @@ if not options.sourcedir or not os.path.exists(options.sourcedir):
 
 tagger_config = TaggerConfig(options.conffile)
 
-logging.basicConfig(level=tagger_config.getint("logging", "level"))
+logging.basicConfig(
+    level=tagger_config.getint("logging", "level"),
+    format = "%(asctime)s [%(levelname)-8s] %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # read necessary config options for batch processing
