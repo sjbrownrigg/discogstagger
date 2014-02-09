@@ -1,0 +1,308 @@
+{"resp": {
+  "status": true,
+  "release": {
+    "status": "Accepted",
+    "styles": ["Neo-Classical", "Avantgarde"],
+    "videos": [
+      {
+        "duration": 418,
+        "description": "18.) G-Spot Tornado- Frank Zappa and Ensemble Modern-The Yellow Shark",
+        "embed": true,
+        "uri": "http://www.youtube.com/watch?v=imAWVWi5PIU",
+        "title": "18.) G-Spot Tornado- Frank Zappa and Ensemble Modern-The Yellow Shark"
+      },
+      {
+        "duration": 423,
+        "description": "17.) Get Whitey- Frank Zappa and Ensemble Modern-The Yellow Shark",
+        "embed": true,
+        "uri": "http://www.youtube.com/watch?v=pdIKVVkCUE8",
+        "title": "17.) Get Whitey- Frank Zappa and Ensemble Modern-The Yellow Shark"
+      },
+      {
+        "duration": 218,
+        "description": "4.) Outrage At Valdez- Frank Zappa and Ensemble Modern- The Yellow Shark",
+        "embed": true,
+        "uri": "http://www.youtube.com/watch?v=9oBTsOU6TG4",
+        "title": "4.) Outrage At Valdez- Frank Zappa and Ensemble Modern- The Yellow Shark"
+      }
+    ],
+    "series": [],
+    "released_formatted": "1995",
+    "labels": [
+      {
+        "id": 818,
+        "resource_url": "http://api.discogs.com/labels/818",
+        "catno": "RCD 40560",
+        "name": "Rykodisc",
+        "entity_type": ""
+      }
+    ],
+    "estimated_weight": 85,
+    "community": {
+      "status": "Accepted",
+      "rating": {
+        "count": 5,
+        "average": 4.4
+      },
+      "have": 25,
+      "contributors": [
+        {
+          "username": "FREEDERRY",
+          "resource_url": "http://api.discogs.com/users/FREEDERRY"
+        }
+      ],
+      "want": 10,
+      "submitter": {
+        "username": "FREEDERRY",
+        "resource_url": "http://api.discogs.com/users/FREEDERRY"
+      },
+      "data_quality": "Needs Vote"
+    },
+    "released": "1995-00-00",
+    "master_url": "http://api.discogs.com/masters/47696",
+    "year": 1995,
+    "images": [
+      {
+        "uri": "http://api.discogs.com/image/R-2454735-1284979557.jpeg",
+        "height": 212,
+        "width": 237,
+        "resource_url": "http://api.discogs.com/image/R-2454735-1284979557.jpeg",
+        "type": "primary",
+        "uri150": "http://api.discogs.com/image/R-150-2454735-1284979557.jpeg"
+      }
+    ],
+    "format_quantity": 1,
+    "id": 2454735,
+    "genres": ["Classical", "Rock"],
+    "thumb": "http://api.discogs.com/image/R-150-2454735-1284979557.jpeg",
+    "extraartists": [
+      {
+        "join": "",
+        "name": "Ali N. Askin",
+        "anv": "",
+        "tracks": "2, 3, 7 to 9, 19",
+        "role": "Arranged By",
+        "resource_url": "http://api.discogs.com/artists/15903",
+        "id": 15903
+      },
+      {
+        "join": "",
+        "name": "Todd Yvega",
+        "anv": "",
+        "tracks": "",
+        "role": "Computer",
+        "resource_url": "http://api.discogs.com/artists/574652",
+        "id": 574652
+      },
+      {
+        "join": "",
+        "name": "Dave Dondorf",
+        "anv": "",
+        "tracks": "",
+        "role": "Engineer",
+        "resource_url": "http://api.discogs.com/artists/509651",
+        "id": 509651
+      },
+      {
+        "join": "",
+        "name": "Harry Andronis",
+        "anv": "",
+        "tracks": "",
+        "role": "Engineer",
+        "resource_url": "http://api.discogs.com/artists/451470",
+        "id": 451470
+      },
+      {
+        "join": "",
+        "name": "Spencer Chrislu",
+        "anv": "",
+        "tracks": "",
+        "role": "Engineer",
+        "resource_url": "http://api.discogs.com/artists/509659",
+        "id": 509659
+      },
+      {
+        "join": "",
+        "name": "Peter Rundel",
+        "anv": "",
+        "tracks": "",
+        "role": "Leader",
+        "resource_url": "http://api.discogs.com/artists/462175",
+        "id": 462175
+      },
+      {
+        "join": "",
+        "name": "Ensemble Modern",
+        "anv": "",
+        "tracks": "",
+        "role": "Orchestra",
+        "resource_url": "http://api.discogs.com/artists/65807",
+        "id": 65807
+      },
+      {
+        "join": "",
+        "name": "Frank Zappa",
+        "anv": "",
+        "tracks": "",
+        "role": "Producer",
+        "resource_url": "http://api.discogs.com/artists/92623",
+        "id": 92623
+      }
+    ],
+    "title": "The Yellow Shark",
+    "country": "Europe",
+    "notes": "Digipack case comes in slipcase with extra booklet\r\n\r\nMade in EU\n",
+    "companies": [],
+    "uri": "http://www.discogs.com/Zappa-Ensemble-Modern-The-Yellow-Shark/release/2454735",
+    "artists": [
+      {
+        "join": "&",
+        "name": "Frank Zappa",
+        "anv": "Zappa",
+        "tracks": "",
+        "role": "",
+        "resource_url": "http://api.discogs.com/artists/92623",
+        "id": 92623
+      },
+      {
+        "join": "",
+        "name": "Ensemble Modern",
+        "anv": "",
+        "tracks": "",
+        "role": "",
+        "resource_url": "http://api.discogs.com/artists/65807",
+        "id": 65807
+      }
+    ],
+    "formats": [
+      {
+        "descriptions": ["Album", "Reissue"],
+        "name": "CD",
+        "qty": "1"
+      }
+    ],
+    "resource_url": "http://api.discogs.com/releases/2454735",
+    "master_id": 47696,
+    "tracklist": [
+      {
+        "duration": "1:43",
+        "position": "1",
+        "title": "Intro"
+      },
+      {
+        "duration": "2:07",
+        "position": "2",
+        "title": "Dog Breath Variations"
+      },
+      {
+        "duration": "3:24",
+        "position": "3",
+        "title": "Uncle Meat"
+      },
+      {
+        "duration": "3:27",
+        "position": "4",
+        "title": "Outrage At Valdez"
+      },
+      {
+        "duration": "7:31",
+        "position": "5",
+        "title": "Times Beach II"
+      },
+      {
+        "duration": "1:45",
+        "position": "6",
+        "title": "III Revised"
+      },
+      {
+        "duration": "4:33",
+        "position": "7",
+        "title": "The Girl In The Magnesium Dress"
+      },
+      {
+        "duration": "3:43",
+        "position": "8",
+        "title": "Be-Bop Tango"
+      },
+      {
+        "duration": "5:56",
+        "position": "9",
+        "title": "Ruth Is Sleeping"
+      },
+      {
+        "duration": "2:17",
+        "position": "10",
+        "title": "None Of The Above"
+      },
+      {
+        "duration": "2:28",
+        "position": "11",
+        "title": "Pentagon Afternoon"
+      },
+      {
+        "duration": "3:03",
+        "position": "12",
+        "title": "Questi Cazzi Di Piccione"
+      },
+      {
+        "duration": "4:26",
+        "position": "13",
+        "title": "Times Beach III"
+      },
+      {
+        "duration": "2:52",
+        "position": "14",
+        "extraartists": [
+          {
+            "join": "",
+            "name": "Hilary Sturt",
+            "anv": "",
+            "tracks": "",
+            "role": "Vocals",
+            "resource_url": "http://api.discogs.com/artists/416817",
+            "id": 416817
+          }
+        ],
+        "title": "Food Gathering In Post-Industrial America, 1992"
+      },
+      {
+        "duration": "6:39",
+        "position": "15",
+        "extraartists": [
+          {
+            "join": "",
+            "name": "Hermann Kretzschmar",
+            "anv": "Hermann Kretschmar",
+            "tracks": "",
+            "role": "Vocals",
+            "resource_url": "http://api.discogs.com/artists/416814",
+            "id": 416814
+          }
+        ],
+        "title": "Welcome To The United States"
+      },
+      {
+        "duration": "2:12",
+        "position": "16",
+        "title": "Pound For A Brown"
+      },
+      {
+        "duration": "1:37",
+        "position": "17",
+        "title": "Exercise #4"
+      },
+      {
+        "duration": "7:00",
+        "position": "18",
+        "title": "Get Whitey"
+      },
+      {
+        "duration": "5:17",
+        "position": "19",
+        "title": "G-Spot Tornado"
+      }
+    ],
+    "data_quality": "Needs Vote"
+  },
+  "version": "2.0"
+}}

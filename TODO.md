@@ -43,6 +43,7 @@
       break tagging, just report error
 - [x] handle multi disc recognition, furthermore handle multi tracks with different "subtracks"
       (e.g. http://www.discogs.com/release/513904)
+- [ ] add "local" datasource, reuse DummyResponse from tests, needed to easily work around errors
 
 
 ### Later Versions (in no order)

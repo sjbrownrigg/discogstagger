@@ -281,17 +281,14 @@ class DiscogsAlbum(object):
 
     def album_artists(self, artist_data):
         """ obtain the artists (normalized using clean_name).
-            add tests  .....
+            the handling of the 'join' stuff is not implemented in discogs_client ;-(
         """
         artists = []
 
+        last_artist = None
         for x in artist_data:
             logger.debug("album-x: %s" % x)
-
-            if isinstance(x, basestring):
-                artists.append(x)
-            else:
-                artists.append(x.name)
+            artists.append(self.clean_name(x.name))
 
         return artists
 

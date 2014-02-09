@@ -489,6 +489,8 @@ class TaggerUtils(object):
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
 
+            filetype = ""
+
             self.album.copy_files = []
 
             if self.album.has_multi_disc:

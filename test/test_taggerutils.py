@@ -155,7 +155,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
-    def test__get_target_list_multi_disc(self):
+    def test_get_target_list_multi_disc(self):
         # copy file to source directory and rename it
         self.copy_files(self.album)
 
@@ -197,7 +197,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert self.album.discs[1].tracks[19].orig_file == "20-song.flac"
         assert self.album.discs[1].tracks[19].new_file == "20-jay-z-i_just_wanna_love_u_(give_it_2_me)_(radio_edit).flac"
 
-    def test__get_target_list_single_disc(self):
+    def test_get_target_list_single_disc(self):
         self.ogsrelid = "3083"
 
         # construct config with only default values
@@ -241,7 +241,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert self.album.discs[0].copy_files[1] == "album.m3u"
         assert self.album.discs[0].copy_files[2] == "id.txt"
 
-    def test__get_target_list_single_disc_with_subtracks(self):
+    def test_get_target_list_single_disc_with_subtracks(self):
         """
             Some releases do have "subtracks" (see 513904, track 15), which means that there
             are two tracks assigned to one position (e.g. 15.1 and 15.2). This gets quite
@@ -275,21 +275,6 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
 
-
-        # assert self.album.sourcedir == self.source_dir
-        # assert self.album.discs[0].sourcedir == None
-        #
-        # assert self.album.target_dir == os.path.join(self.target_dir, "robbie_williams-swing_when_youre_winning-(7243_536826_2_0)-2001")
-        # assert self.album.discs[0].target_dir == None
-        #
-        # assert self.album.discs[0].tracks[0].orig_file == "01-song.flac"
-        # assert self.album.discs[0].tracks[0].new_file == "01-robbie_williams-i_will_talk_and_hollywood_will_listen.flac"
-        #
-        # assert self.album.discs[0].copy_files[0] == "513904.json"
-        # assert self.album.discs[0].copy_files[1] == "album.cue"
-        # assert self.album.discs[0].copy_files[2] == "album.m3u"
-        # assert self.album.discs[0].copy_files[3] == "id.txt"
-
         try:
             taggerutils._get_target_list()
         except TaggerError as te:
@@ -298,7 +283,34 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
 
         assert False
 
-    def test__create_file_from_template(self):
+    def test_get_target_list_with_multiple_release_artists(self):
+        """
+            Some releases do have multiple release-artists (see 2452735),
+            the release artists are treated differently from the track artists,
+            check it in here, to make sure it is really working (should be in
+            test_discogs.py usually)
+        """
+        self.ogsrelid = "2454735"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(dummy_response)
+        self.album = discogs_album.map()
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
+
+        taggerutils._get_target_list()
+
+        assert len(self.album.artists) == 2
+        assert self.album.artists[0] == "Frank Zappa"
+        assert self.album.artists[1] == "Ensemble Modern"
+
+        assert self.album.artist == "Frank Zappa"
+        assert self.album.discs[0].tracks[0].new_file == "01-frank_zappa-intro"
+
+    def test_create_file_from_template(self):
         self.ogsrelid = "3083"
 
         # construct config with only default values
@@ -551,6 +563,9 @@ class TestFileHandler(TestTaggerUtilFiles):
         # the following stuff is only needed in the test, since we cannot use
         # a config option for these values ;-(
         # we are unfortunately treated to login every time this method is called ;-(
+
+        consumer_key = None
+        consumer_secret = None
 
         if os.environ.has_key("TRAVIS_DISCOGS_CONSUMER_KEY"):
             consumer_key = os.environ.get('TRAVIS_DISCOGS_CONSUMER_KEY')
