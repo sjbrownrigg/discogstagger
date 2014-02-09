@@ -658,7 +658,8 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         metadata = MediaFile(os.path.join(self.source_dir, self.target_file_name))
 
-        logger.debug("artist: %s" % metadata.artist_sort)
+        logger.debug("artist_sort: %s" % metadata.artist_sort)
+        logger.debug("artist: %s" % metadata.artist)
         assert metadata.artist == "D-Flame Feat. Eißfeldt"
         assert metadata.artist_sort == "D-Flame"
         assert metadata.discogs_id == self.ogsrelid

@@ -186,7 +186,7 @@ class DiscogsAlbum(object):
     def map(self):
         """ map the retrieved information to the tagger specific objects """
 
-        album = Album(self.release._id, self.release.title, self.artists(self.release.artists))
+        album = Album(self.release._id, self.release.title, self.album_artists(self.release.artists))
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
@@ -279,12 +279,34 @@ class DiscogsAlbum(object):
             except AttributeError:
                 pass
 
+    def album_artists(self, artist_data):
+        """ obtain the artists (normalized using clean_name).
+            add tests  .....
+        """
+        artists = []
+
+        for x in artist_data:
+            logger.debug("album-x: %s" % x)
+
+            if isinstance(x, basestring):
+                artists.append(x)
+            else:
+                artists.append(x.name)
+
+        return artists
+
     def artists(self, artist_data):
-        """ obtain the artists (normalized using clean_name). """
+        """ obtain the artists (normalized using clean_name). this is specific for tracks, since tracks are handled
+            differently from the album artists.
+            here the "join" is taken into account as well....
+
+        """
         artists = []
         last_artist = None
 
         for x in artist_data:
+            logger.debug("x: %s" % x)
+
             if isinstance(x, basestring):
                 last_artist = last_artist + " " + x
             else:
@@ -293,7 +315,9 @@ class DiscogsAlbum(object):
                     artists.append(last_artist)
                     last_artist = None
                 else:
-                    last_artist = self.clean_name(x.name)
+                     last_artist = self.clean_name(x.name)
+
+            logger.debug("last_artist: %s" % last_artist)
 
         artists.append(last_artist)
 
