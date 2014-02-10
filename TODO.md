@@ -2,6 +2,8 @@
 
 ## TODO List
 
+This list is here for historic reasons, all TODOs are now maintained in the github issues for this project. If you do have a new issue, just put it in the issues. This file is not maintained anymore.
+
 ### Version 1.2
 
 - [x] Merge current latest version (branch: folder-jpeg) into master
