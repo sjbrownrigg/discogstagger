@@ -27,7 +27,7 @@
 - [x] Provide authentication for downloading images
 - [ ] Minor Refactoring to avoid multiple checking of disc.target_dir and
       disc.sourcedir != None (taggerutils.py)
-- [ ] Add unit-tests for single disc albums
+- [x] Add unit-tests for single disc albums
 - [x] Allow different sources, not only discogs for the metadata
 - [x] Add unit tests for different configuration in id.txt files
 - [x] Adopt migration script according to the multi source stuff
@@ -36,17 +36,25 @@
 - [x] Rename discogs_tagger.py to discogstagger2.py (we are something different now)
 - [x] Add error-handling to tagger_config, do not break execution, if empty id.txt file is read in tagger_config
 - [x] Fix authentication problem - no need to authenticate every time
-- [ ] Recalculate remaining RateLimit seconds to hours and minutes (and seconds)
+- [x] Recalculate remaining RateLimit seconds to hours and minutes (and seconds)
 - [x] Adopt logging to show time as well
 - [x] Adopt logging to use not only debug level, allow logging to file
 - [x] Add error-handling for problems with disc (e.g. wrong source dir, like mentioned above), no need to
       break tagging, just report error
 - [x] handle multi disc recognition, furthermore handle multi tracks with different "subtracks"
       (e.g. http://www.discogs.com/release/513904)
-- [ ] add "local" datasource, reuse DummyResponse from tests, needed to easily work around errors
+- [ ] adopt setup.py - bump version, adopt other tags as well to use own repository
+- [ ] create github release
+- [ ] move from TODO.md to github issues
 
+### Version 2.2
+
+- [ ] add possibility to only tag files without moving/copying them (just leave them where they are)
+- [ ] add "local" datasource, reuse DummyResponse from tests, needed to easily work around errors
+- [ ] adopt setup.py - bump version, adopt other tags as well to use own repository
+- [ ] add replay_gain possibility
 
 ### Later Versions (in no order)
 
 - [x] Add Rate-Limiting functionality for discogs
-- [ ] Add different tagging-sources (e.g. AMG)
+- [ ] Add different external tagging-sources (e.g. AMG)
