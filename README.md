@@ -156,18 +156,23 @@ line options. Please note, that we are using python 2.7.
 The command line takes the following parameters:
 
 ```
-Usage: discogs_tagger.py [options]
+Usage: discogstagger2.py [options]
 
 Options:
+  --version             show program's version number and exit
   -h, --help            show this help message and exit
   -r RELEASEID, --releaseid=RELEASEID
-                        The discogs.com release id of the target album
-  -s SDIR, --source=SDIR
+                        The release id of the target album
+  -s SOURCEDIR, --source=SOURCEDIR
                         The directory that you wish to tag
   -d DESTDIR, --destination=DESTDIR
                         The (base) directory to copy the tagged files to
   -c CONFFILE, --conf=CONFFILE
                         The discogstagger configuration file.
+  --recursive           Should albums be searched recursive in the source
+                        directory?
+  -f, --force           Should albums be updated even though the done token
+                        exists?
 ```
 
 ## Examples
