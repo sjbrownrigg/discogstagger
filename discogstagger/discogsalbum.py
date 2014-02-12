@@ -76,6 +76,9 @@ class DiscogsConnector(object):
         else:
             logger.warn('cannot authenticate on discogs (no image download possible) - set consumer_key and consumer_secret')
 
+    def fetch_release(self, release_id, source_dir):
+        return self.fetch_release(release_id)
+
     def fetch_release(self, release_id):
         """ fetches the metadata for the given release_id from the discogs api server
             (no authentication necessary, specific rate-limit implemented on this one)
@@ -158,6 +161,52 @@ class DiscogsConnector(object):
         rl.reset = request.headers['X-RateLimit-Reset']
 
         self.rate_limit_pool[type] = rl
+
+class DummyResponse(object):
+    """
+        The dummy response used to create a discogs.release from a local json file
+    """
+    def __init__(self, releaseid, json_file_path):
+        self.releaseid = releaseid
+
+        json_file = open(json_file_path, "r")
+
+        self.status_code = 200
+        self.content = json_file.read()
+
+class LocalDiscogsConnector(object):
+    """ use local json, do not fetch json from discogs, instead use the one in the source_directory
+        We will need to use the Original DiscogsConnector to allow the usage of the authentication
+    """
+
+    def __init__(self, delegate_discogs_connector):
+        self.delegate = delegate_discogs_connector
+
+    def fetch_release(self, release_id):
+        pass
+
+    def fetch_release(self, release_id, source_dir):
+        """ fetches the metadata for the given release_id from the discogs api server
+            (no authentication necessary, specific rate-limit implemented on this one)
+        """
+        json_file_name = "%s.json" % release_id
+        json_file_path = os.path.join(source_dir, json_file_name)
+
+        dummy_response = DummyResponse(release_id, json_file_path)
+
+        release = discogs.Release(release_id)
+        release._cached_response = dummy_response
+
+        return release
+
+    def authenticate(self):
+        self.delegate.authenticate()
+
+    def fetch_image(self, image_dir, image_url):
+        self.delegate.fetch_image(image_dir, image_url)
+
+    def updateRateLimits(self, request):
+        self.delegate.updateRateLimits(request)
 
 
 class DiscogsAlbum(object):

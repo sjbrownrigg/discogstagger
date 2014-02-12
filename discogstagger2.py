@@ -9,7 +9,7 @@ import sys
 from optparse import OptionParser
 
 from discogstagger.tagger_config import TaggerConfig
-from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, AlbumError
+from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
 import os, errno
@@ -84,6 +84,7 @@ else:
 
 # initialize connection (could be a problem if using multiple sources...)
 discogs_connector = DiscogsConnector(tagger_config)
+local_discogs_connector = LocalDiscogsConnector(discogs_connector)
 
 logger.info("start tagging")
 discs_with_errors = []
@@ -107,6 +108,7 @@ for source_dir in source_dirs:
 
         releaseid = read_id_file(source_dir, id_file, options)
 
+
         if not releaseid:
             p.error("Please specify the discogs.com releaseid ('-r')")
 
@@ -122,7 +124,15 @@ for source_dir in source_dirs:
         logger.info("Using destination directory: %s", destdir)
 
         logger.debug("starting tagging...")
-        release = discogs_connector.fetch_release(releaseid)
+
+        #! TODO this is dirty, refactor it to be able to reuse it for later enhancements
+        if tagger_config.get("source", "name") == "local":
+            release = local_discogs_connector.fetch_release(releaseid, source_dir)
+            connector = local_discogs_connector
+        else:
+            release = discogs_connector.fetch_release(releaseid)
+            connector = discogs_connector
+
         discogs_album = DiscogsAlbum(release)
 
         try:
@@ -157,7 +167,7 @@ for source_dir in source_dirs:
         fileHandler.copy_other_files()
 
         logger.debug("Downloading and storing images")
-        fileHandler.get_images(discogs_connector)
+        fileHandler.get_images(connector)
 
         logger.debug("Embedding Albumart")
         fileHandler.embed_coverart_album()
