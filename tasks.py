@@ -6,7 +6,7 @@ def clean():
 
 @task('clean')
 def test():
-    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=80 -a \!needs_authentication")
+    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=79 -a \!needs_authentication")
 
 @task('clean')
 def test_wo_net():
