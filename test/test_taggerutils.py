@@ -758,3 +758,51 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.encoder == ""
 
         assert metadata.country == ""
+
+    def test_tag_single_album_with_video_tracks(self):
+        self.ogsrelid = "13748"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(dummy_response)
+        self.album = discogs_album.map()
+
+        # copy file to source directory and rename it
+        self.copy_files_single_album(7)
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
+
+        taggerutils._get_target_list()
+
+        testTagHandler = TagHandler(self.album, self.tagger_config)
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        testFileHandler.copy_files()
+
+        testTagHandler.tag_album()
+
+        target_dir = os.path.join(self.target_dir, self.album.target_dir)
+        metadata = MediaFile(os.path.join(target_dir, "01-coldcut-timber_(chopped_down_radio_edit).flac"))
+
+        assert metadata.artist == "Coldcut"
+        assert metadata.albumartist == "Coldcut & Hexstatic"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 1998
+        assert metadata.disctotal == 1
+        assert metadata.genre == "Electronic"
+        assert metadata.tracktotal == 7
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+        assert metadata.country == "Canada"
+
+        metadata = MediaFile(os.path.join(target_dir, "07-coldcut-timber_(the_cheech_wizards_polythump_requiem_for_the_ancient_forests_mix).flac"))
+
+        assert metadata.artist == "Coldcut"
+        assert metadata.albumartist == "Coldcut & Hexstatic"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.tracktotal == 7
