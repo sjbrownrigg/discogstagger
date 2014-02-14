@@ -433,7 +433,7 @@ class DiscogsAlbum(object):
 
         for i, t in enumerate(x for x in self.release.tracklist):
 
-            if t["position"] and (t["position"].startswith("Video") or t["position"].startswith("video")):
+            if t["position"].startswith("Video") or t["position"].startswith("video") or t["position"].startswith("DVD"):
                 continue
 
             # this seems to be an index track, set the discsubtitle
