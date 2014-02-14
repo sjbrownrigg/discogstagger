@@ -155,6 +155,21 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         logger.debug("copy to %s" % os.path.join(self.source_dir, target_file_name))
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
 
+    def copy_files_single_album(self, track_no):
+        # copy file to source directory and rename it
+        for i in range(1, track_no + 1):
+            target_file_name = "%.2d-song.flac" % i
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.m3u"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.cue"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "id.txt"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
     def test_get_target_list_multi_disc(self):
         # copy file to source directory and rename it
         self.copy_files(self.album)
@@ -208,18 +223,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         self.album = discogs_album.map()
 
         # copy file to source directory and rename it
-        for i in range(1, 18):
-            target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.m3u"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.cue"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "id.txt"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+        self.copy_files_single_album(17)
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
 
@@ -257,18 +261,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         self.album = discogs_album.map()
 
         # copy file to source directory and rename it
-        for i in range(1, 15):
-            target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.m3u"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.cue"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "id.txt"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+        self.copy_files_single_album(14)
 
         target_file_name = "513904.json"
         shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
@@ -330,18 +323,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         assert taggerutils.create_nfo(self.target_dir)
 
         # copy file to source directory and rename it
-        for i in range(1, 18):
-            target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.m3u"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.cue"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "id.txt"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+        self.copy_files_single_album(17)
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
 
@@ -747,20 +729,8 @@ class TestTagHandler(TestTaggerUtilFiles):
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
-        #! TODO use a function for this one as well (see self.copy_files)...
         # copy file to source directory and rename it
-        for i in range(1, 12):
-            target_file_name = "%.2d-song.flac" % i
-            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.m3u"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "album.cue"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
-
-        target_file_name = "id.txt"
-        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+        self.copy_files_single_album(11)
 
         taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
 
