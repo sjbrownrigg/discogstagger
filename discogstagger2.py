@@ -99,7 +99,7 @@ for source_dir in source_dirs:
         done_file_path = os.path.join(source_dir, done_file)
 
         if os.path.exists(done_file_path) and not options.forceUpdate:
-            logger.error("Do not read %s, because %s exists and forceUpdate is false" % (source_dir, done_file))
+            logger.warn("Do not read %s, because %s exists and forceUpdate is false" % (source_dir, done_file))
             continue
 
         # reread config to make sure, that the album specific options are reset for each
