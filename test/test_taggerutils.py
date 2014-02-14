@@ -736,3 +736,55 @@ class TestTagHandler(TestTaggerUtilFiles):
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
         assert metadata.encoder == ""
+
+    def test_tag_album_wo_country(self):
+        self.ogsrelid = "543030"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(dummy_response)
+        self.album = discogs_album.map()
+
+        #! TODO use a function for this one as well (see self.copy_files)...
+        # copy file to source directory and rename it
+        for i in range(1, 12):
+            target_file_name = "%.2d-song.flac" % i
+            shutil.copyfile(self.source_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.m3u"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "album.cue"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        target_file_name = "id.txt"
+        shutil.copyfile(self.source_copy_file, os.path.join(self.source_dir, target_file_name))
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
+
+        taggerutils._get_target_list()
+
+        testTagHandler = TagHandler(self.album, self.tagger_config)
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        testFileHandler.copy_files()
+
+        testTagHandler.tag_album()
+
+        target_dir = os.path.join(self.target_dir, self.album.target_dir)
+        metadata = MediaFile(os.path.join(target_dir, "01-front_242-masterhit.flac"))
+
+        assert metadata.artist == "Front 242"
+        assert metadata.albumartist == "Front 242"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 1992
+        assert metadata.disctotal == 1
+        assert metadata.genre == "Electronic"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+        assert metadata.country == ""

@@ -1,0 +1,242 @@
+{"resp": {
+  "status": true,
+  "release": {
+    "status": "Accepted",
+    "styles": ["EBM"],
+    "videos": [
+      {
+        "duration": 292,
+        "description": "FRONT 242 - Funkahdafi live (Hadafi Commando)",
+        "embed": true,
+        "uri": "http://www.youtube.com/watch?v=0NARz4OAcQo",
+        "title": "FRONT 242 - Funkahdafi live (Hadafi Commando)"
+      },
+      {
+        "duration": 278,
+        "description": "FRONT 242 - WYHIWYG (hadafi commando)",
+        "embed": true,
+        "uri": "http://www.youtube.com/watch?v=dd63ZpggcwU",
+        "title": "FRONT 242 - WYHIWYG (hadafi commando)"
+      }
+    ],
+    "series": [],
+    "released_formatted": "1992",
+    "labels": [
+      {
+        "id": 50358,
+        "resource_url": "http://api.discogs.com/labels/50358",
+        "catno": "NFR-376",
+        "name": "No Future Records (2)",
+        "entity_type": "1"
+      }
+    ],
+    "estimated_weight": 85,
+    "community": {
+      "status": "Accepted",
+      "rating": {
+        "count": 25,
+        "average": 4.28
+      },
+      "have": 81,
+      "contributors": [
+        {
+          "username": "terje",
+          "resource_url": "http://api.discogs.com/users/terje"
+        },
+        {
+          "username": "Anni_Funny",
+          "resource_url": "http://api.discogs.com/users/Anni_Funny"
+        },
+        {
+          "username": "Vor-Teks",
+          "resource_url": "http://api.discogs.com/users/Vor-Teks"
+        },
+        {
+          "username": "karlvonschlagend",
+          "resource_url": "http://api.discogs.com/users/karlvonschlagend"
+        },
+        {
+          "username": "Truemmergemuet",
+          "resource_url": "http://api.discogs.com/users/Truemmergemuet"
+        },
+        {
+          "username": "all-blacks",
+          "resource_url": "http://api.discogs.com/users/all-blacks"
+        }
+      ],
+      "want": 21,
+      "submitter": {
+        "username": "terje",
+        "resource_url": "http://api.discogs.com/users/terje"
+      },
+      "data_quality": "Correct"
+    },
+    "released": "1992",
+    "year": 1992,
+    "images": [
+      {
+        "uri": "http://api.discogs.com/image/R-543030-1182368433.jpeg",
+        "height": 600,
+        "width": 592,
+        "resource_url": "http://api.discogs.com/image/R-543030-1182368433.jpeg",
+        "type": "primary",
+        "uri150": "http://api.discogs.com/image/R-150-543030-1182368433.jpeg"
+      },
+      {
+        "uri": "http://api.discogs.com/image/R-543030-1182368798.jpeg",
+        "height": 600,
+        "width": 600,
+        "resource_url": "http://api.discogs.com/image/R-543030-1182368798.jpeg",
+        "type": "secondary",
+        "uri150": "http://api.discogs.com/image/R-150-543030-1182368798.jpeg"
+      },
+      {
+        "uri": "http://api.discogs.com/image/R-543030-1182890550.jpeg",
+        "height": 465,
+        "width": 600,
+        "resource_url": "http://api.discogs.com/image/R-543030-1182890550.jpeg",
+        "type": "secondary",
+        "uri150": "http://api.discogs.com/image/R-150-543030-1182890550.jpeg"
+      },
+      {
+        "uri": "http://api.discogs.com/image/R-543030-1182890624.jpeg",
+        "height": 600,
+        "width": 600,
+        "resource_url": "http://api.discogs.com/image/R-543030-1182890624.jpeg",
+        "type": "secondary",
+        "uri150": "http://api.discogs.com/image/R-150-543030-1182890624.jpeg"
+      },
+      {
+        "uri": "http://api.discogs.com/image/R-543030-1192214478.jpeg",
+        "height": 603,
+        "width": 600,
+        "resource_url": "http://api.discogs.com/image/R-543030-1192214478.jpeg",
+        "type": "secondary",
+        "uri150": "http://api.discogs.com/image/R-150-543030-1192214478.jpeg"
+      },
+      {
+        "uri": "http://api.discogs.com/image/R-543030-1192214488.jpeg",
+        "height": 608,
+        "width": 600,
+        "resource_url": "http://api.discogs.com/image/R-543030-1192214488.jpeg",
+        "type": "secondary",
+        "uri150": "http://api.discogs.com/image/R-150-543030-1192214488.jpeg"
+      }
+    ],
+    "format_quantity": 1,
+    "id": 543030,
+    "genres": ["Electronic"],
+    "thumb": "http://api.discogs.com/image/R-150-543030-1182368433.jpeg",
+    "extraartists": [],
+    "title": "Hadafi Commando",
+    "notes": "Recorded live at Hot Point, Lausanne, November 30th, 1986.\r\n\r\n\u2117 + \u00a9 1992 No Future Records. Digitally remastered analog recording.\r\n\r\n<b>1 :</b> wrongly spelled \"Master Hit\".\r\n<b>4 :</b> \"Television-Station\" instead of \"Television Station\".\r\n<b>6 :</b> wrongly spelled \"Funk Hadafi\".\r\n<b>8 :</b> wrongly spelled \"Quiet Unusual\".\r\n<b>9 :</b> \"Commando Re-Mix\" instead of \"Commando Remix\".\r\n<b>10 :</b> \"What Your Hear Is What You Get\" instead of \"W.Y.H.I.W.Y.G.\".\r\n",
+    "identifiers": [
+      {
+        "type": "Other",
+        "description": "Rights Society",
+        "value": "GEMA"
+      },
+      {
+        "type": "Matrix / Runout",
+        "value": "WIZARD A 288 1"
+      }
+    ],
+    "companies": [
+      {
+        "name": "No Future Records (2)",
+        "entity_type": "13",
+        "catno": "",
+        "resource_url": "http://api.discogs.com/labels/50358",
+        "id": 50358,
+        "entity_type_name": "Phonographic Copyright (p)"
+      },
+      {
+        "name": "No Future Records (2)",
+        "entity_type": "14",
+        "catno": "",
+        "resource_url": "http://api.discogs.com/labels/50358",
+        "id": 50358,
+        "entity_type_name": "Copyright (c)"
+      }
+    ],
+    "uri": "http://www.discogs.com/Front-242-Hadafi-Commando/release/543030",
+    "artists": [
+      {
+        "join": "",
+        "name": "Front 242",
+        "anv": "",
+        "tracks": "",
+        "role": "",
+        "resource_url": "http://api.discogs.com/artists/4655",
+        "id": 4655
+      }
+    ],
+    "formats": [
+      {
+        "descriptions": ["Album", "Unofficial Release"],
+        "name": "CD",
+        "qty": "1"
+      }
+    ],
+    "resource_url": "http://api.discogs.com/releases/543030",
+    "tracklist": [
+      {
+        "duration": "4:14",
+        "position": "1",
+        "title": "Masterhit"
+      },
+      {
+        "duration": "4:00",
+        "position": "2",
+        "title": "No Shuffle"
+      },
+      {
+        "duration": "3:36",
+        "position": "3",
+        "title": "Body To Body"
+      },
+      {
+        "duration": "4:11",
+        "position": "4",
+        "title": "Television Station"
+      },
+      {
+        "duration": "4:13",
+        "position": "5",
+        "title": "Don't Crash"
+      },
+      {
+        "duration": "4:51",
+        "position": "6",
+        "title": "Funkahdafi"
+      },
+      {
+        "duration": "4:10",
+        "position": "7",
+        "title": "Red Team"
+      },
+      {
+        "duration": "4:37",
+        "position": "8",
+        "title": "Quite Unusual"
+      },
+      {
+        "duration": "5:00",
+        "position": "9",
+        "title": "Commando Remix"
+      },
+      {
+        "duration": "4:37",
+        "position": "10",
+        "title": "W.Y.H.I.W.Y.G."
+      },
+      {
+        "duration": "3:39",
+        "position": "11",
+        "title": "U-Men"
+      }
+    ],
+    "data_quality": "Correct"
+  },
+  "version": "2.0"
+}}

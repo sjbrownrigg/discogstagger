@@ -250,9 +250,15 @@ class DiscogsAlbum(object):
         except KeyError:
             album.styles = [""]
 
-        album.country = self.release.data["country"]
+        if "country" in self.release.data:
+            album.country = self.release.data["country"]
+        else:
+            logging.warn("no country set for relid %s" % self.release._id)
+            album.country = ""
+
         if "notes" in self.release.data:
             album.notes = self.release.data["notes"]
+
         album.disctotal = self.disctotal
         album.is_compilation = self.is_compilation
 
