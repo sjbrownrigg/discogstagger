@@ -33,10 +33,12 @@ def parse_file(name):
 		logger.debug("parsing file: %s" % name)
 		for line in fileinput.input(name, inplace=True):
 				if "#Automatic migration from migrate_id_files" in line:
+						fileinput.close()
 						return
 				if "discogs_id=" in line:
 						line = line.replace("discogs_id=", "#Automatic migration from migrate_id_files\n[source]\ndiscogs_id=")
 						sys.stdout.write(line)
+                        fileinput.close()
 
 p = OptionParser()
 p.add_option("-b", "--basedir", action="store", dest="basedir",

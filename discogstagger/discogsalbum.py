@@ -361,7 +361,10 @@ class DiscogsAlbum(object):
 
             if isinstance(x, basestring):
                 logger.debug("x: %s" % x)
-                last_artist = last_artist + " " + x
+                if last_artist:
+                    last_artist = last_artist + " " + x
+                else:
+                    last_artist = x
             else:
                 if not last_artist == None:
                     last_artist = last_artist + " " + self.clean_name(x.name)

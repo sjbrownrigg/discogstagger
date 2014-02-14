@@ -719,6 +719,73 @@ class TestTagHandler(TestTaggerUtilFiles):
         # empty anyway, no need to check this then...
         assert metadata.encoder == ""
 
+    def test_tag_album_with_specific_track_artists(self):
+        self.ogsrelid = "112146"
+
+        # construct config with only default values
+        tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+
+        dummy_response = DummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(dummy_response)
+        self.album = discogs_album.map()
+
+        self.copy_files(self.album)
+
+        taggerutils = TaggerUtils(self.source_dir, self.target_dir, self.tagger_config, self.album)
+
+        taggerutils._get_target_list()
+
+        testTagHandler = TagHandler(self.album, self.tagger_config)
+        testFileHandler = FileHandler(self.album, self.tagger_config)
+
+        testFileHandler.copy_files()
+
+        testTagHandler.tag_album()
+
+        target_dir = os.path.join(self.target_dir, self.album.target_dir, self.album.disc(1).target_dir)
+        metadata = MediaFile(os.path.join(target_dir, "01-artful_dodger-re-rewind_the_crowd_say_bo_selecta_(radio_edit).flac"))
+
+        assert metadata.artist == "Artful Dodger"
+        assert metadata.albumartist == "Artful Dodger"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2000
+        assert metadata.disctotal == 2
+        assert metadata.genre == "Electronic"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+        metadata = MediaFile(os.path.join(target_dir, "04-artful_dodger_feat_romina_johnson-movin_too_fast_(artful_dodger_original_mix).flac"))
+
+        assert metadata.artist == "Artful Dodger Feat. Romina Johnson"
+        assert metadata.albumartist == "Artful Dodger"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2000
+        assert metadata.disctotal == 2
+        assert metadata.track == 4
+        assert metadata.genre == "Electronic"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
+        target_dir = os.path.join(self.target_dir, self.album.target_dir, self.album.disc(2).target_dir)
+        metadata = MediaFile(os.path.join(target_dir, "20-paul_johnson-get_get_down_(illicit_remix).flac"))
+
+        assert metadata.artist == "Paul Johnson"
+        assert metadata.albumartist == "Artful Dodger"
+        assert metadata.discogs_id == self.ogsrelid
+        assert metadata.year == 2000
+        assert metadata.disctotal == 2
+        assert metadata.disc == 2
+        assert metadata.track == 20
+        assert metadata.genre == "Electronic"
+
+        # obviously the encoder element is not in the file, but it is returned
+        # empty anyway, no need to check this then...
+        assert metadata.encoder == ""
+
     def test_tag_album_wo_country(self):
         self.ogsrelid = "543030"
 
