@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from urllib import FancyURLopener
+import errno
 import os
 import re
 import sys
