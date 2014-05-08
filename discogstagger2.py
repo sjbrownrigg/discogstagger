@@ -12,8 +12,6 @@ from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
-import os, errno
-
 def read_id_file(dir, file_name, options):
     # read tags from batch file if available
     idfile = os.path.join(dir, file_name)
