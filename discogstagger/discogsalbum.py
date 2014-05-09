@@ -316,7 +316,7 @@ class DiscogsAlbum(object):
         else:
             discno = int(self.release.data["formats"][0]["qty"])
 
-        logger.debug("determined %d no of discs total" % discno)
+        logger.info("determined %d no of discs total" % discno)
         return discno
 
     @property
