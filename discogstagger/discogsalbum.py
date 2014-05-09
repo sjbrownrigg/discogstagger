@@ -306,13 +306,18 @@ class DiscogsAlbum(object):
     def disctotal(self):
         """ Obtain the number of discs for the given release. """
 
+        discno = 0
+
         # allows tagging of digital releases.
         # sample format <format name="File" qty="2" text="320 kbps">
         # assumes all releases of name=File is 1 disc.
         if self.release.data["formats"][0]["name"] == "File":
-            return 1
+            discno = 1
+        else:
+            discno = int(self.release.data["formats"][0]["qty"])
 
-        return int(self.release.data["formats"][0]["qty"])
+        logger.debug("determined %d no of discs total" % discno)
+        return discno
 
     @property
     def master_id(self):
