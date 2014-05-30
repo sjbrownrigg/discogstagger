@@ -39,6 +39,8 @@ class DiscogsConnector(object):
         self.config = tagger_config
         discogs.user_agent = self.config.get("common", "user_agent")
 
+
+        self.auth_headers = {'content-type': 'application/json', 'User-Agent': discogs.user_agent}
         self.discogs_auth = None
         self.discogs_session = None
         self.rate_limit_pool = {}
@@ -107,15 +109,16 @@ class DiscogsConnector(object):
         if self.discogs_auth and not self.discogs_session:
             logger.debug('discogs authenticated')
             logger.debug('no request_token and request_token_secret, fetch them')
-            request_token, request_token_secret = self.discogs_auth.get_request_token()
+            request_token, request_token_secret = self.discogs_auth.get_request_token(headers=self.auth_headers)
 
-            authorize_url = self.discogs_auth.get_authorize_url(request_token)
+            authorize_url = self.discogs_auth.get_authorize_url(request_token, headers=self.auth_headers)
 
             print 'Visit this URL in your browser: ' + authorize_url
             pin = raw_input('Enter the PIN you got from the above url: ')
 
             self.discogs_session = self.discogs_auth.get_auth_session(request_token, request_token_secret,
-                                                                      method='GET', data={'oauth_verifier': pin})
+                                                                      method='GET', data={'oauth_verifier': pin},
+                                                                      headers=self.auth_headers)
 
             logger.debug('filled session....')
 
@@ -141,7 +144,7 @@ class DiscogsConnector(object):
                 raise RuntimeError('Download limit reached for pool %s' % rate_limit_type)
 
         try:
-            r = self.discogs_session.get(image_url, stream=True)
+            r = self.discogs_session.get(image_url, stream=True, headers=self.auth_headers)
             if r.status_code == 200:
                 with open(image_dir, 'wb') as f:
                     for chunk in r.iter_content():
