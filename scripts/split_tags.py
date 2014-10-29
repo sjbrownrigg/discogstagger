@@ -41,29 +41,55 @@ for filename in files:
 
 	genres = []
 	artists = []
-	isDirty = False
-	for genrename in audio['genre']:
-		if '\\\\' in genrename:
-			isDirty = True
-			genresplit = genrename.split('\\\\')
-			for genrename2 in genresplit:
-				genres.append(genrename2)
-		else:
-			genres.append(genrename)
+	albumArtists = []
+	albumArtists_ = []
 
-	for artistname in audio['artist']:
-		if '\\\\' in artistname:
+	isDirty = False
+	for name in audio['genre']:
+		if '\\\\' in name:
 			isDirty = True
-			artistsplit = artistname.split('\\\\')
-			for artistname2 in artistsplit:
-				artists.append(artistname2)
+			split = name.split('\\\\')
+			for name2 in split:
+				genres.append(name2)
+		else if 'Hip-Hop' in name:
+			isDirty = True
+			genres.append('Hip Hop')
 		else:
-			artists.append(artistname)
+			genres.append(name)
+
+	for name in audio['artist']:
+		if '\\\\' in name:
+			isDirty = True
+			split = name.split('\\\\')
+			for name2 in split:
+				artists.append(name2)
+		else:
+			artists.append(name)
+
+	for name in audio['album artist']:
+		if '\\\\' in name:
+			isDirty = True
+			split = name.split('\\\\')
+			for name2 in split:
+				albumArtists.append(name2)
+		else:
+			albumArtists.append(name)
+
+	for name in audio['albumartist']:
+		if '\\\\' in name:
+			isDirty = True
+			split = name.split('\\\\')
+			for name2 in split:
+				albumArtists_.append(name2)
+		else:
+			albumArtists_.append(name)
 
 	if isDirty:
 		logging.debug('migrated %s with new tags (Genre: %s), (Artists: %s)' % (filename, genres, artists))
 		audio['genre'] = genres
 		audio['artist'] = artists
+		audio['album artist'] = albumArtists
+		audio['albumaartist'] = albumArtists_
 		filenames.append(filename)
 
 		audio.save()
