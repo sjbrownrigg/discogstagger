@@ -37,10 +37,10 @@ class DiscogsConnector(object):
 
     def __init__(self, tagger_config):
         self.config = tagger_config
-        discogs.user_agent = self.config.get("common", "user_agent")
+        self.user_agent = self.config.get("common", "user_agent")
+        self.discogs_client = discogs.Client(self.user_agent)
 
-
-        self.auth_headers = {'content-type': 'application/json', 'User-Agent': discogs.user_agent}
+        self.auth_headers = {'content-type': 'application/json', 'User-Agent': self.user_agent}
         self.discogs_auth = None
         self.discogs_session = None
         self.rate_limit_pool = {}
@@ -86,6 +86,8 @@ class DiscogsConnector(object):
         """ fetches the metadata for the given release_id from the discogs api server
             (no authentication necessary, specific rate-limit implemented on this one)
         """
+        logger.info("fetching release with id %s" % release_id)
+
         rate_limit_type = 'metadata'
 
         if rate_limit_type in self.rate_limit_pool:
@@ -98,7 +100,7 @@ class DiscogsConnector(object):
 
         self.rate_limit_pool[rate_limit_type] = rl
 
-        return discogs.Release(release_id)
+        return self.discogs_client.release(int(release_id))
 
     def authenticate(self):
         """ Authenticates the user on the discogs api via oauth 1.0a
@@ -198,8 +200,11 @@ class LocalDiscogsConnector(object):
 
         dummy_response = DummyResponse(release_id, json_file_path)
 
-        release = discogs.Release(release_id)
-        release._cached_response = dummy_response
+        # we need a dummy client here ;-(
+        client = discogs.Client('Dummy Client - just for unit testing')
+
+        self.content = self.convert(json.loads(dummy_response.content))
+        release = discogs.Release(client, self.content['resp']['release'])
 
         return release
 
