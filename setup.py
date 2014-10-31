@@ -15,4 +15,4 @@ setup (
     data_files = [(
         "/etc/%s/" % NAME, ["conf/discogs_tagger.conf"]),
         ("share/%s" % NAME, ["README.md"])]
-) 
+)

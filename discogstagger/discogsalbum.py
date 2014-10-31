@@ -239,7 +239,7 @@ class DiscogsAlbum(object):
     def map(self):
         """ map the retrieved information to the tagger specific objects """
 
-        album = Album(self.release._id, self.release.title, self.album_artists(self.release.artists))
+        album = Album(self.release.id, self.release.title, self.album_artists(self.release.artists))
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
@@ -257,7 +257,7 @@ class DiscogsAlbum(object):
         if "country" in self.release.data:
             album.country = self.release.data["country"]
         else:
-            logging.warn("no country set for relid %s" % self.release._id)
+            logging.warn("no country set for relid %s" % self.release.id)
             album.country = ""
 
         if "notes" in self.release.data:
@@ -276,7 +276,7 @@ class DiscogsAlbum(object):
     def url(self):
         """ returns the discogs url of this release """
 
-        return "http://www.discogs.com/release/{}".format(self.release._id)
+        return "http://www.discogs.com/release/{}".format(self.release.id)
 
     @property
     def labels_and_numbers(self):
@@ -364,9 +364,11 @@ class DiscogsAlbum(object):
         """
         artists = []
         last_artist = None
+        join = None
 
         for x in artist_data:
-#            logger.debug("x: %s" % x)
+#            logger.debug("x: %s" % vars(x))
+#            logger.debug("join: %s" % x.data['join'])
 
             if isinstance(x, basestring):
                 logger.debug("x: %s" % x)
@@ -376,11 +378,17 @@ class DiscogsAlbum(object):
                     last_artist = x
             else:
                 if not last_artist == None:
-                    last_artist = last_artist + " " + self.clean_name(x.name)
+                    logger.debug("name: %s" % x.name)
+                    concatString = " "
+                    if not join == None:
+                        concatString = " " + join + " "
+
+                    last_artist = last_artist + concatString + self.clean_name(x.name)
                     artists.append(last_artist)
                     last_artist = None
                 else:
-                     last_artist = self.clean_name(x.name)
+                    join = x.data['join']
+                    last_artist = self.clean_name(x.name)
 
             logger.debug("last_artist: %s" % last_artist)
 
@@ -445,33 +453,40 @@ class DiscogsAlbum(object):
 
         for i, t in enumerate(x for x in self.release.tracklist):
 
-            if t["position"].startswith("Video") or t["position"].startswith("video") or t["position"].startswith("DVD"):
+            if t.position.startswith("Video") or t.position.startswith("video") or t.position.startswith("DVD"):
+                continue
+
+            # on multiple discs there do appears a subtitle as the first "track"
+            # on the cd in discogs, this seems to be wrong, but we would like to
+            # handle it anyway
+            if t.title and not t.position and not t.duration:
+                discsubtitle = t.title
                 continue
 
             # this seems to be an index track, set the discsubtitle
-            if t["type"] != "Track":
+            if hasattr(t, 'type_') and t.type_ != "Track":
                 # we are not storing the subtitle on the disc, since it can happen,
                 # that the discsubtitleis just for the following tracks
                 discsubtitle = t["title"]
                 continue
 
-            if t["artists"]:
-                artists = self.artists(t["artists"])
-                sort_artist = self.sort_artist(t["artists"])
+            if t.artists:
+                artists = self.artists(t.artists)
+                sort_artist = self.sort_artist(t.artists)
             else:
                 artists = album.artists
                 sort_artist = album.sort_artist
 
-            track = Track(i + 1, t["title"], artists)
+            track = Track(i + 1, t.title, artists)
 
             track.position = i
 
-            pos = self.disc_and_track_no(t["position"])
+            pos = self.disc_and_track_no(t.position)
             try:
                 track.tracknumber = int(pos["tracknumber"])
                 track.discnumber = int(pos["discnumber"])
             except ValueError as ve:
-                msg = "cannot convert {0} to a valid track-/discnumber".format(t["position"])
+                msg = "cannot convert {0} to a valid track-/discnumber".format(t.position)
                 logger.error(msg)
                 raise AlbumError(msg)
 

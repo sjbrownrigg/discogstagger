@@ -4,4 +4,8 @@ cover
 discogs_tagger_triplem_new.conf
 *.iml
 *.log
+.idea/
+build/
+collectionadmin/
+runner.sh
 

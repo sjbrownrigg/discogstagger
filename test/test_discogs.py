@@ -105,6 +105,7 @@ class TestDiscogsAlbum(object):
         assert os.path.exists(os.path.join(self.dummy_dir, 'folder.jpg'))
 
     test_download_release.needs_network = True
+    test_download_release.needs_authentication = True
     test_download_image_wo_tokens.needs_network = True
     test_download_image_with_tokens.needs_network = True
     test_download_image_with_tokens.needs_authentication = True

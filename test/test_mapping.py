@@ -91,7 +91,7 @@ def test_map_multidisc():
     track = album.discs[1].tracks[18]
 
     logger.debug("track.artists: %s" % track.artists[0])
-    assert track.artists[0] == u"D-Flame Feat. Eißfeldt"
+    assert track.artists[0] == "D-Flame Feat. Eißfeldt"
 
 def test_map_multidisc_with_disctitle():
     ogsrelid = "288308"

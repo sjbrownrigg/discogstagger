@@ -62,7 +62,7 @@ Version 0.6
 
 * fix : artist name is now accessed from the release class, and not the Artist
 class (reported by cmaussan)
-* improvement : Release names now support multiple artists in release names. 
+* improvement : Release names now support multiple artists in release names.
 Multiple artist names are statically joined with an ampersand (&).
 
 Version 0.5
@@ -76,7 +76,7 @@ A couple minor bugfixes, and feature enhancements.
     - FIX : incorrect handling of directory names, when the basename was not in the
       immediate path.
     - Added a new filename tag. %LABEL% now allows the record label name in the filename
-    - Improvement : using the unicodedata library to convert unicode values to their 
+    - Improvement : using the unicodedata library to convert unicode values to their
       known ASCII counterpart. Reduction the CHAR_EXCEPTION dict, which will eventually
       move to the configuration file.
 
@@ -94,6 +94,6 @@ Version 0.2
     - Very basic logging and error handling added to discogs_tagger
     - Providing script to a wider audience.
 
-Version 0.1 
+Version 0.1
 
     - An initial, very basic working release. Minimal testing was performed.
