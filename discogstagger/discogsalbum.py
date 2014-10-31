@@ -172,8 +172,11 @@ class DummyResponse(object):
     """
         The dummy response used to create a discogs.release from a local json file
     """
-    def __init__(self, releaseid, json_file_path):
-        self.releaseid = releaseid
+    def __init__(self, release_id, json_path):
+        self.releaseid = release_id
+
+        json_file_name = "%s.json" % self.releaseid
+        json_file_path = os.path.join(json_path, json_file_name)
 
         json_file = open(json_file_path, "r")
 
@@ -183,6 +186,7 @@ class DummyResponse(object):
 class LocalDiscogsConnector(object):
     """ use local json, do not fetch json from discogs, instead use the one in the source_directory
         We will need to use the Original DiscogsConnector to allow the usage of the authentication
+        for fetching images.
     """
 
     def __init__(self, delegate_discogs_connector):
@@ -192,16 +196,12 @@ class LocalDiscogsConnector(object):
         pass
 
     def fetch_release(self, release_id, source_dir):
-        """ fetches the metadata for the given release_id from the discogs api server
-            (no authentication necessary, specific rate-limit implemented on this one)
+        """ fetches the metadata for the given release_id from a local file
         """
-        json_file_name = "%s.json" % release_id
-        json_file_path = os.path.join(source_dir, json_file_name)
-
-        dummy_response = DummyResponse(release_id, json_file_path)
+        dummy_response = DummyResponse(release_id, source_dir)
 
         # we need a dummy client here ;-(
-        client = discogs.Client('Dummy Client - just for unit testing')
+        client = discogs.Client('Dummy Client - just for testing')
 
         self.content = self.convert(json.loads(dummy_response.content))
         release = discogs.Release(client, self.content['resp']['release'])
@@ -340,7 +340,7 @@ class DiscogsAlbum(object):
         """ yields a list of artists name properties """
         for x in artist_data:
             # bugfix to avoid the following scenario, or ensure we're yielding
-            # and artist object.
+            # an artist object.
             # AttributeError: 'unicode' object has no attribute 'name'
             # [<Artist "A.D.N.Y*">, u'Presents', <Artist "Leiva">]
             try:

@@ -11,7 +11,7 @@ sys.path.append(parentdir)
 
 logger.debug("parentdir: %s" % parentdir)
 
-from _common_test import DummyResponse, DummyDiscogsAlbum
+from _common_test import TestDummyResponse, DummyDiscogsAlbum
 from discogstagger.tagger_config import TaggerConfig
 
 
@@ -21,7 +21,7 @@ def test_map_multidisc():
     # construct config with only default values
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-    dummy_response = DummyResponse(ogsrelid)
+    dummy_response = TestDummyResponse(ogsrelid)
     dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
@@ -99,7 +99,7 @@ def test_map_multidisc_with_disctitle():
     # construct config with only default values
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-    dummy_response = DummyResponse(ogsrelid)
+    dummy_response = TestDummyResponse(ogsrelid)
     dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
@@ -184,7 +184,7 @@ def test_map_multidisc_with_disctitle_for_tracks():
     # construct config with only default values
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-    dummy_response = DummyResponse(ogsrelid)
+    dummy_response = TestDummyResponse(ogsrelid)
     dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 
@@ -260,7 +260,7 @@ def test_map_singledisc():
     # construct config with only default values
     tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-    dummy_response = DummyResponse(ogsrelid)
+    dummy_response = TestDummyResponse(ogsrelid)
     dummy_discogs_album = DummyDiscogsAlbum(dummy_response)
     album = dummy_discogs_album.map()
 

@@ -11,6 +11,8 @@ sys.path.append(parentdir)
 
 logger.debug("parentdir: %s" % parentdir)
 
+from _common_test import TestDummyResponse, DummyDiscogsAlbum
+
 from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsConnector, DiscogsAlbum
 
@@ -103,6 +105,30 @@ class TestDiscogsAlbum(object):
         discogs_connection.fetch_image(os.path.join(self.dummy_dir, 'folder.jpg'), "http://api.discogs.com/image/R-367882-1193559996.jpeg")
 
         assert os.path.exists(os.path.join(self.dummy_dir, 'folder.jpg'))
+
+    def test_year(self):
+        """test the year property of the DiscogsAlbum
+        """
+        dummy_response = TestDummyResponse(self.ogsrelid)
+        discogs_album = DummyDiscogsAlbum(dummy_response)
+
+        discogs_album.release.data["year"] = "2000"
+        assert discogs_album.year == "2000"
+
+        discogs_album.release.data["year"] = "xxxx"
+        assert discogs_album.year == "1900"
+
+        discogs_album.release.data["year"] = None
+        assert discogs_album.year == "1900"
+
+        discogs_album.release.data["year"] = 2000
+        assert discogs_album.year == "2000"
+
+        discogs_album.release.data["year"] = 20
+        assert discogs_album.year == "1900"
+
+        
+
 
     test_download_release.needs_network = True
     test_download_release.needs_authentication = True

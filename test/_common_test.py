@@ -5,21 +5,15 @@ from io import StringIO
 
 import json
 
-from discogstagger.discogsalbum import DiscogsAlbum
+from discogstagger.discogsalbum import DiscogsAlbum, DummyResponse, LocalDiscogsConnector, DiscogsConnector
 import discogs_client as discogs
 
-class DummyResponse(object):
+class TestDummyResponse(DummyResponse):
     def __init__(self, releaseid):
-        self.releaseid = releaseid
-
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        json_file_name =  "%s/release.json" % self.releaseid
-        json_file_path = os.path.join(__location__, json_file_name)
-        json_file = open(json_file_path, "r")
 
-        self.status_code = 200
-        self.content = json_file.read()
-
+        path = os.path.join(__location__, "release")
+        DummyResponse.__init__(self, releaseid, path)
 
 class DummyDiscogsAlbum(DiscogsAlbum):
     def __init__(self, dummy_response):
@@ -32,7 +26,6 @@ class DummyDiscogsAlbum(DiscogsAlbum):
         self.release = discogs.Release(client, self.content['resp']['release'])
 
         DiscogsAlbum.__init__(self, self.release)
-
 
     def convert(self, input):
         if isinstance(input, dict):

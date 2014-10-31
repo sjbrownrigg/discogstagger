@@ -20,7 +20,7 @@ sys.path.append(parentdir)
 
 logger.debug("parentdir: %s" % parentdir)
 
-from _common_test import DummyResponse, DummyDiscogsAlbum
+from _common_test import TestDummyResponse, DummyDiscogsAlbum
 
 from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsConnector
@@ -34,7 +34,7 @@ class TaggerUtilsBase(object):
         # construct config with only default values
         self.tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -218,7 +218,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -256,7 +256,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -288,7 +288,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -309,7 +309,7 @@ class TestTaggerUtilFiles(TaggerUtilsBase):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -725,7 +725,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -792,7 +792,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
@@ -832,7 +832,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         # construct config with only default values
         tagger_config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
 
-        dummy_response = DummyResponse(self.ogsrelid)
+        dummy_response = TestDummyResponse(self.ogsrelid)
         discogs_album = DummyDiscogsAlbum(dummy_response)
         self.album = discogs_album.map()
 
