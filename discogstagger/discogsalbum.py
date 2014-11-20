@@ -11,6 +11,7 @@ import time
 import discogs_client as discogs
 
 from rauth import OAuth1Service
+import json
 
 from album import Album, Disc, Track
 
@@ -204,7 +205,10 @@ class LocalDiscogsConnector(object):
         client = discogs.Client('Dummy Client - just for testing')
 
         self.content = self.convert(json.loads(dummy_response.content))
-        release = discogs.Release(client, self.content['resp']['release'])
+
+        logger.debug('content: %s' % self.content)
+
+        release = discogs.Release(client, self.content)
 
         return release
 
@@ -216,6 +220,18 @@ class LocalDiscogsConnector(object):
 
     def updateRateLimits(self, request):
         self.delegate.updateRateLimits(request)
+
+    def convert(self, input):
+        """ This is an exact copy of a method in _common_test, please refactor
+        """
+        if isinstance(input, dict):
+            return {self.convert(key): self.convert(value) for key, value in input.iteritems()}
+        elif isinstance(input, list):
+            return [self.convert(element) for element in input]
+        elif isinstance(input, unicode):
+            return input.encode('utf-8')
+        else:
+            return input
 
 
 class DiscogsAlbum(object):
