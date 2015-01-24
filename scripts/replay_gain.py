@@ -50,6 +50,6 @@ for albumdir in albums:
 
   p = subprocess.Popen(cmd, shell=True)
   (output, err) = p.communicate()
-  logging.debug("%s" % output)
+  logging.debug("cmd: %s" % cmd)
 
 logging.debug('added replay gain tags to %d albums' % len(albums))
