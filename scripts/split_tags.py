@@ -55,14 +55,14 @@ for filename in files:
 			else:
 				genres.append(name)
 
-	for name in genres:
+	for index, name in enumerate(genres):
 		fixname = name
 		if 'Hip-Hop' == fixname:
 			isDirty = True
-			genres.append('Hip Hop')
+			genres[index] = 'Hip Hop'
 		elif 'Folk, World, & Country' == fixname:
 			isDirty = True
-			genres.append('Folk, World & Country')
+			genres[index] = 'Folk, World & Country'
 
 
 	if 'artist' in audio:
@@ -96,7 +96,7 @@ for filename in files:
 				albumArtists_.append(name)
 
 	if isDirty:
-		logging.debug('migrated %s with new tags (Genre: %s), (Artists: %s)' % (filename, genres, artists))
+#		logging.debug('migrated %s with new tags (Genre: %s), (Artists: %s)' % (filename, genres, artists))
 		audio['GENRE'] = genres
 		audio['ARTIST'] = artists
 		audio['ALBUM ARTIST'] = albumArtists
