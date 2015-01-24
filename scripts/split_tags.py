@@ -51,9 +51,12 @@ for filename in files:
 			split = name.split('\\\\')
 			for name2 in split:
 				genres.append(name2)
-		else if 'Hip-Hop' in name:
+		elif 'Hip-Hop' in name:
 			isDirty = True
 			genres.append('Hip Hop')
+		elif 'Folk, World, & Country':
+			isDirty = True
+			genres.append('Folk, World & Country')
 		else:
 			genres.append(name)
 
@@ -86,10 +89,10 @@ for filename in files:
 
 	if isDirty:
 		logging.debug('migrated %s with new tags (Genre: %s), (Artists: %s)' % (filename, genres, artists))
-		audio['genre'] = genres
-		audio['artist'] = artists
-		audio['album artist'] = albumArtists
-		audio['albumaartist'] = albumArtists_
+		audio['GENRE'] = genres
+		audio['ARTIST'] = artists
+		audio['ALBUM ARTIST'] = albumArtists
+		audio['ALBUMARTIST'] = albumArtists_
 		filenames.append(filename)
 
 		audio.save()
