@@ -45,47 +45,55 @@ for filename in files:
 	albumArtists_ = []
 
 	isDirty = False
-	for name in audio['genre']:
-		if '\\\\' in name:
-			isDirty = True
-			split = name.split('\\\\')
-			for name2 in split:
-				genres.append(name2)
-		elif 'Hip-Hop' in name:
+	if 'genre' in audio:
+		for name in audio['genre']:
+			if '\\\\' in name:
+				isDirty = True
+				split = name.split('\\\\')
+				for name2 in split:
+					genres.append(name2)
+			else:
+				genres.append(name)
+
+	for name in genres:
+		fixname = name
+		if 'Hip-Hop' == fixname:
 			isDirty = True
 			genres.append('Hip Hop')
-		elif 'Folk, World, & Country':
+		elif 'Folk, World, & Country' == fixname:
 			isDirty = True
 			genres.append('Folk, World & Country')
-		else:
-			genres.append(name)
 
-	for name in audio['artist']:
-		if '\\\\' in name:
-			isDirty = True
-			split = name.split('\\\\')
-			for name2 in split:
-				artists.append(name2)
-		else:
-			artists.append(name)
 
-	for name in audio['album artist']:
-		if '\\\\' in name:
-			isDirty = True
-			split = name.split('\\\\')
-			for name2 in split:
-				albumArtists.append(name2)
-		else:
-			albumArtists.append(name)
+	if 'artist' in audio:
+		for name in audio['artist']:
+			if '\\\\' in name:
+				isDirty = True
+				split = name.split('\\\\')
+				for name2 in split:
+					artists.append(name2)
+			else:
+				artists.append(name)
 
-	for name in audio['albumartist']:
-		if '\\\\' in name:
-			isDirty = True
-			split = name.split('\\\\')
-			for name2 in split:
-				albumArtists_.append(name2)
-		else:
-			albumArtists_.append(name)
+	if 'album artist' in audio:
+		for name in audio['album artist']:
+			if '\\\\' in name:
+				isDirty = True
+				split = name.split('\\\\')
+				for name2 in split:
+					albumArtists.append(name2)
+			else:
+				albumArtists.append(name)
+
+	if 'albumartist' in audio:
+		for name in audio['albumartist']:
+			if '\\\\' in name:
+				isDirty = True
+				split = name.split('\\\\')
+				for name2 in split:
+					albumArtists_.append(name2)
+			else:
+				albumArtists_.append(name)
 
 	if isDirty:
 		logging.debug('migrated %s with new tags (Genre: %s), (Artists: %s)' % (filename, genres, artists))
