@@ -35,7 +35,7 @@ def walk_dir_tree(start_dir, id_file):
 
     return source_dirs
 
-p = OptionParser(version="discogstagger2 0.9")
+p = OptionParser(version="discogstagger2 1.2")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The release id of the target album")
 p.add_option("-s", "--source", action="store", dest="sourcedir",
