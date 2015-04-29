@@ -1,5 +1,11 @@
 ## Changelog
 
+Version 2.0.1
+
+* improvement: add new script to add folder tag to all selected files, so that the
+               sorting of those files will be easier in BubbleUpnp, this new tag
+               has to be added to minimserver to be sortable
+
 Version 2.0.0
 
 * improvement: remove group-config tag, as this could be easily added in the
