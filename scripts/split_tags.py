@@ -30,6 +30,10 @@ p.add_option("-b", "--basedir", action="store", dest="basedir",
              help="The (base) directory to search for id files to migrate")
 (options, args) = p.parse_args()
 
+if not options.basedir:
+  p.print_help()
+  sys.exit(1)
+
 logging.debug('starting migration')
 files = find_files(options.basedir, "*.flac")
 
