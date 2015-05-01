@@ -64,6 +64,8 @@ for filename in files:
 	if 'album' in audio:
 		if audio['album'][0].startswith('DJ Kicks'):
 			folder = 'DJ Kicks'
+		elif audio['album'][0].startswith('DJ-Kicks'):
+			folder = 'DJ Kicks'
 		elif audio['album'][0].startswith('Another LateNight'):
 			folder = 'Another LateNight'
 		elif audio['album'][0].startswith('LateNight'):
