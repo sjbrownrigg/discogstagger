@@ -9,6 +9,7 @@ import inspect
 import time
 
 import discogs_client as discogs
+from discogs_client.fetchers import LoggingDelegator
 
 from rauth import OAuth1Service
 import json
@@ -41,9 +42,7 @@ class DiscogsConnector(object):
         self.user_agent = self.config.get("common", "user_agent")
         self.discogs_client = discogs.Client(self.user_agent)
 
-        self.auth_headers = {'content-type': 'application/json', 'User-Agent': self.user_agent}
-        self.discogs_auth = None
-        self.discogs_session = None
+        self.discogs_auth = False
         self.rate_limit_pool = {}
 
         self.initialize_auth()
@@ -66,17 +65,10 @@ class DiscogsConnector(object):
             consumer_secret = os.environ.get("DISCOGS_CONSUMER_SECRET")
 
         if consumer_key and consumer_secret:
-            logger.debug('authenticating at discogs using consumer key %s' % consumer_key)
+            logger.debug('authenticating at discogs using consumer key {0}'.format(consumer_key))
 
-            self.discogs_auth = OAuth1Service(
-                consumer_key=consumer_key,
-                consumer_secret=consumer_secret,
-                name="discogs",
-                access_token_url='http://api.discogs.com/oauth/access_token',
-                authorize_url='http://www.discogs.com/oauth/authorize',
-                request_token_url='http://api.discogs.com/oauth/request_token',
-                base_url='http://api.discogs.com'
-            )
+            self.discogs_client.set_consumer_key(consumer_key, consumer_secret)
+            self.discogs_auth = True
         else:
             logger.warn('cannot authenticate on discogs (no image download possible) - set consumer_key and consumer_secret')
 
@@ -85,9 +77,12 @@ class DiscogsConnector(object):
 
     def fetch_release(self, release_id):
         """ fetches the metadata for the given release_id from the discogs api server
-            (no authentication necessary, specific rate-limit implemented on this one)
+            (authentication necessary as well, specific rate-limit implemented on this one)
         """
         logger.info("fetching release with id %s" % release_id)
+
+        if not self.discogs_auth:
+            logger.error('You are not authenticated, cannot download image metadata')
 
         rate_limit_type = 'metadata'
 
@@ -109,19 +104,15 @@ class DiscogsConnector(object):
             request_token_secret (pin), which the user can get from the authorize_url, which
             needs to get called manually.
         """
-        if self.discogs_auth and not self.discogs_session:
+        if self.discogs_auth:
             logger.debug('discogs authenticated')
             logger.debug('no request_token and request_token_secret, fetch them')
-            request_token, request_token_secret = self.discogs_auth.get_request_token(headers=self.auth_headers)
-
-            authorize_url = self.discogs_auth.get_authorize_url(request_token, headers=self.auth_headers)
+            request_token, request_token_secret, authorize_url = self.discogs_client.get_authorize_url()
 
             print 'Visit this URL in your browser: ' + authorize_url
             pin = raw_input('Enter the PIN you got from the above url: ')
 
-            self.discogs_session = self.discogs_auth.get_auth_session(request_token, request_token_secret,
-                                                                      method='GET', data={'oauth_verifier': pin},
-                                                                      headers=self.auth_headers)
+            access_token, access_secret = self.discogs_client.get_access_token(pin)
 
             logger.debug('filled session....')
 
@@ -133,41 +124,36 @@ class DiscogsConnector(object):
         """
         rate_limit_type = 'image'
 
-        if not self.discogs_session:
+        if not self.discogs_auth:
             logger.error('You are not authenticated, cannot download image - skipping')
             return
 
         if rate_limit_type in self.rate_limit_pool:
-            remaining = self.rate_limit_pool[rate_limit_type].remaining
-            reset = self.rate_limit_pool[rate_limit_type].reset
-            logger.debug('You have %s remaining downloads for the next %s hh:mm:ss' % (remaining, datetime.timedelta(seconds=int(reset))))
-            if remaining <= 1:
-                logger.error('Your download limit is reached, you cannot download the wanted picture today')
-                logger.error('Download can be started again in %d seconds' % self.rate_limit_pool[rate_limit_type].reset)
-                raise RuntimeError('Download limit reached for pool %s' % rate_limit_type)
-
-        try:
-            r = self.discogs_session.get(image_url, stream=True, headers=self.auth_headers)
-            if r.status_code == 200:
-                with open(image_dir, 'wb') as f:
-                    for chunk in r.iter_content():
-                        f.write(chunk)
-            else:
-                logger.error('Problem downloading (status code %s)' % r.status_code)
-
-            self.updateRateLimits(r)
-        except Exception as e:
-            logger.error("Unable to download image '%s', skipping. (%s)" % (image_url, e))
-
-    def updateRateLimits(self, request):
-        type = request.headers['X-RateLimit-Type']
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+                logger.warn('Waiting one second to allow rate limiting...')
+                time.sleep(1)
 
         rl = RateLimit()
-        rl.limit = request.headers['X-RateLimit-Limit']
-        rl.remaining = request.headers['X-RateLimit-Remaining']
-        rl.reset = request.headers['X-RateLimit-Reset']
+        rl.lastcall = time.time()
 
-        self.rate_limit_pool[type] = rl
+        try:
+#            loggingDelegator = LoggingDelegator(self.discogs_client._fetcher)
+#            new_url = image_url.replace("http://", "https://")
+#            content, resp = loggingDelegator.fetch(None, 'GET', new_url, headers={'User-agent': self.discogs_client.user_agent})
+
+#            for e in loggingDelegator.last_request:
+#                logger.debug("request: %s" % e)
+
+#            if resp == 200:
+#                with open(image_dir, 'wb') as f:
+#                    f.write(content)
+#            else:
+#                logger.error('Problem downloading (status code %s)' % resp)
+            urllib.urlretrieve(image_url,  image_dir)
+
+            self.rate_limit_pool[rate_limit_type] = rl
+        except Exception as e:
+            logger.error("Unable to download image '%s', skipping. (%s)" % (image_url, e))
 
 class DummyResponse(object):
     """

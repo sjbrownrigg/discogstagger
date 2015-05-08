@@ -35,7 +35,7 @@ def walk_dir_tree(start_dir, id_file):
 
     return source_dirs
 
-p = OptionParser(version="discogstagger2 1.2")
+p = OptionParser(version="discogstagger2 2.1")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The release id of the target album")
 p.add_option("-s", "--source", action="store", dest="sourcedir",
@@ -49,7 +49,7 @@ p.add_option("--recursive", action="store_true", dest="recursive",
 p.add_option("-f", "--force", action="store_true", dest="forceUpdate",
              help="Should albums be updated even though the done token exists?")
 
-p.set_defaults(conffile="conf/empty.conf")
+p.set_defaults(conffile="conf/default.conf")
 p.set_defaults(recursive=False)
 p.set_defaults(forceUpdate=False)
 

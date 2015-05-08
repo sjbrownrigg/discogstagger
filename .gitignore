@@ -8,4 +8,4 @@ discogs_tagger_triplem_new.conf
 build/
 collectionadmin/
 runner.sh
-
+runner_test.sh

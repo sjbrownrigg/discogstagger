@@ -288,6 +288,8 @@ class FileHandler(object):
         if self.album.images:
             images = self.album.images
 
+            logger.debug("images: %s" % images)
+
             image_format = self.config.get("file-formatting", "image")
             use_folder_jpg = self.config.getboolean("details", "use_folder_jpg")
             download_only_cover = self.config.getboolean("details", "download_only_cover")
