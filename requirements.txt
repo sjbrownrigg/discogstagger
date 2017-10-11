@@ -1,4 +1,4 @@
-discogs-client==2.0.2
+discogs-client==2.2.1
 mutagen>=1.25
 requests>=1.2.0
 nose>=1.3

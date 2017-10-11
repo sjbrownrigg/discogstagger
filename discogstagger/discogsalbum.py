@@ -461,6 +461,9 @@ class DiscogsAlbum(object):
 
         for i, t in enumerate(x for x in self.release.tracklist):
 
+            if t.position is None:
+                logging.error("position is null, shouldn't be...")
+
             if t.position.startswith("Video") or t.position.startswith("video") or t.position.startswith("DVD"):
                 continue
 

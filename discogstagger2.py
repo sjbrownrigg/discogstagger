@@ -48,10 +48,13 @@ p.add_option("--recursive", action="store_true", dest="recursive",
              help="Should albums be searched recursive in the source directory?")
 p.add_option("-f", "--force", action="store_true", dest="forceUpdate",
              help="Should albums be updated even though the done token exists?")
+p.add_option("-g", "--replay-gain", action="store_true", dest="replaygain",
+             help="Should replaygain tags be added to the album? (metaflac needs to be installed)")
 
 p.set_defaults(conffile="conf/default.conf")
 p.set_defaults(recursive=False)
 p.set_defaults(forceUpdate=False)
+p.set_defaults(replaygain=False)
 
 if len(sys.argv) == 1:
     p.print_help()
@@ -169,6 +172,10 @@ for source_dir in source_dirs:
 
         logger.debug("Embedding Albumart")
         fileHandler.embed_coverart_album()
+
+        if options.replaygain:
+            logger.debug("Add ReplayGain tags (if necessary)")
+            fileHandler.add_replay_gain_tags()
 
     # !TODO make this more generic to use different templates and files,
     # furthermore adopt to reflect multi-disc-albums

@@ -215,14 +215,18 @@ class FileHandler(object):
             for track in disc.tracks:
                 logger.debug("source_folder: %s" % source_folder)
                 logger.debug("target_folder: %s" % target_folder)
+                logger.debug("orig_file: %s" % track.orig_file)
                 logger.debug("new_file: %s" % track.new_file)
 
                 source_file = os.path.join(source_folder, track.orig_file)
                 target_file = os.path.join(target_folder, track.new_file)
+
                 if copy_needed and not os.path.exists(target_file):
                     if not os.path.exists(source_file):
                         logger.error("Source does not exists")
                         # throw error
+                    logger.debug("copying files (%s/%s)", source_folder, track.orig_file)
+                    
                     shutil.copyfile(os.path.join(source_folder, track.orig_file),
                         os.path.join(target_folder, track.new_file))
 
@@ -361,6 +365,28 @@ class FileHandler(object):
         metadata.art = imgdata
         metadata.save()
 
+    def add_replay_gain_tags(self):
+        """
+            Add replay gain tags to all flac files in the given directory.
+
+            Uses the default metaflac command, therefor this has to be installed
+            on your system, to be able to use this method.
+        """
+        tag_folders = []
+
+        for dirpath, dirnames, files in os.walk(self.album.target_dir):
+            for filename in fnmatch.filter(files, "*.flac"):
+                tag_folders.append(dirpath)
+                break
+
+        cmd = "metaflac --add-replay-gain"
+        for folder in tag_folders:
+            cmd = cmd + " \"" + folder + "\"/*.flac"
+
+        p = subprocess.Popen(cmd, shell=True)
+        (output, err) = p.communicate()
+        logging.debug("cmd: %s" % cmd)
+
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
         TaggerUtils returns a the corresponding metadata information , in which
@@ -405,6 +431,8 @@ class TaggerUtils(object):
         # the album is stored in a directory beneath the destination directory
         # and following the given dir_format
         self.album.target_dir = self.dest_dir_name
+
+        logging.debug("album.target_dir: %s" % self.dest_dir_name)
 
         # add template functionality ;-)
         self.template_lookup = TemplateLookup(directories=["templates"])
@@ -576,7 +604,6 @@ class TaggerUtils(object):
 
         dest_dir = ""
         for ddir in self.dir_format.split("/"):
-            logger.debug("d_dir: %s" % ddir)
             d_dir = self.get_clean_filename(self._value_from_tag(ddir))
             if dest_dir == "":
                 dest_dir = d_dir

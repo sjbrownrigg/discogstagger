@@ -9,3 +9,4 @@ build/
 collectionadmin/
 runner.sh
 runner_test.sh
+.token

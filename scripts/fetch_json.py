@@ -65,12 +65,38 @@ else:
 
 client.set_consumer_key(consumer_key, consumer_secret)
 
-request_token, request_token_secret, authorize_url = client.get_authorize_url()
+secrets_available = False
 
-print 'Visit this URL in your browser: ' + authorize_url
-pin = raw_input('Enter the PIN you got from the above url: ')
 
-access_token, access_secret = client.get_access_token(pin)
+cwd = os.getcwd()
+token_file_name = '.token'
+token_file = os.path.join(cwd, token_file_name)
+
+access_token = None
+access_secret = None
+
+try:
+  if os.path.join(token_file):
+    with open(token_file, 'r') as tf:
+      access_token, access_secret = tf.read().split(',')
+    if access_token and access_secret:
+      secrets_available = True
+except IOError:
+  pass
+
+if not secrets_available:
+  request_token, request_token_secret, authorize_url = client.get_authorize_url()
+
+  print 'Visit this URL in your browser: ' + authorize_url
+  pin = raw_input('Enter the PIN you got from the above url: ')
+
+  access_token, access_secret = client.get_access_token(pin)
+
+  with open(token_file, 'w') as fh:
+    fh.write('{0},{1}'.format(access_token, access_secret))
+
+else:
+  client.set_token(unicode(access_token), unicode(access_secret))
 
 url = "{0}/releases/{1}".format(client._base_url, options.releaseid)
 
