@@ -1,18 +1,12 @@
 import logging
-import errno
 import re
 import os
-import datetime
 import urllib
-
-import inspect
 
 import time
 
 import discogs_client as discogs
-from discogs_client.fetchers import LoggingDelegator
 
-from rauth import OAuth1Service
 import json
 
 from album import Album, Disc, Track
@@ -106,14 +100,37 @@ class DiscogsConnector(object):
             needs to get called manually.
         """
         if self.discogs_auth:
-            logger.debug('discogs authenticated')
-            logger.debug('no request_token and request_token_secret, fetch them')
-            request_token, request_token_secret, authorize_url = self.discogs_client.get_authorize_url()
+            cwd = os.getcwd()
+            token_file_name = '.token'
+            token_file = os.path.join(cwd, token_file_name)
 
-            print 'Visit this URL in your browser: ' + authorize_url
-            pin = raw_input('Enter the PIN you got from the above url: ')
+            secrets_available = False
 
-            access_token, access_secret = self.discogs_client.get_access_token(pin)
+            access_token = None
+            access_secret = None
+
+            try:
+                if os.path.join(token_file):
+                    with open(token_file, 'r') as tf:
+                        access_token, access_secret = tf.read().split(',')
+                    if access_token and access_secret:
+                        secrets_available = True
+            except IOError:
+                pass
+
+            if not secrets_available:
+                logger.debug('no request_token and request_token_secret, fetch them')
+                request_token, request_token_secret, authorize_url = self.discogs_client.get_authorize_url()
+
+                print 'Visit this URL in your browser: ' + authorize_url
+                pin = raw_input('Enter the PIN you got from the above url: ')
+
+                access_token, access_secret = self.discogs_client.get_access_token(pin)
+
+                with open(token_file, 'w') as fh:
+                    fh.write('{0},{1}'.format(access_token, access_secret))
+            else:
+                self.discogs_client.set_token(unicode(access_token), unicode(access_secret))
 
             logger.debug('filled session....')
 
