@@ -20,7 +20,6 @@ If no release-id is given, the application checks, if a file "id.txt" exists
 contains a specific property (id_tag). If both is true the release-id from this
 file is used. This is useful for batch processing.
 
-
 During the process, album images (if present and if configured) are retrieved from the API.
 To avoid a huge damage to your RateLimit, you can configure, that only the cover image and not all
 are loaded from the Discogs servers.
@@ -54,8 +53,8 @@ invoke test
 * invoke to make running tests easier
 
 discogstagger is also packaging/reusing the MediaFile library from the "beets"
-project. This will be packaged with discogs tagger until MediaFile is split out
-to its own package.
+project. This package is already externalized in beets, but we have adopted this
+package and are therefor providing our own version.
 
 ## Installation
 
@@ -173,38 +172,6 @@ Options:
                         directory?
   -f, --force           Should albums be updated even though the done token
                         exists?
-```
-
-## Examples
-
-```
-$ discogs_tagger.py -s Nine\ Inch\ Nails\ Pretty\ Hate\ Machine -r 145796
-INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): api.discogs.com
-INFO:discogstagger.discogsalbum:Fetching Nine Inch Nails - Pretty Hate Machine (145796)
-INFO:root:Tagging album 'Nine Inch Nails - Pretty Hate Machine'
-INFO:root:Creating destination directory 'Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW'
-INFO:root:Downloading and storing images
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/01-Nine_Inch_Nails-Head_Like_A_Hole.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/02-Nine_Inch_Nails-Terrible_Lie.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/03-Nine_Inch_Nails-Down_In_It.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/04-Nine_Inch_Nails-Sanctified.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/05-Nine_Inch_Nails-Something_I_Can_Never_Have.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/06-Nine_Inch_Nails-Kinda_I_Want_To.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/07-Nine_Inch_Nails-Sin.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/08-Nine_Inch_Nails-Thats_What_I_Get.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/09-Nine_Inch_Nails-The_Only_Time.flac
-INFO:__main__:Embedding album art.
-INFO:__main__:Writing file Nine_Inch_Nails-Pretty_Hate_Machine-(TVT_2610-2)-1989-jW/10-Nine_Inch_Nails-Ringfinger.flac
-INFO:__main__:Embedding album art.
-INFO:root:Generating .nfo file
-INFO:root:Generating .m3u file
-INFO:root:Tagging complete.
+  -g, --replay-gain     Should replaygain tags be added to the album?
+                        (metaflac needs to be installed)
 ```

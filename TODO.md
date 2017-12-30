@@ -58,7 +58,7 @@ This list is here for historic reasons, all TODOs are now maintained in the gith
 - [ ] add "local" datasource, reuse DummyResponse from tests, needed to easily work around errors (see #7)
 - [ ] add possibility to only tag files without moving/copying them (just leave them where they are)
 - [X] adopt setup.py - bump version, adopt other tags as well to use own repository
-- [ ] add replay_gain possibility
+- [X] add replay_gain possibility
 
 ### Later Versions (in no order)
 
