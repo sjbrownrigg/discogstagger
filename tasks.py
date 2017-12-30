@@ -6,11 +6,11 @@ def clean():
 
 @task('clean')
 def test():
-    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=76 -a \!needs_authentication")
+    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=74 -a \!needs_authentication")
 
 @task('clean')
 def test_wo_net():
-    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=76 -a \!needs_network")
+    run("nosetests --with-coverage --cover-erase --cover-branches --cover-html --cover-package=discogstagger --cover-min-percentage=74 -a \!needs_network")
 
 
 # the following task is not working.... (because of authentication stuff)....
