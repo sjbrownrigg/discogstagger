@@ -1,6 +1,6 @@
 ## Changelog
 
-Version 2.1.0
+Version 2.1.2
 
 * improvement: be able to store and re-use tokens for the access to discogs (these are stored
                in the file .token in the current directory
@@ -13,6 +13,10 @@ Version 2.1.0
                COMMENT (DESCRIPTION is not used anymore), ALBUMARTIST (ALBUM ARTIST is not used anymore),
                LABEL (PUBLISHEER is not used anymore), ENCODEDBY (ENCODER is not used anymore),
                DISCOGSID (was DiscogsId), DISCID (for freedb) added, FOLDER (for grouping purposes) added
+
+Version 2.1.1
+
+* improvement: This release contains some fixes for #14 and #16. Furthermore there is already a first draft for #7 included.
 
 Version 2.0.1
 
