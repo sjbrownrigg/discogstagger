@@ -50,14 +50,14 @@ This list is here for historic reasons, all TODOs are now maintained in the gith
 ### Version 2.2
 
 - [ ] Add documentation
-- [ ] move from TODO.md to github issues
-- [ ] use new discogs client
+- [X] move from TODO.md to github issues
+- [X] use new discogs client
 - [ ] Minor Refactoring to avoid multiple checking of disc.target_dir and
       disc.sourcedir != None (taggerutils.py)
 - [ ] Add progress bar for album art processing
 - [ ] add "local" datasource, reuse DummyResponse from tests, needed to easily work around errors (see #7)
 - [ ] add possibility to only tag files without moving/copying them (just leave them where they are)
-- [ ] adopt setup.py - bump version, adopt other tags as well to use own repository
+- [X] adopt setup.py - bump version, adopt other tags as well to use own repository
 - [ ] add replay_gain possibility
 
 ### Later Versions (in no order)
