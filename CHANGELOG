@@ -1,5 +1,19 @@
 ## Changelog
 
+Version 2.1.0
+
+* improvement: be able to store and re-use tokens for the access to discogs (these are stored
+               in the file .token in the current directory
+
+* improvement: use latest version of the ext/mediafile (cloned from https://raw.githubusercontent.com/beetbox/mediafile/master/mediafile.py)
+
+* improvement: cleanup storeage of Metadata of flacs, the following fields are used now:
+               TRACK (TRACKNUMBER is not used anymore), TRACKTOTAL (TRACKC and TOTALTRACKS are not used anymore),
+               DISC (DISCNUMBER is not used anymore), DISCTOTAL (DISCC and TOTALDISCS are not used anymore),
+               COMMENT (DESCRIPTION is not used anymore), ALBUMARTIST (ALBUM ARTIST is not used anymore),
+               LABEL (PUBLISHEER is not used anymore), ENCODEDBY (ENCODER is not used anymore),
+               DISCOGSID (was DiscogsId), DISCID (for freedb) added, FOLDER (for grouping purposes) added
+
 Version 2.0.1
 
 * improvement: add new script to add folder tag to all selected files, so that the

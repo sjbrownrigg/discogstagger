@@ -643,7 +643,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
         # use a different file to check other metadata handling (e.g. artist)
         shutil.copyfile(self.source_file, os.path.join(self.source_dir, self.target_file_name))
@@ -669,7 +669,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
     def test_tag_album(self):
         self.copy_files(self.album)
@@ -700,7 +700,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
         metadata = MediaFile(os.path.join(target_dir, "20-papa_roach-last_resort_(album_version_explizit).flac"))
 
@@ -717,7 +717,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
     def test_tag_album_with_specific_track_artists(self):
         self.ogsrelid = "112146"
@@ -754,7 +754,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
         metadata = MediaFile(os.path.join(target_dir, "04-artful_dodger_feat_romina_johnson-movin_too_fast_(artful_dodger_original_mix).flac"))
 
@@ -768,7 +768,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
         target_dir = os.path.join(self.target_dir, self.album.target_dir, self.album.disc(2).target_dir)
         metadata = MediaFile(os.path.join(target_dir, "20-paul_johnson-get_get_down_(illicit_remix).flac"))
@@ -784,7 +784,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
     def test_tag_album_wo_country(self):
         self.ogsrelid = "543030"
@@ -822,7 +822,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
         assert metadata.country == ""
 
@@ -863,7 +863,7 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
-        assert metadata.encoder == ""
+        assert metadata.encoder == None
 
         assert metadata.country == "Canada"
 

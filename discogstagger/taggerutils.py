@@ -22,7 +22,6 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 logger = logging
-#.getLogger(__name__)
 
 class TagOpener(FancyURLopener, object):
 
@@ -100,11 +99,7 @@ class TagHandler(object):
         metadata.country = self.album.country
         metadata.url = self.album.url
 
-        # adding two as there is no standard. discogstagger pre v1
-        # used (TXXX desc="Catalog #")
-        # mediafile uses TXXX desc="CATALOGNUMBER"
         metadata.catalognum = self.album.catnumbers[0]
-        metadata.catalognumber = self.album.catnumbers[0]
 
         # add styles to the grouping tag (right now, we can just use one)
         metadata.grouping = self.album.style
