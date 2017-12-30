@@ -12,7 +12,6 @@ import json
 from album import Album, Disc, Track
 
 logger = logging
-#    .getLogger(__name__)
 
 class AlbumError(Exception):
     """ A central exception for all errors happening during the album handling
@@ -40,8 +39,11 @@ class DiscogsConnector(object):
         self.discogs_auth = False
         self.rate_limit_pool = {}
 
-        self.initialize_auth()
-        self.authenticate()
+        skip_auth = self.config.get("discogs", "skip_auth")
+
+        if skip_auth != "True":
+            self.initialize_auth()
+            self.authenticate()
 
     def initialize_auth(self):
         """ initializes the authentication against the discogs api
@@ -100,39 +102,52 @@ class DiscogsConnector(object):
             needs to get called manually.
         """
         if self.discogs_auth:
-            cwd = os.getcwd()
-            token_file_name = '.token'
-            token_file = os.path.join(cwd, token_file_name)
+            access_token, access_secret = self.read_token()
 
-            secrets_available = False
-
-            access_token = None
-            access_secret = None
-
-            try:
-                if os.path.join(token_file):
-                    with open(token_file, 'r') as tf:
-                        access_token, access_secret = tf.read().split(',')
-                    if access_token and access_secret:
-                        secrets_available = True
-            except IOError:
-                pass
-
-            if not secrets_available:
+            if not access_token or not access_secret:
                 logger.debug('no request_token and request_token_secret, fetch them')
                 request_token, request_token_secret, authorize_url = self.discogs_client.get_authorize_url()
 
-                print 'Visit this URL in your browser: ' + authorize_url
+                print('Visit this URL in your browser: ' + authorize_url)
                 pin = raw_input('Enter the PIN you got from the above url: ')
 
                 access_token, access_secret = self.discogs_client.get_access_token(pin)
 
+                token_file = self.construct_token_file()
                 with open(token_file, 'w') as fh:
                     fh.write('{0},{1}'.format(access_token, access_secret))
             else:
                 self.discogs_client.set_token(unicode(access_token), unicode(access_secret))
 
             logger.debug('filled session....')
+
+    def read_token(self):
+        """
+            Reads the token-file and returns the contained access_token and access_secret, if available
+        """
+        token_file = self.construct_token_file()
+
+        access_token = None
+        access_secret = None
+
+        try:
+            if os.path.join(token_file):
+                with open(token_file, 'r') as tf:
+                    access_token, access_secret = tf.read().split(',')
+        except IOError:
+            pass
+
+        return access_token, access_secret
+
+
+    def construct_token_file(self):
+        """
+            Constructs the file in which the token is stored
+        """
+        cwd = os.getcwd()
+        token_file_name = '.token'
+        return os.path.join(cwd, token_file_name)
+
 
     def fetch_image(self, image_dir, image_url):
         """
@@ -155,18 +170,6 @@ class DiscogsConnector(object):
         rl.lastcall = time.time()
 
         try:
-#            loggingDelegator = LoggingDelegator(self.discogs_client._fetcher)
-#            new_url = image_url.replace("http://", "https://")
-#            content, resp = loggingDelegator.fetch(None, 'GET', new_url, headers={'User-agent': self.discogs_client.user_agent})
-
-#            for e in loggingDelegator.last_request:
-#                logger.debug("request: %s" % e)
-
-#            if resp == 200:
-#                with open(image_dir, 'wb') as f:
-#                    f.write(content)
-#            else:
-#                logger.error('Problem downloading (status code %s)' % resp)
             urllib.urlretrieve(image_url,  image_dir)
 
             self.rate_limit_pool[rate_limit_type] = rl

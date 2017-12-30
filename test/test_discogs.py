@@ -127,8 +127,38 @@ class TestDiscogsAlbum(object):
         discogs_album.release.data["year"] = 20
         assert discogs_album.year == "1900"
 
-        
+    def test_construct_token_file(self):
+        """test the construct_token_file in discogsConnector
+        """
+        discogs_connection = DiscogsConnector(self.tagger_config)
 
+        filename = discogs_connection.construct_token_file()
+        assert filename.endswith('.token')
+
+    def test_read_token(self):
+        """read the token file, if it exists
+        """
+        config = TaggerConfig(os.path.join(parentdir, "test/empty.conf"))
+        config.set("discogs", "skip_auth", True)
+
+        discogs_connection = DiscogsConnector(self.tagger_config)
+        filename = discogs_connection.construct_token_file()
+
+        if os.path.exists(filename):
+            os.remove(filename)
+
+        access_token, access_secret = discogs_connection.read_token()
+
+        assert not access_token
+        assert not access_secret
+
+        with open(filename, 'w') as fh:
+            fh.write('{0},{1}'.format("token", "secret"))
+
+        access_token, access_secret = discogs_connection.read_token()
+
+        assert access_token
+        assert access_secret
 
     test_download_release.needs_network = True
     test_download_release.needs_authentication = True
