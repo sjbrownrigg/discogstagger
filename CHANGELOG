@@ -1,6 +1,6 @@
 ## Changelog
 
-Version 2.1.2
+Version 2.2.0
 
 * improvement: be able to store and re-use tokens for the access to discogs (these are stored
                in the file .token in the current directory
