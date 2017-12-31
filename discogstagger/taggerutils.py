@@ -97,26 +97,26 @@ class TagHandler(object):
 
         metadata.year = self.album.year
         metadata.country = self.album.country
-        metadata.url = self.album.url
 
         metadata.catalognum = self.album.catnumbers[0]
 
         # add styles to the grouping tag (right now, we can just use one)
         metadata.grouping = self.album.style
 
-        join_genres = self.config.get_without_quotation("details", "join_genres_and_styles")
-        use_style = self.config.getboolean("details", "use_style")
-        genre = join_genres.join(self.album.genres)
-        if use_style:
-            genre = join_genres.join(self.album.style)
+# use genres to allow multiple genres in muliple fields
+#        join_genres = self.config.get_without_quotation("details", "join_genres_and_styles")
+#        use_style = self.config.getboolean("details", "use_style")
+#        genre = join_genres.join(self.album.genres)
+#        if use_style:
+#            genre = join_genres.join(self.album.style)
 
-        metadata.genre = genre
+        metadata.genres = self.album.genres
 
         # this assumes, that there is a metadata-tag with the id_tag_name in the
         # metadata object
         setattr(metadata, self.config.id_tag_name, self.album.id)
 #        metadata.discogs_id = self.album.id
-        metadata.discogs_release_url = 'https://www.discogs.com/release/' + str(self.album.id)
+        metadata.discogs_release_url = self.album.url
 
         metadata.disc = track.discnumber
         metadata.disctotal = len(self.album.discs)
@@ -370,21 +370,26 @@ class FileHandler(object):
             on your system, to be able to use this method.
         """
         cmd = []
-        cmd.append('metaflac')
-        cmd.append(' --preserve-modtime')
-        cmd.append(' --add-replay-gain')
+        cmd.append("metaflac")
+        cmd.append("--preserve-modtime")
+        cmd.append("--add-replay-gain")
 
         albumdir = self.album.target_dir
         subdirs = next(os.walk(albumdir))[1]
 
+        pattern = albumdir
         if not subdirs:
-            cmd.append(albumdir + '/*.flac')
+            pattern = pattern + "/*.flac"
         else:
-            cmd.append(albumdir + '/**/*.flac')
+            pattern = pattern + "/**/*.flac"
 
-        p = subprocess.Popen(cmd)
-        p.wait()
-        logging.debug("updated " + albumdir)
+        cmd.append(pattern)
+
+        line = subprocess.list2cmdline(cmd)
+        p = subprocess.Popen(line, shell=True)
+        return_code = p.wait()
+        logging.debug("return %s" % str(return_code))
+
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.

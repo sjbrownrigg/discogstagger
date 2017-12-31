@@ -33,20 +33,25 @@ albums = find_files(options.basedir, "id.txt")
 logging.debug('add replay gain tags to %d albums' % len(albums))
 
 for albumdir in albums:
+
   cmd = []
-  cmd.append('metaflac')
-  cmd.append(' --preserve-modtime')
-  cmd.append(' --add-replay-gain')
+  cmd.append("metaflac")
+  cmd.append("--preserve-modtime")
+  cmd.append("--add-replay-gain")
 
   subdirs = next(os.walk(albumdir))[1]
-  
-  if not subdirs:
-    cmd.append(albumdir + '/*.flac')
-  else:
-    cmd.append(albumdir + '/**/*.flac')
 
-  p = subprocess.Popen(cmd)
-  p.wait()
-  logging.error(albumdir)
+  pattern = albumdir
+  if not subdirs:
+    pattern = pattern + "/*.flac"
+  else:
+    pattern = pattern + "/**/*.flac"
+
+  cmd.append(pattern)
+
+  line = subprocess.list2cmdline(cmd)
+  p = subprocess.Popen(line, shell=True)
+  return_code = p.wait()
+  logging.debug("return %s" % str(return_code))
 
 logging.debug('added replay gain tags to %d albums' % len(albums))

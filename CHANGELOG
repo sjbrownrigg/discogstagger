@@ -12,6 +12,7 @@ Version 2.2.1
                * ENCODER instead of the below mentioned ENCODEDBY
                * URL_DISCOGS_RELEASE_SITE, the url to the discogs release
                * DISCID instead of the formerly used freedb_id
+               * URL and URLTAGS are not used anymore
 
 * improvement: provide script for tag update
 
@@ -20,6 +21,9 @@ Version 2.2.1
 * improvement: version bump uses bumpversion
 
 * improvement: remove unnecessary enumeration class
+
+* improvement: use genres instead of genre to allow multiple genre fields, the same for GROUPING, ARTIST and ALBUMARTIST
+               Note: this is just tested for FLAC files
 
 Version 2.2.0
 

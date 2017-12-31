@@ -1600,7 +1600,7 @@ class MediaFile(object):
     grouping = MediaField(
         MP3StorageStyle('TIT1'),
         MP4StorageStyle('\xa9grp'),
-        StorageStyle('GROUPING'),
+        ListStorageStyle('GROUPING'),
         ASFStorageStyle('WM/ContentGroupDescription'),
     )
     track = MediaField(
@@ -1669,7 +1669,7 @@ class MediaFile(object):
         MP3StorageStyle('TPE2'),
         MP4StorageStyle('aART'),
 #DT        StorageStyle('ALBUM ARTIST'),
-        StorageStyle('ALBUMARTIST'),
+        ListStorageStyle('ALBUMARTIST'),
         ASFStorageStyle('WM/AlbumArtist'),
     )
     albumtype = MediaField(
