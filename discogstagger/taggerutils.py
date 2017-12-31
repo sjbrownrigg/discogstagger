@@ -374,7 +374,8 @@ class FileHandler(object):
         cmd.append(' --preserve-modtime')
         cmd.append(' --add-replay-gain')
 
-        subdirs = next(os.walk(self.album.target_dir))[1]
+        albumdir = self.album.target_dir
+        subdirs = next(os.walk(albumdir))[1]
 
         if not subdirs:
             cmd.append(albumdir + '/*.flac')
