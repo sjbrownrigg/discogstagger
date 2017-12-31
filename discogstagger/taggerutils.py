@@ -369,20 +369,21 @@ class FileHandler(object):
             Uses the default metaflac command, therefor this has to be installed
             on your system, to be able to use this method.
         """
-        tag_folders = []
+        cmd = []
+        cmd.append('metaflac')
+        cmd.append(' --preserve-modtime')
+        cmd.append(' --add-replay-gain')
 
-        for dirpath, dirnames, files in os.walk(self.album.target_dir):
-            for filename in fnmatch.filter(files, "*.flac"):
-                tag_folders.append(dirpath)
-                break
+        subdirs = next(os.walk(self.album.target_dir))[1]
 
-        cmd = "metaflac --add-replay-gain"
-        for folder in tag_folders:
-            cmd = cmd + " \"" + folder + "\"/*.flac"
+        if not subdirs:
+            cmd.append(albumdir + '/*.flac')
+        else:
+            cmd.append(albumdir + '/**/*.flac')
 
-        p = subprocess.Popen(cmd, shell=True)
-        (output, err) = p.communicate()
-        logging.debug("cmd: %s" % cmd)
+        p = subprocess.Popen(cmd)
+        p.wait()
+        logging.debug("updated " + albumdir)
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.

@@ -13,6 +13,14 @@ Version 2.2.1
                * URL_DISCOGS_RELEASE_SITE, the url to the discogs release
                * DISCID instead of the formerly used freedb_id
 
+* improvement: provide script for tag update
+
+* improvement: refactored replay gain
+
+* improvement: version bump uses bumpversion
+
+* improvement: remove unnecessary enumeration class
+
 Version 2.2.0
 
 * improvement: be able to store and re-use tokens for the access to discogs (these are stored
