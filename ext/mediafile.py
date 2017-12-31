@@ -1606,8 +1606,8 @@ class MediaFile(object):
     track = MediaField(
         MP3SlashPackStorageStyle('TRCK', pack_pos=0),
         MP4TupleStorageStyle('trkn', index=0),
-        StorageStyle('TRACK'),
-#DT        StorageStyle('TRACKNUMBER'),
+#DT        StorageStyle('TRACK'),
+        StorageStyle('TRACKNUMBER'),
         ASFStorageStyle('WM/TrackNumber'),
         out_type=int,
     )
@@ -1623,8 +1623,8 @@ class MediaFile(object):
     disc = MediaField(
         MP3SlashPackStorageStyle('TPOS', pack_pos=0),
         MP4TupleStorageStyle('disk', index=0),
-        StorageStyle('DISC'),
-#DT        StorageStyle('DISCNUMBER'),
+#DT        StorageStyle('DISC'),
+        StorageStyle('DISCNUMBER'),
         ASFStorageStyle('WM/PartOfSet'),
         out_type=int,
     )
@@ -1719,8 +1719,8 @@ class MediaFile(object):
     encoder = MediaField(
         MP3StorageStyle('TENC'),
         MP4StorageStyle('\xa9too'),
-        StorageStyle('ENCODEDBY'),
-#DT        StorageStyle('ENCODER'),
+#DT        StorageStyle('ENCODEDBY'),
+        StorageStyle('ENCODER'),
         ASFStorageStyle('WM/EncodedBy'),
     )
     script = MediaField(
@@ -1961,22 +1961,29 @@ class MediaFile(object):
     # DiscogsTagger specific fields
     # Discogs ID
     discogs_id = MediaField(
-        MP3DescStorageStyle(u'Discogs Release Id'),
-        MP4StorageStyle('----:com.apple.iTunes:Discogs Release Id'),
+        MP3DescStorageStyle(u'DiscogsReleaseId'),
+        MP4StorageStyle('drid'),
         StorageStyle('DISCOGSID'),
-        ASFStorageStyle('Discogs/Release Id'),
+        ASFStorageStyle('DT/Release Id'),
+    )
+    # Discogs Release URL
+    discogs_release_url = MediaField(
+        MP3DescStorageStyle(u'DISCOGS_RELEASE', 'WXXX'),
+        MP4StorageStyle('----:com.apple.iTunes:URL_DISCOGS_RELEASE_SITE	'),
+        StorageStyle('URL_DISCOGS_RELEASE_SITE'),
+        ASFStorageStyle('WM/DiscogsReleaseUrl'),
     )
     # FREEDB ID
     freedb_id = MediaField(
         MP3DescStorageStyle(u'DiscId'),
-        MP4StorageStyle('----:com.apple.iTunes:FreeDB DiscId'),
+        MP4StorageStyle('dId'),
         StorageStyle('DISCID'),
-        ASFStorageStyle('FreeDB/discid'),
+        ASFStorageStyle('DT/discid'),
     )
-    # FOLDER (basically for grouping of tracks/albums), for mp3 we are reusing the same field
+    # FOLDER (basically for grouping of tracks/albums)
     folder = MediaField(
-        MP3StorageStyle('TIT1'),
-        MP4StorageStyle('\xa9fld'),
+        MP3DescStorageStyle(u'Folder'),
+        MP4StorageStyle('fld'),
         StorageStyle('FOLDER'),
         ASFStorageStyle('DT/Folder'),
     )

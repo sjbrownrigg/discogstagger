@@ -633,12 +633,17 @@ class TestTagHandler(TestTaggerUtilFiles):
 
         assert metadata.artist == "Gigi D'Agostino"
         assert metadata.albumartist == "Various"
+
+        print metadata.discogs_id
+        print self.ogsrelid
+        print self.source_dir
+        print self.target_file_name
+
         assert metadata.discogs_id == self.ogsrelid
         assert metadata.year == 2001
         assert metadata.disctotal == 2
         assert metadata.comp
         assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
-
         assert metadata.freedb_id == "4711"
 
         # obviously the encoder element is not in the file, but it is returned

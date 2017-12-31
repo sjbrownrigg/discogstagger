@@ -19,8 +19,8 @@ def read_id_file(dir, file_name, options):
         logger.info("reading id file %s in %s" % (file_name, dir))
         tagger_config.read(idfile)
         source_type = tagger_config.get("source", "name")
-        id_tag_name = tagger_config.get("source", source_type)
-        releaseid = tagger_config.get("source", id_tag_name)
+        id_name = tagger_config.get("source", source_type)
+        releaseid = tagger_config.get("source", id_name)
     elif options.releaseid:
         releaseid = options.releaseid
 

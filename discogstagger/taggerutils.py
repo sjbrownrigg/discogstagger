@@ -115,6 +115,8 @@ class TagHandler(object):
         # this assumes, that there is a metadata-tag with the id_tag_name in the
         # metadata object
         setattr(metadata, self.config.id_tag_name, self.album.id)
+#        metadata.discogs_id = self.album.id
+        metadata.discogs_release_url = 'https://www.discogs.com/release/' + str(self.album.id)
 
         metadata.disc = track.discnumber
         metadata.disctotal = len(self.album.discs)

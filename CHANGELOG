@@ -1,5 +1,18 @@
 ## Changelog
 
+Version 2.2.1
+
+* improvement: Use field mapping used by Jaikoz (https://docs.google.com/spreadsheets/d/1afugW3R1FRDN-mwt5SQLY4R7aLAu3RqzjN3pR1497Ok/htmlview),
+               this means specifially:
+               * DISCOGSID is still used (which is an additional field only used by discogstagger2)
+               * GROUPING used for Style grouping (using styles from Discogs)
+               * FOLDER is still used (another additonal field only used by discogstagger2)
+               * DISCNUMBER instead of the below mentioned DISC
+               * TRACKNUMBER instead of the below mentioned TRACK
+               * ENCODER instead of the below mentioned ENCODEDBY
+               * URL_DISCOGS_RELEASE_SITE, the url to the discogs release
+               * DISCID instead of the formerly used freedb_id
+
 Version 2.2.0
 
 * improvement: be able to store and re-use tokens for the access to discogs (these are stored
@@ -11,7 +24,7 @@ Version 2.2.0
                TRACK (TRACKNUMBER is not used anymore), TRACKTOTAL (TRACKC and TOTALTRACKS are not used anymore),
                DISC (DISCNUMBER is not used anymore), DISCTOTAL (DISCC and TOTALDISCS are not used anymore),
                COMMENT (DESCRIPTION is not used anymore), ALBUMARTIST (ALBUM ARTIST is not used anymore),
-               LABEL (PUBLISHEER is not used anymore), ENCODEDBY (ENCODER is not used anymore),
+               LABEL (PUBLISHER is not used anymore), ENCODEDBY (ENCODER is not used anymore),
                DISCOGSID (was DiscogsId), DISCID (for freedb) added, FOLDER (for grouping purposes) added
 
 Version 2.1.1
