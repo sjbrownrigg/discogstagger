@@ -68,7 +68,6 @@ class TagHandler(object):
     def tag_single_track(self, target_folder, track):
         # load metadata information
         logger.debug("target_folder: %s" % target_folder)
-#        logger.debug("track: %s" % track)
 
         metadata = MediaFile(os.path.join(target_folder, track.new_file))
 
@@ -86,9 +85,7 @@ class TagHandler(object):
         metadata.album = self.album.title
         metadata.composer = self.album.artist
 
-# use list of albumartists
-#        join_artists = self.config.get_without_quotation("details", "join_artists")
-#        metadata.albumartist = join_artists.join(self.album.artists)
+        # use list of albumartists
         metadata.albumartists = self.album.artists
 
 # !TODO really, or should we generate this using a specific method?
@@ -102,22 +99,15 @@ class TagHandler(object):
 
         metadata.catalognum = self.album.catnumbers[0]
 
-        # add styles to the grouping tag (right now, we can just use one)
-        metadata.grouping = self.album.style
+        # add styles to the grouping tag
+        metadata.groupings = self.album.styles
 
-# use genres to allow multiple genres in muliple fields
-#        join_genres = self.config.get_without_quotation("details", "join_genres_and_styles")
-#        use_style = self.config.getboolean("details", "use_style")
-#        genre = join_genres.join(self.album.genres)
-#        if use_style:
-#            genre = join_genres.join(self.album.style)
-
+        # use genres to allow multiple genres in muliple fields
         metadata.genres = self.album.genres
 
         # this assumes, that there is a metadata-tag with the id_tag_name in the
         # metadata object
         setattr(metadata, self.config.id_tag_name, self.album.id)
-#        metadata.discogs_id = self.album.id
         metadata.discogs_release_url = self.album.url
 
         metadata.disc = track.discnumber

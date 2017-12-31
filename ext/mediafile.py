@@ -1599,12 +1599,14 @@ class MediaFile(object):
         StorageStyle('COMPOSER'),
         ASFStorageStyle('WM/Composer'),
     )
-    grouping = MediaField(
-        MP3StorageStyle('TIT1'),
-        MP4StorageStyle('\xa9grp'),
+    groupings = ListMediaField(
+        MP3ListStorageStyle('TIT1'),
+        MP4ListStorageStyle('\xa9grp'),
         ListStorageStyle('GROUPING'),
         ASFStorageStyle('WM/ContentGroupDescription'),
     )
+    grouping = groupings.single_field()
+
     track = MediaField(
         MP3SlashPackStorageStyle('TRCK', pack_pos=0),
         MP4TupleStorageStyle('trkn', index=0),
