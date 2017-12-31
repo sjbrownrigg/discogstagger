@@ -1570,13 +1570,15 @@ class MediaFile(object):
         StorageStyle('TITLE'),
         ASFStorageStyle('Title'),
     )
-    artist = MediaField(
-        MP3StorageStyle('TPE1'),
-        MP4StorageStyle('\xa9ART'),
+    artists = ListMediaField(
+        MP3ListStorageStyle('TPE1'),
+        MP4ListStorageStyle('\xa9ART'),
 #DT        StorageStyle('ARTIST'),
         ListStorageStyle('ARTIST'),
         ASFStorageStyle('Author'),
     )
+    artist = artists.single_field()
+
     album = MediaField(
         MP3StorageStyle('TALB'),
         MP4StorageStyle('\xa9alb'),

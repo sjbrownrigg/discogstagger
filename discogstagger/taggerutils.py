@@ -137,7 +137,7 @@ class TagHandler(object):
 
         # set track metadata
         metadata.title = track.title
-        metadata.artist = track.artist
+        metadata.artists = track.artists
 
 # !TODO take care about sortartist ;-)
         metadata.artist_sort = track.sort_artist
