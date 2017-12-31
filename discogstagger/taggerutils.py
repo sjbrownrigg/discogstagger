@@ -86,8 +86,10 @@ class TagHandler(object):
         metadata.album = self.album.title
         metadata.composer = self.album.artist
 
-        join_artists = self.config.get_without_quotation("details", "join_artists")
-        metadata.albumartist = join_artists.join(self.album.artists)
+# use list of albumartists
+#        join_artists = self.config.get_without_quotation("details", "join_artists")
+#        metadata.albumartist = join_artists.join(self.album.artists)
+        metadata.albumartists = self.album.artists
 
 # !TODO really, or should we generate this using a specific method?
         metadata.albumartist_sort = self.album.sort_artist

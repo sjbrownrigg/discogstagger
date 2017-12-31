@@ -632,18 +632,13 @@ class TestTagHandler(TestTaggerUtilFiles):
         metadata = MediaFile(os.path.join(self.source_dir, self.target_file_name))
 
         assert metadata.artist == "Gigi D'Agostino"
-        assert metadata.albumartist == "Various"
-
-        print metadata.discogs_id
-        print self.ogsrelid
-        print self.source_dir
-        print self.target_file_name
-
+        assert len(metadata.albumartists) == 1
+        assert metadata.albumartists == ['Various']
         assert metadata.discogs_id == self.ogsrelid
         assert metadata.year == 2001
         assert metadata.disctotal == 2
         assert metadata.comp
-        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+        assert metadata.genres == ["Electronic", "Hip Hop", "Pop", "Rock"]
         assert metadata.freedb_id == "4711"
 
         # obviously the encoder element is not in the file, but it is returned
@@ -670,7 +665,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.disc == 2
         assert metadata.track == 19
         assert metadata.comp
-        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+        assert metadata.genres == ["Electronic", "Hip Hop", "Pop", "Rock"]
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
@@ -699,7 +694,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.year == 2001
         assert metadata.disctotal == 2
         assert metadata.comp
-        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+        assert metadata.genres == ["Electronic", "Hip Hop", "Pop", "Rock"]
 
         assert metadata.freedb_id == "4711"
 
@@ -718,7 +713,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         assert metadata.disc == 1
         assert metadata.track == 20
         assert metadata.comp
-        assert metadata.genre == "Electronic & Hip Hop & Pop & Rock"
+        assert metadata.genres == ["Electronic", "Hip Hop", "Pop", "Rock"]
 
         # obviously the encoder element is not in the file, but it is returned
         # empty anyway, no need to check this then...
@@ -859,7 +854,7 @@ class TestTagHandler(TestTaggerUtilFiles):
         metadata = MediaFile(os.path.join(target_dir, "01-coldcut-timber_(chopped_down_radio_edit).flac"))
 
         assert metadata.artist == "Coldcut"
-        assert metadata.albumartist == "Coldcut & Hexstatic"
+        assert metadata.albumartists == ["Coldcut", "Hexstatic"]
         assert metadata.discogs_id == self.ogsrelid
         assert metadata.year == 1998
         assert metadata.disctotal == 1
@@ -875,6 +870,6 @@ class TestTagHandler(TestTaggerUtilFiles):
         metadata = MediaFile(os.path.join(target_dir, "07-coldcut-timber_(the_cheech_wizards_polythump_requiem_for_the_ancient_forests_mix).flac"))
 
         assert metadata.artist == "Coldcut"
-        assert metadata.albumartist == "Coldcut & Hexstatic"
+        assert metadata.albumartists == ["Coldcut", "Hexstatic"]
         assert metadata.discogs_id == self.ogsrelid
         assert metadata.tracktotal == 7

@@ -1665,13 +1665,16 @@ class MediaFile(object):
         ASFStorageStyle('WM/IsCompilation', as_type=bool),
         out_type=bool,
     )
-    albumartist = MediaField(
-        MP3StorageStyle('TPE2'),
-        MP4StorageStyle('aART'),
+    albumartists = ListMediaField(
+        MP3ListStorageStyle('TPE2'),
+        MP4ListStorageStyle('aART'),
 #DT        StorageStyle('ALBUM ARTIST'),
+#DT        StorageStyle('ALBUMARTIST'),
         ListStorageStyle('ALBUMARTIST'),
         ASFStorageStyle('WM/AlbumArtist'),
     )
+    albumartist = albumartists.single_field()
+
     albumtype = MediaField(
         MP3DescStorageStyle(u'MusicBrainz Album Type'),
         MP4StorageStyle('----:com.apple.iTunes:MusicBrainz Album Type'),
