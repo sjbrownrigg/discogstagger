@@ -10,34 +10,18 @@ import re
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-from optparse import OptionParser
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
+from optparse import OptionParser
+# import pysplitcue
+
+from discogstagger.fileutils import FileUtils
 from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError, DiscogsSearch
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
-def read_id_file(dir, file_name, options):
-    # read tags from batch file if available
-    idfile = os.path.join(dir, file_name)
-    if os.path.exists(idfile):
-        logger.info("reading id file %s in %s" % (file_name, dir))
-        tagger_config.read(idfile)
-        source_type = tagger_config.get("source", "name")
-        id_name = tagger_config.get("source", source_type)
-        releaseid = tagger_config.get("source", id_name)
-    elif options.releaseid:
-        releaseid = options.releaseid
 
-    return releaseid
-
-def walk_dir_tree(start_dir, id_file):
-    source_dirs = []
-    for root, dirs, files in os.walk(start_dir):
-        if id_file in files:
-            logger.debug("found %s in %s" % (id_file, root))
-            source_dirs.append(root)
-
-    return source_dirs
 
 def get_audio_dirs(start_dir):
     source_dirs = []
@@ -81,7 +65,11 @@ if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
 
 tagger_config = TaggerConfig(options.conffile)
+<<<<<<< Updated upstream
 options.replaygain = tagger_config.get("batch", "replaygain")
+=======
+# options.replaygain = tagger_config.get("batch", "replaygain")
+>>>>>>> Stashed changes
 
 # initialize logging
 logger_config_file = tagger_config.get("logging", "config_file")
@@ -92,6 +80,7 @@ logger = logging.getLogger(__name__)
 # read necessary config options for batch processing
 id_file = tagger_config.get("batch", "id_file")
 options.searchDiscogs = tagger_config.get("batch", "searchDiscogs")
+<<<<<<< Updated upstream
 
 if options.recursive:
     logger.debug("determine sourcedirs")
@@ -99,6 +88,17 @@ if options.recursive:
 elif options.searchDiscogs:
     logger.debug("looking for audio files")
     source_dirs = get_audio_dirs(options.sourcedir)
+=======
+
+file_utils = FileUtils(tagger_config)
+
+if options.recursive:
+    logger.debug("determine sourcedirs")
+    source_dirs = file_utils.walk_dir_tree(options.sourcedir, id_file)
+elif options.searchDiscogs:
+    logger.debug("looking for audio files")
+    source_dirs = file_utils.get_audio_dirs(options.sourcedir)
+>>>>>>> Stashed changes
     pp.pprint(source_dirs)
 else:
     logger.debug("using sourcedir: %s" % options.sourcedir)
@@ -114,9 +114,10 @@ discs_with_errors = []
 
 converted_discs = 0
 
-releaseid = None
+pp.pprint(source_dirs)
 
 for source_dir in source_dirs:
+    releaseid = None
     try:
         done_file = tagger_config.get("details", "done_file")
         done_file_path = os.path.join(source_dir, done_file)
@@ -131,6 +132,7 @@ for source_dir in source_dirs:
         tagger_config = TaggerConfig(options.conffile)
 
         if options.releaseid is not None:
+<<<<<<< Updated upstream
             releaseid = read_id_file(source_dir, id_file, options)
 
         if not releaseid:
@@ -138,11 +140,28 @@ for source_dir in source_dirs:
             searchParams = discogsSearch.getSearchParams(source_dir)
             releaseid = discogs_connector.search_discogs(searchParams)
             print("stuff to do here")
+=======
+            releaseid = file_utils.read_id_file(source_dir, id_file, options)
+
+        if not releaseid:
+            discogsSearch = DiscogsSearch(tagger_config)
+            searchParams = discogsSearch.getSearchParams(source_dir)
+            releaseid = discogs_connector.search_discogs(searchParams)
+            print("stuff to do here")
+
+        if not releaseid:
+            logger.warn("No releaseid for %s" % (source_dir))
+            continue
+>>>>>>> Stashed changes
 
         # if not releaseid:
         #     p.error("Please specify the discogs.com releaseid ('-r')")
 
+<<<<<<< Updated upstream
         print(releaseid + '  ' + source_dir)
+=======
+        print(str(releaseid) + '  ' + source_dir)
+>>>>>>> Stashed changes
 
         # read destination directory
         # !TODO if both are the same, we are not copying anything,
