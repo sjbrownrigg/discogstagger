@@ -1,15 +1,19 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import os
 import errno
 import logging
 import logging.config
 import sys
+import re
+
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 from optparse import OptionParser
 
 from discogstagger.tagger_config import TaggerConfig
-from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError
+from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError, DiscogsSearch
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
 def read_id_file(dir, file_name, options):
@@ -34,6 +38,17 @@ def walk_dir_tree(start_dir, id_file):
             source_dirs.append(root)
 
     return source_dirs
+
+def get_audio_dirs(start_dir):
+    source_dirs = []
+    for root, dirs, files in os.walk(start_dir):
+        for file in files:
+            if file.endswith(".flac") or file.endswith(".mp3"):
+                logger.debug("found %s in %s" % (file, root))
+                source_dirs.append(root)
+                break
+    return source_dirs
+
 
 p = OptionParser(version="discogstagger2 2.1")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
@@ -66,6 +81,7 @@ if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
 
 tagger_config = TaggerConfig(options.conffile)
+options.replaygain = tagger_config.get("batch", "replaygain")
 
 # initialize logging
 logger_config_file = tagger_config.get("logging", "config_file")
@@ -75,13 +91,19 @@ logger = logging.getLogger(__name__)
 
 # read necessary config options for batch processing
 id_file = tagger_config.get("batch", "id_file")
+options.searchDiscogs = tagger_config.get("batch", "searchDiscogs")
 
 if options.recursive:
     logger.debug("determine sourcedirs")
     source_dirs = walk_dir_tree(options.sourcedir, id_file)
+elif options.searchDiscogs:
+    logger.debug("looking for audio files")
+    source_dirs = get_audio_dirs(options.sourcedir)
+    pp.pprint(source_dirs)
 else:
     logger.debug("using sourcedir: %s" % options.sourcedir)
     source_dirs = [options.sourcedir]
+
 
 # initialize connection (could be a problem if using multiple sources...)
 discogs_connector = DiscogsConnector(tagger_config)
@@ -98,6 +120,7 @@ for source_dir in source_dirs:
     try:
         done_file = tagger_config.get("details", "done_file")
         done_file_path = os.path.join(source_dir, done_file)
+        pp.pprint(source_dir)
 
         if os.path.exists(done_file_path) and not options.forceUpdate:
             logger.warn("Do not read %s, because %s exists and forceUpdate is false" % (source_dir, done_file))
@@ -107,11 +130,19 @@ for source_dir in source_dirs:
         # album
         tagger_config = TaggerConfig(options.conffile)
 
-        releaseid = read_id_file(source_dir, id_file, options)
-
+        if options.releaseid is not None:
+            releaseid = read_id_file(source_dir, id_file, options)
 
         if not releaseid:
-            p.error("Please specify the discogs.com releaseid ('-r')")
+            discogsSearch = DiscogsSearch(tagger_config)
+            searchParams = discogsSearch.getSearchParams(source_dir)
+            releaseid = discogs_connector.search_discogs(searchParams)
+            print("stuff to do here")
+
+        # if not releaseid:
+        #     p.error("Please specify the discogs.com releaseid ('-r')")
+
+        print(releaseid + '  ' + source_dir)
 
         # read destination directory
         # !TODO if both are the same, we are not copying anything,
@@ -148,8 +179,16 @@ for source_dir in source_dirs:
 
         taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
 
+
+        pp.pprint(album.codec)
+
         tagHandler = TagHandler(album, tagger_config)
+
+        pp.pprint(album.codec)
+
         fileHandler = FileHandler(album, tagger_config)
+
+        pp.pprint(album.codec)
 
         try:
             taggerUtils._get_target_list()
@@ -185,7 +224,7 @@ for source_dir in source_dirs:
         logger.debug("Generate nfo")
         taggerUtils.create_nfo(album.target_dir)
 
-        fileHandler.create_done_file()
+        # fileHandler.create_done_file()
     except Exception as ex:
         if releaseid:
             msg = "Error during tagging ({0}), {1}: {2}".format(releaseid, source_dir, ex)
