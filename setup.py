@@ -10,8 +10,8 @@ setup (
     author = "Markus M. May",
     author_email = "triplem@javafreedom.org",
     url = "https://github.com/triplem/discogstagger",
-    scripts = ["scripts/discogstagger2.py"],
-    packages = ["discogstagger", "discogstagger.ext"],
+    scripts = ["discogstagger2.py"],
+    packages = ["discogstagger", "ext"],
     data_files = [(
         "/etc/%s/" % NAME, ["conf/discogs_tagger.conf"]),
         ("share/%s" % NAME, ["README.md"])]

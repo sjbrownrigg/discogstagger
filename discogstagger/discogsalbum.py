@@ -3,6 +3,11 @@ import re
 import os
 import urllib
 
+
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+from ext.mediafile import MediaFile
+
 import time
 
 import discogs_client as discogs
@@ -12,6 +17,49 @@ import json
 from album import Album, Disc, Track
 
 logger = logging
+
+class DiscogsSearch(object):
+    """ Search for a release based on the existing
+        metadata of the files in the source directory
+    """
+    def __init__(self, tagger_config):
+        self.config = tagger_config
+
+    def getSearchParams(self, source_dir):
+        """ get search parameters to find release on discogs
+        """
+        files = self._getMusicFiles(source_dir)
+        searchParams = {}
+        for file in files:
+            metadata = MediaFile(source_dir + '/' + file)
+            searchParams['title'] = metadata.title
+            searchParams['artist'] = metadata.artist
+            searchParams['albumartist'] = metadata.albumartist
+            searchParams['album'] = metadata.album
+            searchParams['year'] = metadata.year
+            searchParams['date'] = metadata.date
+            searchParams['disc'] = metadata.disc
+
+            if 'tracks' not in searchParams:
+                searchParams['tracks'] = {}
+            if metadata.track not in searchParams['tracks']:
+                searchParams['tracks'][metadata.track] = {}
+            searchParams['tracks'][metadata.track]['duration'] = metadata.length
+        # self.searchParams = searchParams
+        return searchParams
+
+    def _getMusicFiles(self, source_dir):
+        """ Get album data
+        """
+        dir_list = os.listdir(source_dir)
+        dir_list.sort()
+        files = []
+        for file in dir_list:
+            if file.endswith('.flac') or file.endswith('.mp3'):
+                files.append(file)
+        pp.pprint(files)
+        return files
+
 
 class AlbumError(Exception):
     """ A central exception for all errors happening during the album handling
@@ -148,6 +196,42 @@ class DiscogsConnector(object):
         token_file_name = '.token'
         return os.path.join(cwd, token_file_name)
 
+    def search_discogs(self, searchParams):
+        candidates = []
+        results = self.discogs_client.search(searchParams['artist'], type='artist')
+        pp.pprint(searchParams)
+        for result in results:
+            if searchParams['artist'] == result.name:
+                releases = result.releases
+                for release in releases:
+                    if searchParams['album'] == release.title or release.title in searchParams['album'] or  searchParams['album'] in release.title:
+                        pp.pprint(release.title)
+                        pp.pprint(release.tracklist)
+                        for version in release.versions:
+                            if len(searchParams['tracks']) == len(version.tracklist):
+                                if searchParams['year'] == version.year:
+                                    pp.pprint(version.id)
+                                    pp.pprint(version.year)
+                                    pp.pprint(version.tracklist)
+                                    pp.pprint(version.data.keys())
+                                    candidates.append(str(version.id))
+                                    trackInfo = self._getTrackInfo(version)
+                                    pp.pprint(trackInfo)
+
+
+            pp.pprint(candidates)
+            # if len(candidates) == 1:
+            return candidates[0]
+
+    def _getTrackInfo(self, version):
+        trackinfo = {}
+        tracklist = version.tracklist
+        for track in version.tracklist:
+            pos = int(str(track.position))
+            trackinfo[pos] = {}
+            for key in [u'duration', u'title']:
+                trackinfo[track.position][key] = getattr(track, key)
+        return trackinfo
 
     def fetch_image(self, image_dir, image_url):
         """

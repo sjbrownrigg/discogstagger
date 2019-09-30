@@ -8,6 +8,9 @@ import logging
 import shutil
 import imghdr
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 from unicodedata import normalize
 
 from mako.template import Template
@@ -81,6 +84,8 @@ class TagHandler(object):
         # remove current metadata
         metadata.delete()
 
+        self.album.codec = metadata.type
+
         # set album metadata
         metadata.album = self.album.title
         metadata.composer = self.album.artist
@@ -139,6 +144,8 @@ class TagHandler(object):
             for name in keepTags:
                 setattr(metadata, name, keepTags[name])
 
+        pp.pprint(self.album.codec)
+
         metadata.save()
 
 class FileHandler(object):
@@ -154,6 +161,7 @@ class FileHandler(object):
     def __init__(self, album, tagger_config):
         self.config = tagger_config
         self.album = album
+        pp.pprint(self.album.codec)
 
     def mkdir_p(self, path):
         try:
@@ -215,7 +223,7 @@ class FileHandler(object):
                         logger.error("Source does not exists")
                         # throw error
                     logger.debug("copying files (%s/%s)", source_folder, track.orig_file)
-                    
+
                     shutil.copyfile(os.path.join(source_folder, track.orig_file),
                         os.path.join(target_folder, track.new_file))
 
@@ -310,7 +318,7 @@ class FileHandler(object):
 
                 except Exception as e:
                     logger.error("Unable to download image '%s', skipping." % image_url)
-                    print e
+                    print(e)
 
     def embed_coverart_album(self):
         """
@@ -385,7 +393,7 @@ class FileHandler(object):
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
-        TaggerUtils returns a the corresponding metadata information , in which
+        TaggerUtils returns a the corresponding metadata information, in which
         we can write to disk. The assumption here is that the destination
         direcory contains a single album in a support format (mp3 or flac).
 
@@ -453,8 +461,11 @@ class TaggerUtils(object):
             "%TRACKNO%": "%.2d" % trackno,
             "%TYPE%": filetype,
             "%LABEL%": self.album.labels[0],
+            "%CODEC%": self.album.codec,
         }
-
+        pp.pprint('value_from_tag_format')
+        pp.pprint(self.album.codec)
+        pp.pprint(self.album.full_path)
         for hashtag in property_map.keys():
             format = format.replace(hashtag, str(property_map[hashtag]))
 
@@ -497,6 +508,9 @@ class TaggerUtils(object):
 
                 track.new_file = self.get_clean_filename(newfile)
 
+    def _get_album_codec(self, full_path):
+        metadata = MediaFile(full_path)
+        return metadata.type
 
     def _get_target_list(self):
         """
@@ -549,8 +563,8 @@ class TaggerUtils(object):
                 if disc_source_dir == None:
                     disc_source_dir = self.album.sourcedir
 
-                logger.debug("discno: %d" % disc.discnumber)
-                logger.debug("sourcedir: %s" % disc.sourcedir)
+                logger.error("discno: %d" % disc.discnumber)
+                logger.error("sourcedir: %s" % disc.sourcedir)
 
                 # strip unwanted files
                 disc_list = os.listdir(os.path.join(self.album.sourcedir, disc_source_dir))
@@ -576,11 +590,20 @@ class TaggerUtils(object):
                                  track.artists[0], track.title))
                     track.orig_file = os.path.basename(filename)
 
+                    track.full_path = self.album.sourcedir + track.orig_file
+                    codec = self._get_album_codec(track.full_path)
+                    self.album.codec = codec
+                    pp.pprint(codec)
+
+                    # self.get_album_codec(track.full_path)
+                    # pp.pprint(track.full_path)
+                    # pp.pprint(self.album.codec)
+
                     filetype = os.path.splitext(filename)[1]
 
             self._set_target_discs_and_tracks(filetype)
 
-        except OSError, e:
+        except OSError as e:
             if e.errno == errno.EEXIST:
                 logger.error("No such directory '%s'", self.sourcedir)
                 raise TaggerError("No such directory '%s'", self.sourcedir)
@@ -644,7 +667,7 @@ class TaggerUtils(object):
 
         a = normalize("NFKD", a).encode("ascii", "ignore")
 
-        cf = re.compile(r"[^-\w.\(\)_]")
+        cf = re.compile(r"[^-\w.\(\)_\[\]]")
         cf = cf.sub("", str(a))
 
         cf = cf.replace(" ", "_")
