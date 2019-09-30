@@ -213,27 +213,32 @@ class DiscogsConnector(object):
         self.rate_limit_pool[rate_limit_type] = rl
 
         results = self.discogs_client.search(searchParams['artist'], type='artist')
-        pp.pprint(searchParams)
         for result in results:
             if searchParams['artist'] == result.name:
                 for release in result.releases:
+                    pp.pprint(release.title)
+                    pp.pprint(searchParams['album'])
                     if searchParams['album'] == release.title or release.title in searchParams['album'] or searchParams['album'] in release.title:
+                        pp.pprint('matched title')
                         # pp.pprint(release.title)
                         # pp.pprint(release.tracklist)
                         for version in release.versions:
                             pp.pprint(version.tracklist)
                             if len(searchParams['tracks']) == len(version.tracklist):
                                 trackInfo = self._getTrackInfo(version)
+                                pp.pprint(searchParams)
                                 pp.pprint(trackInfo)
+                                pp.pprint(self._compareTracklist(searchParams, trackInfo))
                                 if self._compareTracklist(searchParams, trackInfo) > 95:
                                     candidates.append(version)
-        print(candidates)
+        pp.pprint(candidates)
 
         if len(candidates) == 1:
             print(candidates[0].id)
             return candidates[0].id
 
         elif len(candidates) > 1:
+            return candidates[0].id
             if searchParams['year'] is not None:
                 for version in candidates:
                     print(version.id)
@@ -250,6 +255,7 @@ class DiscogsConnector(object):
             potential = imported[track]['title']
             match = self._fuzzyStringMatch(original, potential)
             if match < quality:
+                print(quality)
                 print(original)
                 print(potential)
                 quality = match

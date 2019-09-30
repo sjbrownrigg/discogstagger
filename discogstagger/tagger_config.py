@@ -4,7 +4,7 @@ import logging
 
 import inspect
 
-from configparser import RawConfigParser
+from ConfigParser import RawConfigParser
 
 logger = logging
 #.getLogger(__name__)

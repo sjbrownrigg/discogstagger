@@ -402,6 +402,7 @@ class TaggerUtils(object):
 
     def __init__(self, sourcedir, destdir, tagger_config, album=None):
         self.config = tagger_config
+        self.cue_done_dir = '.cue'
 
 # !TODO should we define those in here or in each method (where needed) or in a separate method
 # doing the "mapping"?
@@ -513,7 +514,6 @@ class TaggerUtils(object):
             in the self.sourcedir location as target_list, other
             files in the sourcedir are returned in the copy_files list.
         """
-
         copy_files = []
         target_list = []
 
@@ -525,6 +525,10 @@ class TaggerUtils(object):
         try:
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
+
+            # self.cue_done_dir = '.cue'
+            extf = (self.cue_done_dir)
+            dir_list[:] = [d for d in dir_list if d not in extf]
 
             filetype = ""
 
