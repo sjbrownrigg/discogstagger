@@ -144,8 +144,6 @@ class TagHandler(object):
             for name in keepTags:
                 setattr(metadata, name, keepTags[name])
 
-        pp.pprint(self.album.codec)
-
         metadata.save()
 
 class FileHandler(object):
@@ -161,7 +159,6 @@ class FileHandler(object):
     def __init__(self, album, tagger_config):
         self.config = tagger_config
         self.album = album
-        pp.pprint(self.album.codec)
 
     def mkdir_p(self, path):
         try:
@@ -463,9 +460,7 @@ class TaggerUtils(object):
             "%LABEL%": self.album.labels[0],
             "%CODEC%": self.album.codec,
         }
-        pp.pprint('value_from_tag_format')
-        pp.pprint(self.album.codec)
-        pp.pprint(self.album.full_path)
+
         for hashtag in property_map.keys():
             format = format.replace(hashtag, str(property_map[hashtag]))
 
@@ -563,8 +558,8 @@ class TaggerUtils(object):
                 if disc_source_dir == None:
                     disc_source_dir = self.album.sourcedir
 
-                logger.error("discno: %d" % disc.discnumber)
-                logger.error("sourcedir: %s" % disc.sourcedir)
+                logger.debug("discno: %d" % disc.discnumber)
+                logger.debug("sourcedir: %s" % disc.sourcedir)
 
                 # strip unwanted files
                 disc_list = os.listdir(os.path.join(self.album.sourcedir, disc_source_dir))
@@ -593,17 +588,11 @@ class TaggerUtils(object):
                     track.full_path = self.album.sourcedir + track.orig_file
                     codec = self._get_album_codec(track.full_path)
                     self.album.codec = codec
-                    pp.pprint(codec)
-
-                    # self.get_album_codec(track.full_path)
-                    # pp.pprint(track.full_path)
-                    # pp.pprint(self.album.codec)
-
                     filetype = os.path.splitext(filename)[1]
 
             self._set_target_discs_and_tracks(filetype)
 
-        except OSError as e:
+        except OSError, e:
             if e.errno == errno.EEXIST:
                 logger.error("No such directory '%s'", self.sourcedir)
                 raise TaggerError("No such directory '%s'", self.sourcedir)

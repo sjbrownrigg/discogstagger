@@ -2,12 +2,13 @@ import logging
 import re
 import os
 import urllib
-
+from fuzzywuzzy import fuzz
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 from ext.mediafile import MediaFile
 
+from datetime import timedelta
 import time
 
 import discogs_client as discogs
@@ -24,42 +25,42 @@ class DiscogsSearch(object):
     """
     def __init__(self, tagger_config):
         self.config = tagger_config
+        self.cue_done_dir = '.cue'
 
     def getSearchParams(self, source_dir):
         """ get search parameters to find release on discogs
         """
+
         files = self._getMusicFiles(source_dir)
         searchParams = {}
         for file in files:
-            metadata = MediaFile(source_dir + '/' + file)
-            searchParams['title'] = metadata.title
+            metadata = MediaFile(os.path.join(source_dir, file))
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
             searchParams['disc'] = metadata.disc
-
             if 'tracks' not in searchParams:
                 searchParams['tracks'] = {}
-            if metadata.track not in searchParams['tracks']:
-                searchParams['tracks'][metadata.track] = {}
-            searchParams['tracks'][metadata.track]['duration'] = metadata.length
-        # self.searchParams = searchParams
+            track = str(metadata.disc) + '-' + str(metadata.track) if metadata.disc else str(metadata.track)
+            if track not in searchParams['tracks']:
+                searchParams['tracks'][track] = {}
+            searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
+            searchParams['tracks'][track]['title'] = metadata.title
         return searchParams
 
     def _getMusicFiles(self, source_dir):
         """ Get album data
         """
-        dir_list = os.listdir(source_dir)
-        dir_list.sort()
-        files = []
-        for file in dir_list:
-            if file.endswith('.flac') or file.endswith('.mp3'):
-                files.append(file)
-        pp.pprint(files)
-        return files
-
+        extf = (self.cue_done_dir)
+        found = []
+        for root,dirs,files in os.walk(source_dir):
+            dirs[:] = [d for d in dirs if d not in extf]
+            for file in files:
+                if file.endswith(('.flac', '.mp3')):
+                    found.append(os.path.join(root, file))
+        return found
 
 class AlbumError(Exception):
     """ A central exception for all errors happening during the album handling
@@ -198,39 +199,75 @@ class DiscogsConnector(object):
 
     def search_discogs(self, searchParams):
         candidates = []
+
+        rate_limit_type = 'metadata'
+
+        if rate_limit_type in self.rate_limit_pool:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+                logger.warn('Waiting one second to allow rate limiting...')
+                time.sleep(1)
+
+        rl = RateLimit()
+        rl.lastcall = time.time()
+
+        self.rate_limit_pool[rate_limit_type] = rl
+
         results = self.discogs_client.search(searchParams['artist'], type='artist')
         pp.pprint(searchParams)
         for result in results:
             if searchParams['artist'] == result.name:
-                releases = result.releases
-                for release in releases:
-                    if searchParams['album'] == release.title or release.title in searchParams['album'] or  searchParams['album'] in release.title:
-                        pp.pprint(release.title)
-                        pp.pprint(release.tracklist)
+                for release in result.releases:
+                    if searchParams['album'] == release.title or release.title in searchParams['album'] or searchParams['album'] in release.title:
+                        # pp.pprint(release.title)
+                        # pp.pprint(release.tracklist)
                         for version in release.versions:
+                            pp.pprint(version.tracklist)
                             if len(searchParams['tracks']) == len(version.tracklist):
-                                if searchParams['year'] == version.year:
-                                    pp.pprint(version.id)
-                                    pp.pprint(version.year)
-                                    pp.pprint(version.tracklist)
-                                    pp.pprint(version.data.keys())
-                                    candidates.append(str(version.id))
-                                    trackInfo = self._getTrackInfo(version)
-                                    pp.pprint(trackInfo)
+                                trackInfo = self._getTrackInfo(version)
+                                pp.pprint(trackInfo)
+                                if self._compareTracklist(searchParams, trackInfo) > 95:
+                                    candidates.append(version)
+        print(candidates)
+
+        if len(candidates) == 1:
+            print(candidates[0].id)
+            return candidates[0].id
+
+        elif len(candidates) > 1:
+            if searchParams['year'] is not None:
+                for version in candidates:
+                    print(version.id)
+                    if searchParams['year'] == version.year:
+                        return version.id
+            elif version.format == 'CD':
+                        return version.id
 
 
-            pp.pprint(candidates)
-            # if len(candidates) == 1:
-            return candidates[0]
+    def _compareTracklist(self, current, imported):
+        quality = 100
+        for track in current['tracks'].keys():
+            original = current['tracks'][track]['title']
+            potential = imported[track]['title']
+            match = self._fuzzyStringMatch(original, potential)
+            if match < quality:
+                print(original)
+                print(potential)
+                quality = match
+        return quality
+
+
+    def _fuzzyStringMatch(self, string1, string2):
+        result = fuzz.token_set_ratio(string1, string2)
+        print('Fuzzy match: ' + str(result))
+        return result
 
     def _getTrackInfo(self, version):
         trackinfo = {}
-        tracklist = version.tracklist
         for track in version.tracklist:
-            pos = int(str(track.position))
+            pos = str(track.position)
             trackinfo[pos] = {}
             for key in [u'duration', u'title']:
-                trackinfo[track.position][key] = getattr(track, key)
+                trackinfo[pos][key] = getattr(track, key)
         return trackinfo
 
     def fetch_image(self, image_dir, image_url):
