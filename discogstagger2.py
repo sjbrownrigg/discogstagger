@@ -61,6 +61,7 @@ logger = logging.getLogger(__name__)
 # read necessary config options for batch processing
 id_file = tagger_config.get("batch", "id_file")
 options.searchDiscogs = tagger_config.get("batch", "searchDiscogs")
+# options.parse_cue_files = tagger_config.get('cue', 'parse_cue_files')
 
 file_utils = FileUtils(tagger_config)
 
@@ -154,17 +155,9 @@ for source_dir in source_dirs:
 
         taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
 
-
-        pp.pprint(album.codec)
-
         tagHandler = TagHandler(album, tagger_config)
 
-        pp.pprint(album.codec)
-
         fileHandler = FileHandler(album, tagger_config)
-
-        pp.pprint(album.codec)
-
         try:
             taggerUtils._get_target_list()
         except TaggerError as te:
@@ -172,6 +165,10 @@ for source_dir in source_dirs:
             logger.error(msg)
             discs_with_errors.append(msg)
             continue
+
+        # reset the target directory now that we have discogs metadata and
+        #  filedata - otherwise this is declared too early in the process
+        album.target_dir = taggerUtils.dest_dir_name
 
         fileHandler.copy_files()
 
