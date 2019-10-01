@@ -17,9 +17,9 @@ pp = pprint.PrettyPrinter(indent=4)
 
 class FileUtils(object):
     def __init__(self, tagger_config):
-        self.tagger_config = tagger_config
+        self.config = tagger_config
         self.source_dirs = []
-        self.cue_done_dir = '.cue'
+        self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
 
     def read_id_file(self, dir, file_name, options):
         # read tags from batch file if available
@@ -47,6 +47,7 @@ class FileUtils(object):
         """ Returns a list of directories with audio track to be processed.
             Any CUE files encountered will be split automatically
         """
+        parse_cue_files = self.config.get('cue', 'parse_cue_files')
         extf = (self.cue_done_dir)
         source_dirs = []
         for root, dirs, files in os.walk(start_dir):
@@ -67,7 +68,7 @@ class FileUtils(object):
                     cue_files.append(file)
                 elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
                     audio_files.append(file)
-            if len(cue_files) > 0 and len(cue_files) == len(audio_files):
+            if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
                 result = self._processCueFiles(root, cue_files)
                 if result == 0:
                     source_dirs.append(root + '/')

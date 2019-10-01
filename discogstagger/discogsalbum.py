@@ -2,13 +2,14 @@ import logging
 import re
 import os
 import urllib
-from fuzzywuzzy import fuzz
+import string
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 from ext.mediafile import MediaFile
 
-from datetime import timedelta
+from datetime import time as Time
+from datetime import timedelta, datetime
 import time
 
 import discogs_client as discogs
@@ -84,9 +85,10 @@ class DiscogsConnector(object):
         self.config = tagger_config
         self.user_agent = self.config.get("common", "user_agent")
         self.discogs_client = discogs.Client(self.user_agent)
-
+        self.tracklength_tolerance = self.config.get("batch", "tracklength_tolerance")
         self.discogs_auth = False
         self.rate_limit_pool = {}
+
 
         skip_auth = self.config.get("discogs", "skip_auth")
 
@@ -214,29 +216,27 @@ class DiscogsConnector(object):
 
         results = self.discogs_client.search(searchParams['artist'], type='artist')
         for result in results:
-            if searchParams['artist'] == result.name:
+            if searchParams['artist'].lower() == result.name.lower():
                 for release in result.releases:
-                    pp.pprint(release.title)
-                    pp.pprint(searchParams['album'])
+                    # pp.pprint(searchParams['album'])
                     if searchParams['album'] == release.title or release.title in searchParams['album'] or searchParams['album'] in release.title:
-                        pp.pprint('matched title')
+                        # pp.pprint('matched title')
                         # pp.pprint(release.title)
                         # pp.pprint(release.tracklist)
                         for version in release.versions:
-                            pp.pprint(version.tracklist)
-                            if len(searchParams['tracks']) == len(version.tracklist):
-                                trackInfo = self._getTrackInfo(version)
-                                pp.pprint(searchParams)
-                                pp.pprint(trackInfo)
-                                pp.pprint(self._compareTracklist(searchParams, trackInfo))
-                                if self._compareTracklist(searchParams, trackInfo) > 95:
+                            # pp.pprint(version.tracklist)
+                            trackInfo = self._getTrackInfo(version)
+                            # pp.pprint(trackInfo)
+                            # pp.pprint(searchParams)
+                            if len(searchParams['tracks']) == len(trackInfo):
+                                if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
                                     candidates.append(version)
-        pp.pprint(candidates)
 
         if len(candidates) == 1:
             print(candidates[0].id)
             return candidates[0].id
 
+# TODO: better comparison of releases, maybe based on quality of the metadata
         elif len(candidates) > 1:
             return candidates[0].id
             if searchParams['year'] is not None:
@@ -247,29 +247,51 @@ class DiscogsConnector(object):
             elif version.format == 'CD':
                         return version.id
 
+    def _paddedHMS(self, string):
+        array = [int(s) for s in string.split(':')]
+        while len(array) < 3:
+            array.insert(0, 0)
+        narray = ['{:0>2}'.format(d) for d in array ]
+        return ':'.join(narray)
 
-    def _compareTracklist(self, current, imported):
-        quality = 100
-        for track in current['tracks'].keys():
-            original = current['tracks'][track]['title']
-            potential = imported[track]['title']
-            match = self._fuzzyStringMatch(original, potential)
-            if match < quality:
-                print(quality)
-                print(original)
-                print(potential)
-                quality = match
-        return quality
-
-
-    def _fuzzyStringMatch(self, string1, string2):
-        result = fuzz.token_set_ratio(string1, string2)
-        print('Fuzzy match: ' + str(result))
-        return result
+    def _compareTracks(self, current, imported):
+        """ Compare original tracklist against discogs tracklist, by comparing
+            the track lengths. Some releases have tracks in different order,
+            so we need to weed those out.  Returns the highest value.
+        """
+        tolerance = 0.0
+        curr_tracklist = current['tracks']
+        for track in curr_tracklist.keys():
+            """ some tracks have alphanumerical identifiers,
+                e.g. vinyl, cassettes
+            """
+            if track not in imported.keys():
+                logging.debug('track not present, numbering format different')
+                return 100
+            else:
+                try:
+                    a = self._paddedHMS(curr_tracklist[track]['duration'])
+                    b = self._paddedHMS(imported[track]['duration'])
+                    timea = datetime.strptime(a, '%H:%M:%S')
+                    timeb = datetime.strptime(b, '%H:%M:%S')
+                    difference = timea - timeb
+                    if difference.total_seconds() > tolerance:
+                        tolerance = difference.total_seconds()
+                except Exception as e:
+                    print(e)
+            logging.debug('tracklength tolerance for release (change if there are any matching issues) %s: ' % tolerance)
+        return tolerance
 
     def _getTrackInfo(self, version):
+        """ Get the track values from the release, so that we can compare them
+            to what we have got.  Remove extra info appearing with empty track
+            number, e.g. Bonus tracks, or section titles.
+        """
         trackinfo = {}
         for track in version.tracklist:
+            if str(track.position) == '':
+                logger.debug('ignoring non-track info: %s' % getattr(track, u'title'))
+                continue
             pos = str(track.position)
             trackinfo[pos] = {}
             for key in [u'duration', u'title']:

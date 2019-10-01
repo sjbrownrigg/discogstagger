@@ -402,7 +402,9 @@ class TaggerUtils(object):
 
     def __init__(self, sourcedir, destdir, tagger_config, album=None):
         self.config = tagger_config
-        self.cue_done_dir = '.cue'
+
+        # ignore directory where old cue files are stashed
+        self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
 
 # !TODO should we define those in here or in each method (where needed) or in a separate method
 # doing the "mapping"?
