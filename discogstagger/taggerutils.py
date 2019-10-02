@@ -576,7 +576,6 @@ class TaggerUtils(object):
 
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
-
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)
                     logger.error("not matching number of files....")
@@ -589,9 +588,11 @@ class TaggerUtils(object):
 
                     logger.debug("mapping file %s --to--> %s - %s" % (filename,
                                  track.artists[0], track.title))
-                    track.orig_file = os.path.basename(filename)
 
-                    track.full_path = self.album.sourcedir + track.orig_file
+                    track.orig_file = os.path.basename(filename)
+                    # multidisc target path is in filename, not track.orig_file
+                    # track.full_path = self.album.sourcedir + track.orig_file
+                    track.full_path = os.path.join(self.album.sourcedir, filename)
                     codec = self._get_album_codec(track.full_path)
                     self.album.codec = codec
                     filetype = os.path.splitext(filename)[1]
