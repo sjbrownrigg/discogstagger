@@ -666,9 +666,11 @@ class TaggerUtils(object):
         cf = re.compile(r"[^-\w.\(\)_\[\]]")
         cf = cf.sub("", str(a))
 
-        cf = cf.replace(" ", "_")
-        cf = cf.replace("__", "_")
-        cf = cf.replace("_-_", "-")
+        # Don't force space/underscore replacement. If the user want's this it
+        # can be done via config. The user may want spaces.
+        # cf = cf.replace(" ", "_")
+        # cf = cf.replace("__", "_")
+        # cf = cf.replace("_-_", "-")
 
         cf = "".join([cf, fileext])
 
