@@ -15,7 +15,14 @@ formatted_string = "%albumartist%\%album%\$num(%track%,2) %title%$if($strcmp(%ar
 
 class StringFormatting(object):
 
-    def parseString(string, data):
+    def __init__(self, string):
+        self.string = string
+        self.functions = (
+            'num',
+            'strcmp'
+        )
+
+    def parseString(self, string, data):
         print(string)
         output = ''
         subs = set(re.findall(r'(%.*?%)', string))
@@ -35,35 +42,39 @@ class StringFormatting(object):
                 open = open + 1
             elif re.search(r'\)', c) and lastchar != '\\':
                 command[hierarchy] += c
-                self.execute(command[hierarchy])
+                output += self.execute(command[hierarchy])
                 open = open - 1
                 hierarchy = hierarchy - 1
+                print(output)
             elif hierarchy > 0:
                 command[hierarchy] += c
             else:
                 output += c
             lastchar = c
 
-            print(command)
 
         # print(commands)
         print(subs)
         print(string)
         print(output)
 
-    def execute(command):
+    def execute(self, command):
         command = re.sub(r'\$', 'self.', command)
         output = ''
-        result = exec(command)
+        result = eval(command)
 
         print(command)
         print(result)
-        return
+        return result
 
     def num(self, num, places):
-        return '{:0' + places + '}'.format(num)
+        string = '{:0>%%}'
+        string = re.sub(r'\%\%', str(places), string)
+        string = string.format(str(places), str(num))
+        print(string)
+        return string
 
 
 
-
- parseString(formatted_string, data)
+stringFormatting = StringFormatting(formatted_string)
+stringFormatting.parseString(formatted_string, data)
