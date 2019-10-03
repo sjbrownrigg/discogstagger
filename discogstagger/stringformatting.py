@@ -35,21 +35,21 @@ class StringFormatting(object):
         }
 
         multidisctrack = {
-            'formatted_string': '%albumartist%/[%year%] %album%$if1($strcmp(%totaldiscs%,),,$ifequal(%totaldiscs%,1,YEP,/CD %discnumber%))/$num(%track%,2) $if1($strcmp(%artist%,%albumartist%),,%artist% - )%title%%fileext%',
+            'formatted_string': '%albumartist%/[%year%] %album%/$if1($strcmp("%totaldiscs%",""),"",$ifequal("%totaldiscs%","1","","CD %discnumber%/"))$num("%track%","2") $if1($strcmp("%artist%","%albumartist%"),"","%artist% - ")%title%%fileext%',
             'test': 'Advance/[2014] Deus Ex Machina/CD 2/09 When we return.flac',
             '%artist%': 'Advance',
             '%albumartist%': 'Advance',
             '%year%': '2014',
             '%album%': 'Deus Ex Machina',
-            # '%discnumber%': '2',
-            '%totaldiscs%': '2',
+            '%discnumber%': '2',
+            # '%totaldiscs%': '2',
             '%title%': 'When we return',
             '%track%': '9',
             '%fileext%': '.flac',
         }
 
         various = {
-            'formatted_string': '$if1($strcmp(%albumartist%,Various Artists),Various Artists,%albumartist%)/[%year%] %album%/$num(%track%,2) $if1($strcmp(%artist%,%albumartist%),,%artist% - )%title%%fileext%',
+            'formatted_string': '%albumartist%/[%year%] %album%/$num(\'%track%\',\'2\') $if1($strcmp("%artist%","%albumartist%"),"","%artist% - ")%title%%fileext%',
             'test': 'Various Artists/[2016] Modern EBM/05 Advance - Dead technology.flac',
             '%artist%': 'Advance',
             '%albumartist%': 'Various Artists',
@@ -79,20 +79,21 @@ class StringFormatting(object):
 
         """Test 2: track from a single artist album"""
         result = stringFormatting.parseString(track['formatted_string'], track)
+        print(result)
         output = 'Output should read "{}": {}'.format(track['test'], failMessage if result != track['test'] else passMessage)
         print(output)
 
-        # """Test 3: track from a various artist album"""
-        # result = stringFormatting.parseString(various['formatted_string'], various)
-        # output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
-        # print(output)
-        #
-        # """Test 4: track from a multidisc album"""
-        # result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
-        # print(result)
-        # output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
-        # print(output)
-        #
+        """Test 3: track from a various artist album"""
+        result = stringFormatting.parseString(various['formatted_string'], various)
+        output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
+        print(output)
+
+        """Test 4: track from a multidisc album"""
+        result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
+        print(result)
+        output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
+        print(output)
+
 
 
     def ifequal(self, int1,int2,yes,nope):
@@ -100,7 +101,7 @@ class StringFormatting(object):
         print(int2)
         print(yes)
         print(nope)
-        result = yes if int(int1) == int(int2) else nope
+        result = yes if int1 == int2 else nope
         print(result)
         return result
 
@@ -117,7 +118,12 @@ class StringFormatting(object):
         return result
 
     def if1(self, cond, string1, string2=''):
+        print(cond)
+        print(string1)
+        print(string2)
+        print(cond)
         result = string1 if cond == True else string2
+        print(result)
         return result
 
     def parseString(self, string, data):
@@ -161,13 +167,14 @@ class StringFormatting(object):
                 command += c
                 if hierarchy == 0:
                     result = self.execute(command)
+                    output += result
                     command = ''
             elif hierarchy > 0:
                 command += c
             else:
                 output += c
             lastchar = c
-
+        print(output)
         return output
 
     def execute(self, string):
@@ -176,7 +183,17 @@ class StringFormatting(object):
         """
         output = ''
 
+        print('excecute')
         print(string)
+
+        functNameMatch = re.findall(r'(\$[a-z0-9_]+)\(', string)
+        for match in functNameMatch:
+            if match not in self.functions:
+                 return 'unknown command'
+        string = re.sub(r'\$', 'self.', string)
+        print(functNameMatch)
+        print(string)
+        # parameters = re.findall(r'\(\w[^\(\)*]\)*', string)
 
         # TODO: do this differently!!!
         # funtNameMatch = re.search(r'(\$[a-z0-9_]+)', string)
@@ -201,8 +218,8 @@ class StringFormatting(object):
         # # if len(parameters) != self.functions[funtNameMatch.group(1)]:
         # #     return 'wrong number of arguments'
 
-        result = eval(function + str(tuple(parameters)))
-
+        result = eval(string)
+        print(result)
         return result
 
 
