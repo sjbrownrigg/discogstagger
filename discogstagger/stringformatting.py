@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import re, os
 
 class StringFormatting(object):
@@ -17,6 +17,7 @@ class StringFormatting(object):
             '$num': 2,
             '$strcmp': 2,
             '$if1': 3,  # cannot use $if
+            '$ifequal': 4,
         }
 
     def test(self):
@@ -28,6 +29,20 @@ class StringFormatting(object):
             '%albumartist%': 'Advance',
             '%year%': '2014',
             '%album%': 'Deus Ex Machina',
+            '%title%': 'When we return',
+            '%track%': '9',
+            '%fileext%': '.flac',
+        }
+
+        multidisctrack = {
+            'formatted_string': '%albumartist%/[%year%] %album%$if1($strcmp(%totaldiscs%,),,$ifequal(%totaldiscs%,1,YEP,/CD %discnumber%))/$num(%track%,2) $if1($strcmp(%artist%,%albumartist%),,%artist% - )%title%%fileext%',
+            'test': 'Advance/[2014] Deus Ex Machina/CD 2/09 When we return.flac',
+            '%artist%': 'Advance',
+            '%albumartist%': 'Advance',
+            '%year%': '2014',
+            '%album%': 'Deus Ex Machina',
+            # '%discnumber%': '2',
+            '%totaldiscs%': '2',
             '%title%': 'When we return',
             '%track%': '9',
             '%fileext%': '.flac',
@@ -64,6 +79,23 @@ class StringFormatting(object):
         output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
         print(output)
 
+        """Test 4: track from a multidisc album"""
+        result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
+        print(result)
+        output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
+        print(output)
+
+
+
+    def ifequal(self, int1,int2,yes,nope):
+        print(int1)
+        print(int2)
+        print(yes)
+        print(nope)
+        result = yes if int(int1) == int(int2) else nope
+        print(result)
+        return result
+
 
     def num(self, num, places):
         string = '{:0>%%}'
@@ -72,9 +104,9 @@ class StringFormatting(object):
         return string
 
     def strcmp(self, string1, string2):
-        return str(string1 == string2)
+        return str(string1) == str(string2)
 
-    def if1(self, cond, string1, string2):
+    def if1(self, cond, string1, string2=''):
         result = string1 if cond == 'True' else string2
         return result
 
@@ -86,20 +118,28 @@ class StringFormatting(object):
             There is probably a clever way to do this with regex, but doing
             it this way to properly manage nested functions
         """
-        # print(string)
+        print(string)
         output = ''
 
         # TODO: substitutions will happen later on when script embedded
         subs = set(re.findall(r'(%.*?%)', string))
+        print(subs)
         for sub in subs:
-            string = re.sub(sub, data[sub], string)
+            if sub in data:
+                string = re.sub(sub, data[sub], string)
+            else:
+                string = re.sub(sub, '', string)
 
         command = {}
+        flags = {}
         """hierarchy used to track & collect nested functions
         """
         hierarchy = 0
         lastchar = ''
         for c in string:
+            print(command)
+            print(flags)
+            print(output)
             if c == '$':
                 hierarchy = hierarchy + 1
                 command[hierarchy] = c
@@ -110,9 +150,12 @@ class StringFormatting(object):
             elif re.search(r'\)', c) and lastchar != '\\':
                 command[hierarchy] += c
                 result = self.execute(command[hierarchy])
+                print(type(result))
+                if type(result) == bool:
+                    flags[hierarchy] = result
                 hierarchy = hierarchy - 1
                 if hierarchy > 0:
-                    command[hierarchy] += result
+                    command[hierarchy] += str(result)
                 else:
                     output += result
             elif hierarchy > 0:
@@ -148,9 +191,13 @@ class StringFormatting(object):
             # TODO hand over to function that handles placeholder substitution
             print(param)
 
-        if len(parameters) != self.functions[funtNameMatch.group(1)]:
-            return 'wrong number of arguments'
+        # if len(parameters) != self.functions[funtNameMatch.group(1)]:
+        #     return 'wrong number of arguments'
 
         result = eval(function + str(tuple(parameters)))
 
         return result
+
+
+stringFormatting = StringFormatting()
+stringFormatting.test()
