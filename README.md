@@ -1,14 +1,15 @@
-# discogstagger2
+# discogstagger3
 
  [![Build Status](https://travis-ci.org/triplem/discogstagger.png)](http://travis-ci.org/triplem/discogstagger) [![Coverage Status](https://coveralls.io/repos/triplem/discogstagger/badge.png)](https://coveralls.io/r/triplem/discogstagger)
 
 
 ## What is it
 
-discogstagger2 is a console based audio meta-data tagger. Release data is
+discogstagger3 is a console based audio meta-data tagger. Release data is
 retrieved via the discogs.com API.
 
-discogstagger2 is based on the great work of [jesseward](https://github.com/jesseward/discogstagger).
+discogstagger3 is based on the great work of [jesseward](https://github.com/jesseward/discogstagger)
+and forked from [triplem](htps://github.com/triplem/discogstagger).
 
 Simply provide the script with a base directory, that contains an album
 consisting of either FLAC or MP3 media files and the discogs.com
