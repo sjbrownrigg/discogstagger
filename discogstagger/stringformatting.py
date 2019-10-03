@@ -23,7 +23,7 @@ class StringFormatting(object):
     def test(self):
 
         track = {
-            'formatted_string': '%albumartist%/[%year%] %album%/$num(%track%,2) $if1($strcmp(%artist%,%albumartist%),,%artist% - )%title%%fileext%',
+            'formatted_string': '%albumartist%/[%year%] %album%/$num(%track%,2) $if1($strcmp("%artist%","%albumartist%"),"","%artist% - ")%title%%fileext%',
             'test': 'Advance/[2014] Deus Ex Machina/09 When we return.flac',
             '%artist%': 'Advance',
             '%albumartist%': 'Advance',
@@ -60,6 +60,14 @@ class StringFormatting(object):
             '%fileext%': '.flac',
         }
 
+
+
+        string = "Advance/[2014] Deus Ex Machina$if1($strcmp(2,),,$ifequal(2,1,YEP,/CD ))/$num(9,2) $if1($strcmp(Advance,Advance),,Advance - )When we return.flac"
+        commands = 'self.if1(self.strcmp("Advance","Advance"),"smae","Advance - ")'
+
+        # commands = "self.if1(self.strcmp('2','1'),'',self.ifequal('2','2','','/CD '))"
+        result = eval(commands)
+        print(result)
         passMessage = 'Pass'
         failMessage = 'Fail'
 
@@ -74,17 +82,17 @@ class StringFormatting(object):
         output = 'Output should read "{}": {}'.format(track['test'], failMessage if result != track['test'] else passMessage)
         print(output)
 
-        """Test 3: track from a various artist album"""
-        result = stringFormatting.parseString(various['formatted_string'], various)
-        output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
-        print(output)
-
-        """Test 4: track from a multidisc album"""
-        result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
-        print(result)
-        output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
-        print(output)
-
+        # """Test 3: track from a various artist album"""
+        # result = stringFormatting.parseString(various['formatted_string'], various)
+        # output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
+        # print(output)
+        #
+        # """Test 4: track from a multidisc album"""
+        # result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
+        # print(result)
+        # output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
+        # print(output)
+        #
 
 
     def ifequal(self, int1,int2,yes,nope):
@@ -104,10 +112,12 @@ class StringFormatting(object):
         return string
 
     def strcmp(self, string1, string2):
-        return str(string1) == str(string2)
+        result = str(string1) == str(string2)
+        print(result)
+        return result
 
     def if1(self, cond, string1, string2=''):
-        result = string1 if cond == 'True' else string2
+        result = string1 if cond == True else string2
         return result
 
     def parseString(self, string, data):
@@ -130,36 +140,30 @@ class StringFormatting(object):
             else:
                 string = re.sub(sub, '', string)
 
-        command = {}
-        flags = {}
+        print(string)
+
+        command = ''
         """hierarchy used to track & collect nested functions
         """
         hierarchy = 0
         lastchar = ''
         for c in string:
             print(command)
-            print(flags)
-            print(output)
             if c == '$':
                 hierarchy = hierarchy + 1
-                command[hierarchy] = c
+                command += c
             elif re.search(r'[\\\/]', c) and lastchar != '\\':
                 output += os.path.sep
             elif re.search(r'\(', c) and lastchar != '\\':
-                command[hierarchy] += c
+                command += c
             elif re.search(r'\)', c) and lastchar != '\\':
-                command[hierarchy] += c
-                result = self.execute(command[hierarchy])
-                print(type(result))
-                if type(result) == bool:
-                    flags[hierarchy] = result
-                hierarchy = hierarchy - 1
-                if hierarchy > 0:
-                    command[hierarchy] += str(result)
-                else:
-                    output += result
+                hierarchy = hierarchy -1
+                command += c
+                if hierarchy == 0:
+                    result = self.execute(command)
+                    command = ''
             elif hierarchy > 0:
-                command[hierarchy] += c
+                command += c
             else:
                 output += c
             lastchar = c
@@ -172,27 +176,30 @@ class StringFormatting(object):
         """
         output = ''
 
-        funtNameMatch = re.search(r'(\$[a-z0-9_]+)', string)
-        if funtNameMatch is None:
-            return 'unknown command'
-        elif funtNameMatch.group(1) not in self.functions:
-            return 'unknown command'
-        else:
-            function = re.sub(r'\$', 'self.', funtNameMatch.group(1))
+        print(string)
 
-        paramString = re.search(r'\((.*)\)$', string)
-        if paramString is None:
-            return 'cannot parse arguments'
-        else:
-            parameters = re.split(r'(?<!\\)(?:\\\\)*,', paramString.group(1))
-
-        """we will need to substitute placeholders before further processing"""
-        for param in parameters:
-            # TODO hand over to function that handles placeholder substitution
-            print(param)
-
-        # if len(parameters) != self.functions[funtNameMatch.group(1)]:
-        #     return 'wrong number of arguments'
+        # TODO: do this differently!!!
+        # funtNameMatch = re.search(r'(\$[a-z0-9_]+)', string)
+        # if funtNameMatch is None:
+        #     return 'unknown command'
+        # elif funtNameMatch.group(1) not in self.functions:
+        #     return 'unknown command'
+        # else:
+        #     function = re.sub(r'\$', 'self.', funtNameMatch.group(1))
+        #
+        # paramString = re.search(r'\((.*)\)$', string)
+        # if paramString is None:
+        #     return 'cannot parse arguments'
+        # else:
+        #     parameters = re.split(r'(?<!\\)(?:\\\\)*,', paramString.group(1))
+        #
+        # """we will need to substitute placeholders before further processing"""
+        # for param in parameters:
+        #     # TODO hand over to function that handles placeholder substitution
+        #     print(param)
+        #
+        # # if len(parameters) != self.functions[funtNameMatch.group(1)]:
+        # #     return 'wrong number of arguments'
 
         result = eval(function + str(tuple(parameters)))
 
