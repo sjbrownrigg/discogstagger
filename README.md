@@ -32,6 +32,20 @@ Optionally discogstagger will embed the found album art into the file meta data
 For detailed configuration options, take a look in the conf/default.conf file, there you will be
 able to see default values as well as a short explanation for each config option.
 
+## Why this version?
+
+I have the ambition of setting this script running on a cron job, so that it proccesses any new releases that are dropped into a folder.  I have used other tagging tools in the past, mp3tag being my favourite, but they all still require a lot of manual input.
+
+I am used to the powerful string formatting functions available to FooBar2000 and mp3tag, and wanted to bring them to an automated script. See http://wiki.hydrogenaud.io/index.php?title=Foobar2000:Title_Formatting_Reference
+
+I also have a large collection of music in cue files, so I wanted to automate their processing too.
+
+With this version I am developing:
+
+  * string formatting functions
+  * cue file processing
+  * searching discogs for release data
+
 ## Develop on discogstagger
 
 If you are developing on discogstagger, please do not forget to check, if the
