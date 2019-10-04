@@ -67,7 +67,7 @@ class FileUtils(object):
                     cue_files.append(file)
                 elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
                     audio_files.append(file)
-            if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
+            if parse_cue_files == 'True' and len(cue_files) > 0 and len(cue_files) == len(audio_files):
                 result = self._processCueFiles(root, cue_files)
                 if result == 0:
                     source_dirs.append(root + '/')
