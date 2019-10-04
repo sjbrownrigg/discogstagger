@@ -46,7 +46,7 @@ class CUE:
                             mode = 'r')
         self.content = f.readlines()
         self.content = [ x.replace("/","\\") for x in self.content]
-	f.close()
+        f.close()
 
     def parse(self):
         scope = 'global'

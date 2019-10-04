@@ -7,7 +7,6 @@ from mutagen.flac import FLAC
 import re
 from subprocess import Popen,PIPE
 from ext.cue import CUE, Track
-import textdistance
 
 import logging
 logger = logging

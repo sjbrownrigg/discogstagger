@@ -18,6 +18,7 @@ from mako.lookup import TemplateLookup
 
 from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.album import Album, Disc, Track
+from discogstagger.stringformatting import StringFormatting
 
 from ext.mediafile import MediaFile
 

@@ -157,7 +157,7 @@ class StringFormatting(object):
         }
 
         various = {
-            'formatted_string': "%albumartist%/[%year%] %album%$if1($strcmp('%totaldiscs%',''),'',$ifgreater('%totaldiscs%', 1,'/CD %discnumber%',''))$if1($strcmp('%disctitle%',''),'',', %disctitle%')/$num('%track%','2') $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ')%title%%fileext%",
+            'formatted_string': "%albumartist%/[%year%] %album% \(%catnumber%\)$if1($strcmp('%totaldiscs%',''),'',$ifgreater('%totaldiscs%', 1,'/CD %discnumber%',''))$if1($strcmp('%disctitle%',''),'',', %disctitle%')/$num('%track%','2') $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ')%title%%fileext%",
             'test': 'Various Artists/[2016] Modern EBM/05 Advance - Dead technology.flac',
             '%artist%': 'Advance',
             '%albumartist%': 'Various Artists',
@@ -192,5 +192,5 @@ class StringFormatting(object):
         output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
         print(output)
 
-# stringFormatting = StringFormatting()
-# stringFormatting.test()
+stringFormatting = StringFormatting()
+stringFormatting.test()

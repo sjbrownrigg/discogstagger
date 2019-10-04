@@ -4,7 +4,12 @@ import logging
 
 import inspect
 
-from ConfigParser import RawConfigParser
+try:
+    import configparser
+except:
+    from six.moves import configparser
+
+from configparser import RawConfigParser
 
 logger = logging
 #.getLogger(__name__)
