@@ -2,14 +2,30 @@
 import re, os
 
 class StringFormatting(object):
-    """ Some string formatting functions. Loosely based on:
+    """ The goal here is to have one formatting string that can cope with any
+        type of release.  We don't want different strings for Various Artists,
+        or multidisc releases, where each disc has a separate title.
+
+        One string to rule them all.
+
+        Some string formatting functions. Loosely based on:
         http://wiki.hydrogenaud.io/index.php?title=Foobar2000:Title_Formatting_Reference
-        Validate anything passed through.  Reject unknown functions and wrong number of paramString
+
+        Limitations:
+            don't leave empty conditions (or potentiall empty), blank
+            placeholders.
+
+            $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ') -- good
+            $if1($strcmp(%artist%,%albumartist%),,%artist% - ) -- bad
 
         Example:
         stringFormatting = StringFormatting()
         stringFormatting.test()
 
+        string = "%albumartist%/[%year%] %album%/$num(%track%,2) $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ')%title%%fileext%"
+        new_string = stringFormatting.parseString(string)
+
+        See tests for more examples
     """
 
     def __init__(self):
@@ -18,91 +34,19 @@ class StringFormatting(object):
             '$strcmp': 2,
             '$if1': 3,  # cannot use $if
             '$ifequal': 4,
+            '$ifgreater': 4,
         }
 
-    def test(self):
-
-        track = {
-            'formatted_string': '%albumartist%/[%year%] %album%/$num(%track%,2) $if1($strcmp("%artist%","%albumartist%"),"","%artist% - ")%title%%fileext%',
-            'test': 'Advance/[2014] Deus Ex Machina/09 When we return.flac',
-            '%artist%': 'Advance',
-            '%albumartist%': 'Advance',
-            '%year%': '2014',
-            '%album%': 'Deus Ex Machina',
-            '%title%': 'When we return',
-            '%track%': '9',
-            '%fileext%': '.flac',
-        }
-
-        multidisctrack = {
-            'formatted_string': '%albumartist%/[%year%] %album%/$if1($strcmp("%totaldiscs%",""),"",$ifequal("%totaldiscs%","1","","CD %discnumber%/"))$num("%track%","2") $if1($strcmp("%artist%","%albumartist%"),"","%artist% - ")%title%%fileext%',
-            'test': 'Advance/[2014] Deus Ex Machina/CD 2/09 When we return.flac',
-            '%artist%': 'Advance',
-            '%albumartist%': 'Advance',
-            '%year%': '2014',
-            '%album%': 'Deus Ex Machina',
-            '%discnumber%': '2',
-            # '%totaldiscs%': '2',
-            '%title%': 'When we return',
-            '%track%': '9',
-            '%fileext%': '.flac',
-        }
-
-        various = {
-            'formatted_string': '%albumartist%/[%year%] %album%/$num(\'%track%\',\'2\') $if1($strcmp("%artist%","%albumartist%"),"","%artist% - ")%title%%fileext%',
-            'test': 'Various Artists/[2016] Modern EBM/05 Advance - Dead technology.flac',
-            '%artist%': 'Advance',
-            '%albumartist%': 'Various Artists',
-            '%year%': '2016',
-            '%album%': 'Modern EBM',
-            '%title%': 'Dead technology',
-            '%track%': '5',
-            '%fileext%': '.flac',
-        }
+    def ifgreater(self, int1,int2,met,unmet):
+        # for convenience if int1 or int2 are None make 0
+        int1 = 0 if int1 is None or int1 == '' else int1
+        int2 = 0 if int2 is None or int2 == '' else int2
+        result = met if int(int1) > int(int2) else unmet
+        return result
 
 
-
-        string = "Advance/[2014] Deus Ex Machina$if1($strcmp(2,),,$ifequal(2,1,YEP,/CD ))/$num(9,2) $if1($strcmp(Advance,Advance),,Advance - )When we return.flac"
-        commands = 'self.if1(self.strcmp("Advance","Advance"),"smae","Advance - ")'
-
-        # commands = "self.if1(self.strcmp('2','1'),'',self.ifequal('2','2','','/CD '))"
-        result = eval(commands)
-        print(result)
-        passMessage = 'Pass'
-        failMessage = 'Fail'
-
-        """Test 1: directly calling function"""
-        result = self.num(8,4)
-        test = '0008'
-        output = 'Output should read: "{}": {}'.format(test, failMessage if result != test else passMessage)
-        print(output)
-
-        """Test 2: track from a single artist album"""
-        result = stringFormatting.parseString(track['formatted_string'], track)
-        print(result)
-        output = 'Output should read "{}": {}'.format(track['test'], failMessage if result != track['test'] else passMessage)
-        print(output)
-
-        """Test 3: track from a various artist album"""
-        result = stringFormatting.parseString(various['formatted_string'], various)
-        output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
-        print(output)
-
-        """Test 4: track from a multidisc album"""
-        result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
-        print(result)
-        output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
-        print(output)
-
-
-
-    def ifequal(self, int1,int2,yes,nope):
-        print(int1)
-        print(int2)
-        print(yes)
-        print(nope)
-        result = yes if int1 == int2 else nope
-        print(result)
+    def ifequal(self, int1,int2,met,unmet):
+        result = met if int(int1) == int(int2) else unmet
         return result
 
 
@@ -114,16 +58,10 @@ class StringFormatting(object):
 
     def strcmp(self, string1, string2):
         result = str(string1) == str(string2)
-        print(result)
         return result
 
     def if1(self, cond, string1, string2=''):
-        print(cond)
-        print(string1)
-        print(string2)
-        print(cond)
         result = string1 if cond == True else string2
-        print(result)
         return result
 
     def parseString(self, string, data):
@@ -134,19 +72,16 @@ class StringFormatting(object):
             There is probably a clever way to do this with regex, but doing
             it this way to properly manage nested functions
         """
-        print(string)
         output = ''
 
         # TODO: substitutions will happen later on when script embedded
         subs = set(re.findall(r'(%.*?%)', string))
-        print(subs)
+
         for sub in subs:
             if sub in data:
                 string = re.sub(sub, data[sub], string)
             else:
                 string = re.sub(sub, '', string)
-
-        print(string)
 
         command = ''
         """hierarchy used to track & collect nested functions
@@ -154,12 +89,10 @@ class StringFormatting(object):
         hierarchy = 0
         lastchar = ''
         for c in string:
-            print(command)
+            # print(command)
             if c == '$':
                 hierarchy = hierarchy + 1
                 command += c
-            elif re.search(r'[\\\/]', c) and lastchar != '\\':
-                output += os.path.sep
             elif re.search(r'\(', c) and lastchar != '\\':
                 command += c
             elif re.search(r'\)', c) and lastchar != '\\':
@@ -174,7 +107,7 @@ class StringFormatting(object):
             else:
                 output += c
             lastchar = c
-        print(output)
+
         return output
 
     def execute(self, string):
@@ -183,45 +116,81 @@ class StringFormatting(object):
         """
         output = ''
 
-        print('excecute')
-        print(string)
+#TODO:  regex to capture empty & unquoted parameters
 
         functNameMatch = re.findall(r'(\$[a-z0-9_]+)\(', string)
         for match in functNameMatch:
             if match not in self.functions:
                  return 'unknown command'
         string = re.sub(r'\$', 'self.', string)
-        print(functNameMatch)
-        print(string)
-        # parameters = re.findall(r'\(\w[^\(\)*]\)*', string)
-
-        # TODO: do this differently!!!
-        # funtNameMatch = re.search(r'(\$[a-z0-9_]+)', string)
-        # if funtNameMatch is None:
-        #     return 'unknown command'
-        # elif funtNameMatch.group(1) not in self.functions:
-        #     return 'unknown command'
-        # else:
-        #     function = re.sub(r'\$', 'self.', funtNameMatch.group(1))
-        #
-        # paramString = re.search(r'\((.*)\)$', string)
-        # if paramString is None:
-        #     return 'cannot parse arguments'
-        # else:
-        #     parameters = re.split(r'(?<!\\)(?:\\\\)*,', paramString.group(1))
-        #
-        # """we will need to substitute placeholders before further processing"""
-        # for param in parameters:
-        #     # TODO hand over to function that handles placeholder substitution
-        #     print(param)
-        #
-        # # if len(parameters) != self.functions[funtNameMatch.group(1)]:
-        # #     return 'wrong number of arguments'
-
         result = eval(string)
-        print(result)
+
         return result
 
+    def test(self):
+        track = {
 
-stringFormatting = StringFormatting()
-stringFormatting.test()
+            'formatted_string': "%albumartist%/[%year%] %album%$if1($strcmp('%totaldiscs%',''),'',$ifgreater('%totaldiscs%', 1,'/CD %discnumber%',''))$if1($strcmp('%disctitle%',''),'',', %disctitle%')/$num('%track%','2') $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ')%title%%fileext%",
+            'test': 'Advance/[2014] Deus Ex Machina/09 When we return.flac',
+            '%artist%': 'Advance',
+            '%albumartist%': 'Advance',
+            '%year%': '2014',
+            '%album%': 'Deus Ex Machina',
+            '%title%': 'When we return',
+            '%track%': '9',
+            '%fileext%': '.flac',
+        }
+
+        multidisctrack = {
+            'formatted_string': "%albumartist%/[%year%] %album%$if1($strcmp('%totaldiscs%',''),'',$ifgreater('%totaldiscs%', 1,'/CD %discnumber%',''))$if1($strcmp('%disctitle%',''),'',', %disctitle%')/$num('%track%','2') $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ')%title%%fileext%",
+            'test': 'Advance/[2014] Deus Ex Machina/CD 2, Bonus tracks/09 When we return.flac',
+            '%artist%': 'Advance',
+            '%albumartist%': 'Advance',
+            '%year%': '2014',
+            '%album%': 'Deus Ex Machina',
+            '%discnumber%': '2',
+            '%totaldiscs%': '2',
+            '%disctitle%': 'Bonus tracks',
+            '%title%': 'When we return',
+            '%track%': '9',
+            '%fileext%': '.flac',
+        }
+
+        various = {
+            'formatted_string': "%albumartist%/[%year%] %album%$if1($strcmp('%totaldiscs%',''),'',$ifgreater('%totaldiscs%', 1,'/CD %discnumber%',''))$if1($strcmp('%disctitle%',''),'',', %disctitle%')/$num('%track%','2') $if1($strcmp('%artist%','%albumartist%'),'','%artist% - ')%title%%fileext%",
+            'test': 'Various Artists/[2016] Modern EBM/05 Advance - Dead technology.flac',
+            '%artist%': 'Advance',
+            '%albumartist%': 'Various Artists',
+            '%year%': '2016',
+            '%album%': 'Modern EBM',
+            '%title%': 'Dead technology',
+            '%track%': '5',
+            '%fileext%': '.flac',
+        }
+
+        passMessage = 'Pass'
+        failMessage = 'Fail'
+
+        """Test 1: directly calling function"""
+        result = self.num(8,4)
+        test = '0008'
+        output = 'Output should read: "{}": {}'.format(test, failMessage if result != test else passMessage)
+        print(output)
+
+        """Test 2: track from a single artist album"""
+        result = stringFormatting.parseString(track['formatted_string'], track)
+        output = 'Output should read "{}": {}'.format(track['test'], failMessage if result != track['test'] else passMessage)
+        print(output)
+
+        """Test 3: track from a various artist album"""
+        result = stringFormatting.parseString(various['formatted_string'], various)
+        output = 'Output should read "{}": {}'.format(various['test'], failMessage if result != various['test'] else passMessage)
+        print(output)
+
+        """Test 4: track from a multidisc album"""
+        result = stringFormatting.parseString(multidisctrack['formatted_string'], multidisctrack)
+        output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
+        print(output)
+
+# stringFormatting = StringFormatting()
+# stringFormatting.test()
