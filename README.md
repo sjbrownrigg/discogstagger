@@ -46,6 +46,8 @@ With this version I am developing:
   * cue file processing
   * searching discogs for release data
 
+This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
+
 ## Develop on discogstagger
 
 If you are developing on discogstagger, please do not forget to check, if the
