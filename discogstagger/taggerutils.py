@@ -474,8 +474,15 @@ class TaggerUtils(object):
         """ Generates the filename tagging map
             avoid usage of file extension here already, could lead to problems
         """
+        stringFormatting = StringFormatting()
         format = self._value_from_tag_format(format, discno, trackno, filetype)
+
+        print(format)
+
+        format = stringFormatting.parseString(format)
         format = self.get_clean_filename(format)
+
+        print(format)
 
         logger.debug("output: %s" % format)
 
@@ -600,7 +607,7 @@ class TaggerUtils(object):
 
             self._set_target_discs_and_tracks(filetype)
 
-        except OSError, e:
+        except (OSError) as e:
             if e.errno == errno.EEXIST:
                 logger.error("No such directory '%s'", self.sourcedir)
                 raise TaggerError("No such directory '%s'", self.sourcedir)
@@ -663,10 +670,12 @@ class TaggerUtils(object):
             a = a.replace(k, v)
 
         a = normalize("NFKD", a).encode("ascii", "ignore")
+        print(a)
 
         cf = re.compile(r"[^-\w.\(\)_\[\]]")
         cf = cf.sub("", str(a))
 
+        print(cf)
         # Don't force space/underscore replacement. If the user want's this it
         # can be done via config. The user may want spaces.
         # cf = cf.replace(" ", "_")

@@ -64,7 +64,7 @@ class StringFormatting(object):
         result = string1 if cond == True else string2
         return result
 
-    def parseString(self, string, data):
+    def parseString(self, string):
         """ Walk through the input string, collecting functions along the way.
 
             string = 'some text $functionname(arg1,arg2, ...)'
@@ -75,13 +75,13 @@ class StringFormatting(object):
         output = ''
 
         # TODO: substitutions will happen later on when script embedded
-        subs = set(re.findall(r'(%.*?%)', string))
-
-        for sub in subs:
-            if sub in data:
-                string = re.sub(sub, data[sub], string)
-            else:
-                string = re.sub(sub, '', string)
+        # subs = set(re.findall(r'(%.*?%)', string))
+        #
+        # for sub in subs:
+        #     if sub in data:
+        #         string = re.sub(sub, data[sub], string)
+        #     else:
+        #         string = re.sub(sub, '', string)
 
         command = ''
         """hierarchy used to track & collect nested functions
@@ -192,5 +192,5 @@ class StringFormatting(object):
         output = 'Output should read "{}": {}'.format(multidisctrack['test'], failMessage if result != multidisctrack['test'] else passMessage)
         print(output)
 
-stringFormatting = StringFormatting()
-stringFormatting.test()
+# stringFormatting = StringFormatting()
+# stringFormatting.test()
