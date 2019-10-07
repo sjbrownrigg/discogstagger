@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from urllib import FancyURLopener
+# from urllib import FancyURLopener
 import errno
 import os
 import re
@@ -22,19 +22,20 @@ from discogstagger.stringformatting import StringFormatting
 
 from ext.mediafile import MediaFile
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
+# commenting these out (python3)
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 logger = logging
 
-class TagOpener(FancyURLopener, object):
-
-    version = "discogstagger2"
-
-    def __init__(self, user_agent):
-        self.version = user_agent
-        FancyURLopener.__init__(self)
-
+# class TagOpener(FancyURLopener, object):
+#
+#     version = "discogstagger2"
+#
+#     def __init__(self, user_agent):
+#         self.version = user_agent
+#         FancyURLopener.__init__(self)
+#
 class TaggerError(Exception):
     """ A central exception for all errors happening during the tagging
     """
@@ -450,6 +451,29 @@ class TaggerUtils(object):
             Transfer this via a map.
         """
         property_map = {
+
+            '%album artist%': self.album.artist,
+            '%albumartist%': self.album.artist,
+            '%album%': self.album.title,
+            '%artist%': self.album.disc(discno).track(trackno).artist,
+            '%discnumber%':discno,
+            '%totaldiscs%':'',
+            '%track artist%': self.album.disc(discno).track(trackno).artist,
+            '%title%': self.album.disc(discno).track(trackno).title,
+            '%tracknumber%': "%.2d" % trackno,
+            '%track number%': "%.2d" % trackno,
+            '%bitrate%':'',
+            '%channels%':'',
+            '%codec%': self.album.codec,
+            '%filesize%':'',
+            '%filesize_natural%':'',
+            '%length%':'',
+            '%length_ex%':'',
+            '%length_seconds%':'',
+            '%length_seconds_fp%':'',
+            '%length_samples%':'',
+            '%samplerate%':'',
+
             "%ALBTITLE%": self.album.title,
             "%ALBARTIST%": self.album.artist,
             "%YEAR%": self.album.year,
