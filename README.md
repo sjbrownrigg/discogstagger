@@ -9,7 +9,7 @@ discogstagger3 is a console based audio meta-data tagger. Release data is
 retrieved via the discogs.com API.
 
 discogstagger3 is based on the great work of [jesseward](https://github.com/jesseward/discogstagger)
-and forked from [triplem](https://github.com/triplem/discogstagger).
+and forked from the work done by [triplem](https://github.com/triplem/discogstagger).
 
 Simply provide the script with a base directory, that contains an album
 consisting of either FLAC or MP3 media files and the discogs.com
@@ -34,7 +34,7 @@ able to see default values as well as a short explanation for each config option
 
 ## Why this version?
 
-I have the ambition of setting this script running on a cron job, so that it proccesses any new releases that are dropped into a folder.  I have used other tagging tools in the past, mp3tag being my favourite, but they all still require a lot of manual input.
+I have the ambition of setting this script running as a cron job, so that it proccesses any new releases that are dropped into a folder.  I have used other tagging tools in the past, mp3tag being my favourite, but they all still require a lot of manual input.
 
 I am used to the powerful string formatting functions available to FooBar2000 and mp3tag, and wanted to bring them to an automated script. See http://wiki.hydrogenaud.io/index.php?title=Foobar2000:Title_Formatting_Reference
 
@@ -45,6 +45,8 @@ With this version I am developing:
   * string formatting functions
   * cue file processing
   * searching discogs for release data
+
+This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
 
 ## Develop on discogstagger
 
