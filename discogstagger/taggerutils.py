@@ -631,7 +631,7 @@ class TaggerUtils(object):
             if dest_dir == "":
                 dest_dir = d_dir
             else:
-                dest_dir = dest_dir + "/" + d_dir
+                dest_dir = os.path.join(dest_dir, d_dir)
 
             logger.debug("d_dir: %s" % dest_dir)
 
