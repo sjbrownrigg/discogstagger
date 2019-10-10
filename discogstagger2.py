@@ -92,6 +92,7 @@ pp.pprint(source_dirs)
 for source_dir in source_dirs:
     releaseid = None
     release = None
+    connector = None
     try:
         done_file = tagger_config.get("details", "done_file")
         done_file_path = os.path.join(source_dir, done_file)
@@ -114,6 +115,7 @@ for source_dir in source_dirs:
             # reuse the Discogs Release class, it saves re-fetching later
             if release is not None and type(release).__name__ in ('Release', 'Version'):
                 releaseid = release.id
+                connector = discogs_connector
 
         if not releaseid:
             logger.warn('No releaseid for {}'.format(source_dir))
