@@ -31,7 +31,7 @@ class TaggerConfig(RawConfigParser):
     """ provides the configuration mechanisms for the discogstagger """
 
     def __init__(self, config_file):
-        RawConfigParser.__init__(self)
+        RawConfigParser.__init__(self, strict=False)
         self.read(os.path.join("conf", "default.conf"))
         self.read(config_file)
 
@@ -46,8 +46,8 @@ class TaggerConfig(RawConfigParser):
         config_value = self.get(section, name)
         return config_value.replace("\"", "")
 
-    def get(self, section, name):
-        config_value = RawConfigParser.get(self, section, name)
+    def get(self, section, name, **kw):
+        config_value = RawConfigParser.get(self, section, name, raw=True)
 
         if config_value == "":
             config_value = None
@@ -60,7 +60,8 @@ class TaggerConfig(RawConfigParser):
     def get_character_exceptions(self):
         """ placeholders for special characters within character exceptions. """
 
-        exceptions = self._sections["character_exceptions"]
+
+        exceptions = self._sections["character_exceptions"] if "character_exceptions" in self._sections else {}
 
         KEYS = {
             "{space}": " ",
@@ -85,7 +86,7 @@ class TaggerConfig(RawConfigParser):
             return all configured tags to be able to overwrite certain
             tags via a configuration file (e.g. id.txt)
         """
-        tags = self._sections["tags"]
+        tags = self._sections["tags"] if 'tags' in self._sections else {}
 
         try:
             del tags["__name__"]

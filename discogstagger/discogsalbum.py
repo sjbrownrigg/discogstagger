@@ -16,7 +16,7 @@ import discogs_client as discogs
 
 import json
 
-from album import Album, Disc, Track
+from discogstagger.album import Album, Disc, Track
 
 logger = logging
 
@@ -107,10 +107,10 @@ class DiscogsConnector(object):
         consumer_secret = self.config.get("discogs", "consumer_secret")
 
         # allow config override thru env variables
-        if os.environ.has_key("DISCOGS_CONSUMER_KEY"):
+        if 'DISCOGS_CONSUMER_KEY' in os.environ:
             consumer_key = os.environ.get('DISCOGS_CONSUMER_KEY')
-        if os.environ.has_key("DISCOGS_CONSUMER_SECRET"):
-            consumer_secret = os.environ.get("DISCOGS_CONSUMER_SECRET")
+        if 'DISCOGS_CONSUMER_SECRET' in os.environ:
+            consumer_secret = os.environ.get('DISCOGS_CONSUMER_SECRET')
 
         if consumer_key and consumer_secret:
             logger.debug('authenticating at discogs using consumer key {0}'.format(consumer_key))

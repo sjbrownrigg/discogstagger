@@ -5,6 +5,7 @@ import errno
 import logging
 import logging.config
 import sys
+print(sys.version)
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -60,7 +61,7 @@ logger = logging.getLogger(__name__)
 
 # read necessary config options for batch processing
 id_file = tagger_config.get("batch", "id_file")
-options.searchDiscogs = tagger_config.get("batch", "searchDiscogs")
+options.searchDiscogs = tagger_config.get('batch', 'searchDiscogs')
 # options.parse_cue_files = tagger_config.get('cue', 'parse_cue_files')
 
 file_utils = FileUtils(tagger_config)
