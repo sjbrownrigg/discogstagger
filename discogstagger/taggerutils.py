@@ -455,6 +455,7 @@ class TaggerUtils(object):
             '%album artist%': self.album.artist,
             '%albumartist%': self.album.artist,
             '%album%': self.album.title,
+            "%year%": self.album.year,
             '%artist%': self.album.disc(discno).track(trackno).artist,
             '%discnumber%':discno,
             '%totaldiscs%':'',
@@ -498,11 +499,10 @@ class TaggerUtils(object):
         """ Generates the filename tagging map
             avoid usage of file extension here already, could lead to problems
         """
+
+        print('_value_from_tag')
         stringFormatting = StringFormatting()
         format = self._value_from_tag_format(format, discno, trackno, filetype)
-
-        print(format)
-
         format = stringFormatting.parseString(format)
         format = self.get_clean_filename(format)
 
@@ -683,20 +683,26 @@ class TaggerUtils(object):
 
         filename, fileext = os.path.splitext(f)
 
+        print('get_clean_filename')
+
         if not fileext in TaggerUtils.FILE_TYPE and not fileext in [".m3u", ".nfo"]:
             logger.debug("fileext: %s" % fileext)
             filename = f
             fileext = ""
 
-        a = unicode(filename, "utf-8")
 
-        for k, v in self.char_exceptions.iteritems():
-            a = a.replace(k, v)
-
-        a = normalize("NFKD", a).encode("ascii", "ignore")
+        print(filename)
+        a = str(filename)
         print(a)
 
-        cf = re.compile(r"[^-\w.\(\)_\[\]]")
+
+        for k, v in self.char_exceptions.items():
+            a = a.replace(k, v)
+
+        a = normalize("NFKD", a)
+        print(a)
+
+        cf = re.compile(r"[^-\w.\(\)_\[\]\s]")
         cf = cf.sub("", str(a))
 
         print(cf)
@@ -710,6 +716,8 @@ class TaggerUtils(object):
 
         if self.use_lower:
             cf = cf.lower()
+
+        print(cf)
 
         return cf
 

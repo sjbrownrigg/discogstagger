@@ -32,10 +32,20 @@ class DiscogsSearch(object):
         """ get search parameters to find release on discogs
         """
 
+        print('Setting original metadata for search purposes')
+
         files = self._getMusicFiles(source_dir)
+
         searchParams = {}
         for file in files:
+
+            head, tail = os.path.split(file)
+
+            file = tail
+
+            print(file)
             metadata = MediaFile(os.path.join(source_dir, file))
+
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
             searchParams['album'] = metadata.album
@@ -49,6 +59,8 @@ class DiscogsSearch(object):
                 searchParams['tracks'][track] = {}
             searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
             searchParams['tracks'][track]['title'] = metadata.title
+        print(searchParams)
+
         return searchParams
 
     def _getMusicFiles(self, source_dir):
@@ -85,10 +97,9 @@ class DiscogsConnector(object):
         self.config = tagger_config
         self.user_agent = self.config.get("common", "user_agent")
         self.discogs_client = discogs.Client(self.user_agent)
-        self.tracklength_tolerance = self.config.get("batch", "tracklength_tolerance")
+        self.tracklength_tolerance = self.config.getfloat("batch", "tracklength_tolerance")
         self.discogs_auth = False
         self.rate_limit_pool = {}
-
 
         skip_auth = self.config.get("discogs", "skip_auth")
 
@@ -160,7 +171,7 @@ class DiscogsConnector(object):
                 request_token, request_token_secret, authorize_url = self.discogs_client.get_authorize_url()
 
                 print('Visit this URL in your browser: ' + authorize_url)
-                pin = raw_input('Enter the PIN you got from the above url: ')
+                pin = input('Enter the PIN you got from the above url: ')
 
                 access_token, access_secret = self.discogs_client.get_access_token(pin)
 
@@ -168,7 +179,7 @@ class DiscogsConnector(object):
                 with open(token_file, 'w') as fh:
                     fh.write('{0},{1}'.format(access_token, access_secret))
             else:
-                self.discogs_client.set_token(unicode(access_token), unicode(access_secret))
+                self.discogs_client.set_token(str(access_token), str(access_secret))
 
             logger.debug('filled session....')
 
@@ -199,9 +210,8 @@ class DiscogsConnector(object):
         token_file_name = '.token'
         return os.path.join(cwd, token_file_name)
 
-    def search_discogs(self, searchParams):
-        candidates = []
 
+    def _rateLimit(self):
         rate_limit_type = 'metadata'
 
         if rate_limit_type in self.rate_limit_pool:
@@ -214,31 +224,53 @@ class DiscogsConnector(object):
 
         self.rate_limit_pool[rate_limit_type] = rl
 
+    def search_discogs(self, searchParams):
+        self._rateLimit()
+
+        print('Searching discogs')
+
+        candidates = []
+
         results = self.discogs_client.search(searchParams['artist'], type='artist')
         for result in results:
-            if searchParams['artist'].lower() == result.name.lower():
+            a = searchParams['artist'].lower()
+            # workaround for many artists with the same name, e.g. Deimos (3)
+            n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
+            # print(n)
+            if a == n:
                 for release in result.releases:
-                    # pp.pprint(searchParams['album'])
-                    if searchParams['album'] == release.title or release.title in searchParams['album'] or searchParams['album'] in release.title:
-                        # pp.pprint('matched title')
-                        # pp.pprint(release.title)
-                        # pp.pprint(release.tracklist)
-                        for version in release.versions:
-                            # pp.pprint(version.tracklist)
-                            trackInfo = self._getTrackInfo(version)
-                            # pp.pprint(trackInfo)
-                            # pp.pprint(searchParams)
+                    r = release.title.lower()
+                    # print(r)
+                    s = searchParams['album'].lower()
+                    # print(s)
+                    if s == r or r in s or s in r:
+                        pp.pprint('matched title')
+                        pp.pprint(release.title)
+                        pp.pprint(release.tracklist)
+                        print()
+                        if hasattr(release, 'versions') == True:
+                            for version in release.versions:
+                                # pp.pprint(version.tracklist)
+                                trackInfo = self._getTrackInfo(version)
+                                # pp.pprint(trackInfo)
+                                # pp.pprint(searchParams)
+                                if len(searchParams['tracks']) == len(trackInfo):
+                                    if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
+                                        candidates.append(version)
+                        else:
+                            trackInfo = self._getTrackInfo(release)
                             if len(searchParams['tracks']) == len(trackInfo):
                                 if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
-                                    candidates.append(version)
+                                    candidates.append(release)
+
 
         if len(candidates) == 1:
             print(candidates[0].id)
-            return candidates[0].id
+            return candidates[0]
 
 # TODO: better comparison of releases, maybe based on quality of the metadata
         elif len(candidates) > 1:
-            return candidates[0].id
+            return candidates[0]
             if searchParams['year'] is not None:
                 for version in candidates:
                     print(version.id)
@@ -246,6 +278,8 @@ class DiscogsConnector(object):
                         return version.id
             elif version.format == 'CD':
                         return version.id
+        else:
+            return None
 
     def _paddedHMS(self, string):
         array = [int(s) for s in string.split(':')]
@@ -384,8 +418,8 @@ class LocalDiscogsConnector(object):
             return {self.convert(key): self.convert(value) for key, value in input.iteritems()}
         elif isinstance(input, list):
             return [self.convert(element) for element in input]
-        elif isinstance(input, unicode):
-            return input.encode('utf-8')
+        # elif isinstance(input, unicode):
+        #     return input.encode('utf-8')
         else:
             return input
 

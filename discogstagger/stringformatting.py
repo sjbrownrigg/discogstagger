@@ -74,6 +74,8 @@ class StringFormatting(object):
         """
         output = ''
 
+        print('parseString, input: {}'.format(string))
+
         # TODO: substitutions will happen later on when script embedded
         # subs = set(re.findall(r'(%.*?%)', string))
         #
@@ -107,6 +109,8 @@ class StringFormatting(object):
             else:
                 output += c
             lastchar = c
+
+        print('parseString, output: {}'.format(output))
 
         return output
 
