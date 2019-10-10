@@ -1,41 +1,26 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import os
 import errno
 import logging
 import logging.config
 import sys
+print(sys.version)
+
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
 from optparse import OptionParser
+# import pysplitcue
 
+from discogstagger.fileutils import FileUtils
 from discogstagger.tagger_config import TaggerConfig
-from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError
+from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError, DiscogsSearch
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
-def read_id_file(dir, file_name, options):
-    # read tags from batch file if available
-    idfile = os.path.join(dir, file_name)
-    if os.path.exists(idfile):
-        logger.info("reading id file %s in %s" % (file_name, dir))
-        tagger_config.read(idfile)
-        source_type = tagger_config.get("source", "name")
-        id_name = tagger_config.get("source", source_type)
-        releaseid = tagger_config.get("source", id_name)
-    elif options.releaseid:
-        releaseid = options.releaseid
 
-    return releaseid
 
-def walk_dir_tree(start_dir, id_file):
-    source_dirs = []
-    for root, dirs, files in os.walk(start_dir):
-        if id_file in files:
-            logger.debug("found %s in %s" % (id_file, root))
-            source_dirs.append(root)
-
-    return source_dirs
-
-p = OptionParser(version="discogstagger2 2.1")
+p = OptionParser(version="discogstagger3 3.0")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The release id of the target album")
 p.add_option("-s", "--source", action="store", dest="sourcedir",
@@ -66,6 +51,7 @@ if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
 
 tagger_config = TaggerConfig(options.conffile)
+# options.replaygain = tagger_config.get("batch", "replaygain")
 
 # initialize logging
 logger_config_file = tagger_config.get("logging", "config_file")
@@ -75,13 +61,22 @@ logger = logging.getLogger(__name__)
 
 # read necessary config options for batch processing
 id_file = tagger_config.get("batch", "id_file")
+options.searchDiscogs = tagger_config.get('batch', 'searchDiscogs')
+# options.parse_cue_files = tagger_config.get('cue', 'parse_cue_files')
+
+file_utils = FileUtils(tagger_config)
 
 if options.recursive:
     logger.debug("determine sourcedirs")
-    source_dirs = walk_dir_tree(options.sourcedir, id_file)
+    source_dirs = file_utils.walk_dir_tree(options.sourcedir, id_file)
+elif options.searchDiscogs:
+    logger.debug("looking for audio files")
+    source_dirs = file_utils.get_audio_dirs(options.sourcedir)
+    pp.pprint(source_dirs)
 else:
     logger.debug("using sourcedir: %s" % options.sourcedir)
     source_dirs = [options.sourcedir]
+
 
 # initialize connection (could be a problem if using multiple sources...)
 discogs_connector = DiscogsConnector(tagger_config)
@@ -92,26 +87,42 @@ discs_with_errors = []
 
 converted_discs = 0
 
-releaseid = None
+pp.pprint(source_dirs)
 
 for source_dir in source_dirs:
+    releaseid = None
+    release = None
     try:
         done_file = tagger_config.get("details", "done_file")
         done_file_path = os.path.join(source_dir, done_file)
 
         if os.path.exists(done_file_path) and not options.forceUpdate:
-            logger.warn("Do not read %s, because %s exists and forceUpdate is false" % (source_dir, done_file))
+            logger.warn('Do not read {}, because {} exists and forceUpdate is false'.format(source_dir, done_file))
             continue
 
         # reread config to make sure, that the album specific options are reset for each
         # album
         tagger_config = TaggerConfig(options.conffile)
 
-        releaseid = read_id_file(source_dir, id_file, options)
-
+        if options.releaseid is not None:
+            releaseid = file_utils.read_id_file(source_dir, id_file, options)
 
         if not releaseid:
-            p.error("Please specify the discogs.com releaseid ('-r')")
+            discogsSearch = DiscogsSearch(tagger_config)
+            searchParams = discogsSearch.getSearchParams(source_dir)
+            release = discogs_connector.search_discogs(searchParams)
+            # reuse the Discogs Release class, it saves re-fetching later
+            if release is not None and type(release).__name__ in ('Release', 'Version'):
+                releaseid = release.id
+
+        if not releaseid:
+            logger.warn('No releaseid for {}'.format(source_dir))
+            continue
+
+        # if not releaseid:
+        #     p.error("Please specify the discogs.com releaseid ('-r')")
+
+        print('Found release ID: {} for source dir: {}'.format(releaseid, source_dir))
 
         # read destination directory
         # !TODO if both are the same, we are not copying anything,
@@ -120,19 +131,21 @@ for source_dir in source_dirs:
             destdir = source_dir
         else:
             destdir = options.destdir
-            logger.debug("destdir set to %s", options.destdir)
+            logger.debug('destdir set to {}'.format(options.destdir))
 
-        logger.info("Using destination directory: %s", destdir)
+        logger.info('Using destination directory: {}'.format(destdir))
 
         logger.debug("starting tagging...")
 
-        #! TODO this is dirty, refactor it to be able to reuse it for later enhancements
-        if tagger_config.get("source", "name") == "local":
-            release = local_discogs_connector.fetch_release(releaseid, source_dir)
-            connector = local_discogs_connector
-        else:
-            release = discogs_connector.fetch_release(releaseid)
-            connector = discogs_connector
+
+        if releaseid is not None and release is None:
+            #! TODO this is dirty, refactor it to be able to reuse it for later enhancements
+            if tagger_config.get("source", "name") == "local":
+                release = local_discogs_connector.fetch_release(releaseid, source_dir)
+                connector = local_discogs_connector
+            else:
+                release = discogs_connector.fetch_release(releaseid)
+                connector = discogs_connector
 
         discogs_album = DiscogsAlbum(release)
 
@@ -144,13 +157,13 @@ for source_dir in source_dirs:
             discs_with_errors.append(msg)
             continue
 
-        logger.info("Tagging album '%s - %s'" % (album.artist, album.title))
+        logger.info('Tagging album "{} - {}"'.format(album.artist, album.title))
 
         taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
 
         tagHandler = TagHandler(album, tagger_config)
-        fileHandler = FileHandler(album, tagger_config)
 
+        fileHandler = FileHandler(album, tagger_config)
         try:
             taggerUtils._get_target_list()
         except TaggerError as te:
@@ -158,6 +171,10 @@ for source_dir in source_dirs:
             logger.error(msg)
             discs_with_errors.append(msg)
             continue
+
+        # reset the target directory now that we have discogs metadata and
+        #  filedata - otherwise this is declared too early in the process
+        album.target_dir = taggerUtils.dest_dir_name
 
         fileHandler.copy_files()
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from urllib import FancyURLopener
+# from urllib import FancyURLopener
 import errno
 import os
 import re
@@ -8,6 +8,9 @@ import logging
 import shutil
 import imghdr
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 from unicodedata import normalize
 
 from mako.template import Template
@@ -15,22 +18,24 @@ from mako.lookup import TemplateLookup
 
 from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.album import Album, Disc, Track
+from discogstagger.stringformatting import StringFormatting
 
 from ext.mediafile import MediaFile
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
+# commenting these out (python3)
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 logger = logging
 
-class TagOpener(FancyURLopener, object):
-
-    version = "discogstagger2"
-
-    def __init__(self, user_agent):
-        self.version = user_agent
-        FancyURLopener.__init__(self)
-
+# class TagOpener(FancyURLopener, object):
+#
+#     version = "discogstagger2"
+#
+#     def __init__(self, user_agent):
+#         self.version = user_agent
+#         FancyURLopener.__init__(self)
+#
 class TaggerError(Exception):
     """ A central exception for all errors happening during the tagging
     """
@@ -80,6 +85,8 @@ class TagHandler(object):
 
         # remove current metadata
         metadata.delete()
+
+        self.album.codec = metadata.type
 
         # set album metadata
         metadata.album = self.album.title
@@ -215,7 +222,7 @@ class FileHandler(object):
                         logger.error("Source does not exists")
                         # throw error
                     logger.debug("copying files (%s/%s)", source_folder, track.orig_file)
-                    
+
                     shutil.copyfile(os.path.join(source_folder, track.orig_file),
                         os.path.join(target_folder, track.new_file))
 
@@ -310,7 +317,7 @@ class FileHandler(object):
 
                 except Exception as e:
                     logger.error("Unable to download image '%s', skipping." % image_url)
-                    print e
+                    print(e)
 
     def embed_coverart_album(self):
         """
@@ -385,7 +392,7 @@ class FileHandler(object):
 
 class TaggerUtils(object):
     """ Accepts a destination directory name and discogs release id.
-        TaggerUtils returns a the corresponding metadata information , in which
+        TaggerUtils returns a the corresponding metadata information, in which
         we can write to disk. The assumption here is that the destination
         direcory contains a single album in a support format (mp3 or flac).
 
@@ -397,6 +404,9 @@ class TaggerUtils(object):
 
     def __init__(self, sourcedir, destdir, tagger_config, album=None):
         self.config = tagger_config
+
+        # ignore directory where old cue files are stashed
+        self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
 
 # !TODO should we define those in here or in each method (where needed) or in a separate method
 # doing the "mapping"?
@@ -441,6 +451,30 @@ class TaggerUtils(object):
             Transfer this via a map.
         """
         property_map = {
+
+            '%album artist%': self.album.artist,
+            '%albumartist%': self.album.artist,
+            '%album%': self.album.title,
+            "%year%": self.album.year,
+            '%artist%': self.album.disc(discno).track(trackno).artist,
+            '%discnumber%':discno,
+            '%totaldiscs%':'',
+            '%track artist%': self.album.disc(discno).track(trackno).artist,
+            '%title%': self.album.disc(discno).track(trackno).title,
+            '%tracknumber%': "%.2d" % trackno,
+            '%track number%': "%.2d" % trackno,
+            '%bitrate%':'',
+            '%channels%':'',
+            '%codec%': self.album.codec,
+            '%filesize%':'',
+            '%filesize_natural%':'',
+            '%length%':'',
+            '%length_ex%':'',
+            '%length_seconds%':'',
+            '%length_seconds_fp%':'',
+            '%length_samples%':'',
+            '%samplerate%':'',
+
             "%ALBTITLE%": self.album.title,
             "%ALBARTIST%": self.album.artist,
             "%YEAR%": self.album.year,
@@ -453,6 +487,7 @@ class TaggerUtils(object):
             "%TRACKNO%": "%.2d" % trackno,
             "%TYPE%": filetype,
             "%LABEL%": self.album.labels[0],
+            "%CODEC%": self.album.codec,
         }
 
         for hashtag in property_map.keys():
@@ -464,8 +499,14 @@ class TaggerUtils(object):
         """ Generates the filename tagging map
             avoid usage of file extension here already, could lead to problems
         """
+
+        print('_value_from_tag')
+        stringFormatting = StringFormatting()
         format = self._value_from_tag_format(format, discno, trackno, filetype)
+        format = stringFormatting.parseString(format)
         format = self.get_clean_filename(format)
+
+        print(format)
 
         logger.debug("output: %s" % format)
 
@@ -497,6 +538,9 @@ class TaggerUtils(object):
 
                 track.new_file = self.get_clean_filename(newfile)
 
+    def _get_album_codec(self, full_path):
+        metadata = MediaFile(full_path)
+        return metadata.type
 
     def _get_target_list(self):
         """
@@ -504,9 +548,10 @@ class TaggerUtils(object):
             in the self.sourcedir location as target_list, other
             files in the sourcedir are returned in the copy_files list.
         """
-
         copy_files = []
         target_list = []
+
+        print('_get_target_list')
 
         sourcedir = self.album.sourcedir
 
@@ -517,11 +562,19 @@ class TaggerUtils(object):
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
 
+            print(dir_list)
+
+            # self.cue_done_dir = '.cue'
+            extf = (self.cue_done_dir)
+            dir_list[:] = [d for d in dir_list if d not in extf]
+
             filetype = ""
+            print(dir_list)
 
             self.album.copy_files = []
 
             if self.album.has_multi_disc:
+                print('album identified as having multiple discs')
                 logger.debug("is multi disc album, looping discs")
 
                 logger.debug("dir_list: %s" % dir_list)
@@ -540,6 +593,7 @@ class TaggerUtils(object):
                 self.album.discs[0].sourcedir = None
 
             for disc in self.album.discs:
+                print('going through disc')
                 try:
                     disc_source_dir = disc.sourcedir
                 except AttributeError:
@@ -549,18 +603,24 @@ class TaggerUtils(object):
                 if disc_source_dir == None:
                     disc_source_dir = self.album.sourcedir
 
+                print(disc_source_dir)
                 logger.debug("discno: %d" % disc.discnumber)
                 logger.debug("sourcedir: %s" % disc.sourcedir)
 
                 # strip unwanted files
-                disc_list = os.listdir(os.path.join(self.album.sourcedir, disc_source_dir))
+                disc_list = os.listdir(disc_source_dir)
+                print(disc_list)
                 disc_list.sort()
+
+                print('disc_list.sort')
 
                 disc.copy_files = [x for x in disc_list
                                 if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
+
+                print(target_list)
 
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)
@@ -570,17 +630,25 @@ class TaggerUtils(object):
                 for position, filename in enumerate(target_list):
                     logger.debug("track position: %d" % position)
 
+                    print('position: {}'.format(position))
+                    print('filename: {}'.format(filename))
+
                     track = disc.tracks[position]
 
                     logger.debug("mapping file %s --to--> %s - %s" % (filename,
                                  track.artists[0], track.title))
-                    track.orig_file = os.path.basename(filename)
 
+                    track.orig_file = os.path.basename(filename)
+                    # multidisc target path is in filename, not track.orig_file
+                    # track.full_path = self.album.sourcedir + track.orig_file
+                    track.full_path = os.path.join(self.album.sourcedir, filename)
+                    codec = self._get_album_codec(track.full_path)
+                    self.album.codec = codec
                     filetype = os.path.splitext(filename)[1]
 
             self._set_target_discs_and_tracks(filetype)
 
-        except OSError, e:
+        except (OSError) as e:
             if e.errno == errno.EEXIST:
                 logger.error("No such directory '%s'", self.sourcedir)
                 raise TaggerError("No such directory '%s'", self.sourcedir)
@@ -604,7 +672,7 @@ class TaggerUtils(object):
             if dest_dir == "":
                 dest_dir = d_dir
             else:
-                dest_dir = dest_dir + "/" + d_dir
+                dest_dir = os.path.join(dest_dir, d_dir)
 
             logger.debug("d_dir: %s" % dest_dir)
 
@@ -632,29 +700,41 @@ class TaggerUtils(object):
 
         filename, fileext = os.path.splitext(f)
 
+        print('get_clean_filename')
+
         if not fileext in TaggerUtils.FILE_TYPE and not fileext in [".m3u", ".nfo"]:
             logger.debug("fileext: %s" % fileext)
             filename = f
             fileext = ""
 
-        a = unicode(filename, "utf-8")
 
-        for k, v in self.char_exceptions.iteritems():
+        print(filename)
+        a = str(filename)
+        print(a)
+
+
+        for k, v in self.char_exceptions.items():
             a = a.replace(k, v)
 
-        a = normalize("NFKD", a).encode("ascii", "ignore")
+        a = normalize("NFKD", a)
+        print(a)
 
-        cf = re.compile(r"[^-\w.\(\)_]")
+        cf = re.compile(r"[^-\w.\(\)_\[\]\s]")
         cf = cf.sub("", str(a))
 
-        cf = cf.replace(" ", "_")
-        cf = cf.replace("__", "_")
-        cf = cf.replace("_-_", "-")
+        print(cf)
+        # Don't force space/underscore replacement. If the user want's this it
+        # can be done via config. The user may want spaces.
+        # cf = cf.replace(" ", "_")
+        # cf = cf.replace("__", "_")
+        # cf = cf.replace("_-_", "-")
 
         cf = "".join([cf, fileext])
 
         if self.use_lower:
             cf = cf.lower()
+
+        print(cf)
 
         return cf
 

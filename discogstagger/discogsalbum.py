@@ -2,16 +2,78 @@ import logging
 import re
 import os
 import urllib
+import string
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+from ext.mediafile import MediaFile
+
+from datetime import time as Time
+from datetime import timedelta, datetime
 import time
 
 import discogs_client as discogs
 
 import json
 
-from album import Album, Disc, Track
+from discogstagger.album import Album, Disc, Track
 
 logger = logging
+
+class DiscogsSearch(object):
+    """ Search for a release based on the existing
+        metadata of the files in the source directory
+    """
+    def __init__(self, tagger_config):
+        self.config = tagger_config
+        self.cue_done_dir = '.cue'
+
+    def getSearchParams(self, source_dir):
+        """ get search parameters to find release on discogs
+        """
+
+        print('Setting original metadata for search purposes')
+
+        files = self._getMusicFiles(source_dir)
+
+        searchParams = {}
+        for file in files:
+
+            head, tail = os.path.split(file)
+
+            file = tail
+
+            print(file)
+            metadata = MediaFile(os.path.join(source_dir, file))
+
+            searchParams['artist'] = metadata.artist
+            searchParams['albumartist'] = metadata.albumartist
+            searchParams['album'] = metadata.album
+            searchParams['year'] = metadata.year
+            searchParams['date'] = metadata.date
+            searchParams['disc'] = metadata.disc
+            if 'tracks' not in searchParams:
+                searchParams['tracks'] = {}
+            track = str(metadata.disc) + '-' + str(metadata.track) if metadata.disc else str(metadata.track)
+            if track not in searchParams['tracks']:
+                searchParams['tracks'][track] = {}
+            searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
+            searchParams['tracks'][track]['title'] = metadata.title
+        print(searchParams)
+
+        return searchParams
+
+    def _getMusicFiles(self, source_dir):
+        """ Get album data
+        """
+        extf = (self.cue_done_dir)
+        found = []
+        for root,dirs,files in os.walk(source_dir):
+            dirs[:] = [d for d in dirs if d not in extf]
+            for file in files:
+                if file.endswith(('.flac', '.mp3')):
+                    found.append(os.path.join(root, file))
+        return found
 
 class AlbumError(Exception):
     """ A central exception for all errors happening during the album handling
@@ -35,7 +97,7 @@ class DiscogsConnector(object):
         self.config = tagger_config
         self.user_agent = self.config.get("common", "user_agent")
         self.discogs_client = discogs.Client(self.user_agent)
-
+        self.tracklength_tolerance = self.config.getfloat("batch", "tracklength_tolerance")
         self.discogs_auth = False
         self.rate_limit_pool = {}
 
@@ -56,10 +118,10 @@ class DiscogsConnector(object):
         consumer_secret = self.config.get("discogs", "consumer_secret")
 
         # allow config override thru env variables
-        if os.environ.has_key("DISCOGS_CONSUMER_KEY"):
+        if 'DISCOGS_CONSUMER_KEY' in os.environ:
             consumer_key = os.environ.get('DISCOGS_CONSUMER_KEY')
-        if os.environ.has_key("DISCOGS_CONSUMER_SECRET"):
-            consumer_secret = os.environ.get("DISCOGS_CONSUMER_SECRET")
+        if 'DISCOGS_CONSUMER_SECRET' in os.environ:
+            consumer_secret = os.environ.get('DISCOGS_CONSUMER_SECRET')
 
         if consumer_key and consumer_secret:
             logger.debug('authenticating at discogs using consumer key {0}'.format(consumer_key))
@@ -109,7 +171,7 @@ class DiscogsConnector(object):
                 request_token, request_token_secret, authorize_url = self.discogs_client.get_authorize_url()
 
                 print('Visit this URL in your browser: ' + authorize_url)
-                pin = raw_input('Enter the PIN you got from the above url: ')
+                pin = input('Enter the PIN you got from the above url: ')
 
                 access_token, access_secret = self.discogs_client.get_access_token(pin)
 
@@ -117,7 +179,7 @@ class DiscogsConnector(object):
                 with open(token_file, 'w') as fh:
                     fh.write('{0},{1}'.format(access_token, access_secret))
             else:
-                self.discogs_client.set_token(unicode(access_token), unicode(access_secret))
+                self.discogs_client.set_token(str(access_token), str(access_secret))
 
             logger.debug('filled session....')
 
@@ -148,6 +210,127 @@ class DiscogsConnector(object):
         token_file_name = '.token'
         return os.path.join(cwd, token_file_name)
 
+
+    def _rateLimit(self):
+        rate_limit_type = 'metadata'
+
+        if rate_limit_type in self.rate_limit_pool:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+                logger.warn('Waiting one second to allow rate limiting...')
+                time.sleep(1)
+
+        rl = RateLimit()
+        rl.lastcall = time.time()
+
+        self.rate_limit_pool[rate_limit_type] = rl
+
+    def search_discogs(self, searchParams):
+        self._rateLimit()
+
+        print('Searching discogs')
+
+        candidates = []
+
+        results = self.discogs_client.search(searchParams['artist'], type='artist')
+        for result in results:
+            a = searchParams['artist'].lower()
+            # workaround for many artists with the same name, e.g. Deimos (3)
+            n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
+            # print(n)
+            if a == n:
+                for release in result.releases:
+                    r = release.title.lower()
+                    # print(r)
+                    s = searchParams['album'].lower()
+                    # print(s)
+                    if s == r or r in s or s in r:
+                        pp.pprint('matched title')
+                        pp.pprint(release.title)
+                        pp.pprint(release.tracklist)
+                        print()
+                        if hasattr(release, 'versions') == True:
+                            for version in release.versions:
+                                # pp.pprint(version.tracklist)
+                                trackInfo = self._getTrackInfo(version)
+                                # pp.pprint(trackInfo)
+                                # pp.pprint(searchParams)
+                                if len(searchParams['tracks']) == len(trackInfo):
+                                    if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
+                                        candidates.append(version)
+                        else:
+                            trackInfo = self._getTrackInfo(release)
+                            if len(searchParams['tracks']) == len(trackInfo):
+                                if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
+                                    candidates.append(release)
+
+
+        if len(candidates) == 1:
+            print(candidates[0].id)
+            return candidates[0]
+
+# TODO: better comparison of releases, maybe based on quality of the metadata
+        elif len(candidates) > 1:
+            return candidates[0]
+            if searchParams['year'] is not None:
+                for version in candidates:
+                    print(version.id)
+                    if searchParams['year'] == version.year:
+                        return version.id
+            elif version.format == 'CD':
+                        return version.id
+        else:
+            return None
+
+    def _paddedHMS(self, string):
+        array = [int(s) for s in string.split(':')]
+        while len(array) < 3:
+            array.insert(0, 0)
+        narray = ['{:0>2}'.format(d) for d in array ]
+        return ':'.join(narray)
+
+    def _compareTracks(self, current, imported):
+        """ Compare original tracklist against discogs tracklist, by comparing
+            the track lengths. Some releases have tracks in different order,
+            so we need to weed those out.  Returns the highest value.
+        """
+        tolerance = 0.0
+        curr_tracklist = current['tracks']
+        for track in curr_tracklist.keys():
+            """ some tracks have alphanumerical identifiers,
+                e.g. vinyl, cassettes
+            """
+            if track not in imported.keys():
+                logging.debug('track not present, numbering format different')
+                return 100
+            else:
+                try:
+                    a = self._paddedHMS(curr_tracklist[track]['duration'])
+                    b = self._paddedHMS(imported[track]['duration'])
+                    timea = datetime.strptime(a, '%H:%M:%S')
+                    timeb = datetime.strptime(b, '%H:%M:%S')
+                    difference = timea - timeb
+                    if difference.total_seconds() > tolerance:
+                        tolerance = difference.total_seconds()
+                except Exception as e:
+                    print(e)
+            logging.debug('tracklength tolerance for release (change if there are any matching issues) %s: ' % tolerance)
+        return tolerance
+
+    def _getTrackInfo(self, version):
+        """ Get the track values from the release, so that we can compare them
+            to what we have got.  Remove extra info appearing with empty track
+            number, e.g. Bonus tracks, or section titles.
+        """
+        trackinfo = {}
+        for track in version.tracklist:
+            if str(track.position) == '':
+                logger.debug('ignoring non-track info: %s' % getattr(track, u'title'))
+                continue
+            pos = str(track.position)
+            trackinfo[pos] = {}
+            for key in [u'duration', u'title']:
+                trackinfo[pos][key] = getattr(track, key)
+        return trackinfo
 
     def fetch_image(self, image_dir, image_url):
         """
@@ -235,8 +418,8 @@ class LocalDiscogsConnector(object):
             return {self.convert(key): self.convert(value) for key, value in input.iteritems()}
         elif isinstance(input, list):
             return [self.convert(element) for element in input]
-        elif isinstance(input, unicode):
-            return input.encode('utf-8')
+        # elif isinstance(input, unicode):
+        #     return input.encode('utf-8')
         else:
             return input
 
