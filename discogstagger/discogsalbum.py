@@ -2,7 +2,8 @@ import logging
 import re
 import os
 import urllib
-import string
+import urllib.request
+3import string
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -353,7 +354,8 @@ class DiscogsConnector(object):
         rl.lastcall = time.time()
 
         try:
-            urllib.urlretrieve(image_url,  image_dir)
+            urllib.request.urlretrieve(image_url,  image_dir)
+            # urllib.urlretrieve(image_url,  image_dir)
 
             self.rate_limit_pool[rate_limit_type] = rl
         except Exception as e:
