@@ -551,6 +551,8 @@ class TaggerUtils(object):
         copy_files = []
         target_list = []
 
+        print('_get_target_list')
+
         sourcedir = self.album.sourcedir
 
         logger.debug("target_dir: %s" % self.album.target_dir)
@@ -560,15 +562,19 @@ class TaggerUtils(object):
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
 
+            print(dir_list)
+
             # self.cue_done_dir = '.cue'
             extf = (self.cue_done_dir)
             dir_list[:] = [d for d in dir_list if d not in extf]
 
             filetype = ""
+            print(dir_list)
 
             self.album.copy_files = []
 
             if self.album.has_multi_disc:
+                print('album identified as having multiple discs')
                 logger.debug("is multi disc album, looping discs")
 
                 logger.debug("dir_list: %s" % dir_list)
@@ -587,6 +593,7 @@ class TaggerUtils(object):
                 self.album.discs[0].sourcedir = None
 
             for disc in self.album.discs:
+                print('going through disc')
                 try:
                     disc_source_dir = disc.sourcedir
                 except AttributeError:
@@ -596,18 +603,25 @@ class TaggerUtils(object):
                 if disc_source_dir == None:
                     disc_source_dir = self.album.sourcedir
 
+                print(disc_source_dir)
                 logger.debug("discno: %d" % disc.discnumber)
                 logger.debug("sourcedir: %s" % disc.sourcedir)
 
                 # strip unwanted files
-                disc_list = os.listdir(os.path.join(self.album.sourcedir, disc_source_dir))
+                disc_list = os.listdir(disc_source_dir)
+                print(disc_list)
                 disc_list.sort()
+
+                print('disc_list.sort')
 
                 disc.copy_files = [x for x in disc_list
                                 if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
+
+                print(target_list)
+
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)
                     logger.error("not matching number of files....")
@@ -615,6 +629,9 @@ class TaggerUtils(object):
 
                 for position, filename in enumerate(target_list):
                     logger.debug("track position: %d" % position)
+
+                    print('position: {}'.format(position))
+                    print('filename: {}'.format(filename))
 
                     track = disc.tracks[position]
 
