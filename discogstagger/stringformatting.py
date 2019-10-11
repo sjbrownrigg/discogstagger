@@ -36,6 +36,7 @@ class StringFormatting(object):
             '$ifequal': 4,
             '$ifgreater': 4,
             '$lower': 2,
+            '$upper': 2,
         }
 
 
@@ -43,6 +44,11 @@ class StringFormatting(object):
         ''' Make string lowercase
         '''
         return str(string).lower()
+
+    def upper(self, string):
+        ''' Make string uppercase
+        '''
+        return str(string).upper()
 
     def ifgreater(self, int1, int2, met, unmet):
         # for convenience if int1 or int2 are None make 0
