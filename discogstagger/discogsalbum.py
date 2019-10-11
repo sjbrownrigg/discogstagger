@@ -3,7 +3,7 @@ import re
 import os
 import urllib
 import urllib.request
-3import string
+import string
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
