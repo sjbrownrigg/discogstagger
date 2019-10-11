@@ -179,6 +179,7 @@ for source_dir in source_dirs:
             discs_with_errors.append(msg)
             continue
 
+        taggerUtils.gather_addional_properties()
         # reset the target directory now that we have discogs metadata and
         #  filedata - otherwise this is declared too early in the process
         album.target_dir = taggerUtils.dest_dir_name

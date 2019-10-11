@@ -450,6 +450,7 @@ class TaggerUtils(object):
 
             Transfer this via a map.
         """
+
         property_map = {
 
             '%album artist%': self.album.artist,
@@ -539,9 +540,15 @@ class TaggerUtils(object):
 
                 track.new_file = self.get_clean_filename(newfile)
 
-    def _get_album_codec(self, full_path):
-        metadata = MediaFile(full_path)
-        return metadata.type
+    def gather_addional_properties(self):
+        ''' Fetches additional technical information about the tracks
+        '''
+        for disc in self.album.discs:
+            for track in disc.tracks:
+                metadata = MediaFile(track.full_path)
+                self.album.codec = metadata.type
+
+
 
     def _get_target_list(self):
         """
@@ -643,8 +650,6 @@ class TaggerUtils(object):
                     # multidisc target path is in filename, not track.orig_file
                     # track.full_path = self.album.sourcedir + track.orig_file
                     track.full_path = os.path.join(self.album.sourcedir, filename)
-                    codec = self._get_album_codec(track.full_path)
-                    self.album.codec = codec
                     filetype = os.path.splitext(filename)[1]
 
             self._set_target_discs_and_tracks(filetype)
