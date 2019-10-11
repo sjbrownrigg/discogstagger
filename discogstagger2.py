@@ -49,6 +49,11 @@ if len(sys.argv) == 1:
 
 if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
+else:
+    options.sourcedir = os.path.abspath(options.sourcedir)
+
+if options.destdir and os.path.exists(options.destdir):
+    options.destdir = os.path.abspath(options.destdir)
 
 tagger_config = TaggerConfig(options.conffile)
 # options.replaygain = tagger_config.get("batch", "replaygain")
