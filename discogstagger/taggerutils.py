@@ -463,6 +463,7 @@ class TaggerUtils(object):
             '%title%': self.album.disc(discno).track(trackno).title,
             '%tracknumber%': "%.2d" % trackno,
             '%track number%': "%.2d" % trackno,
+            "%fileext%": filetype,
             '%bitrate%':'',
             '%channels%':'',
             '%codec%': self.album.codec,
