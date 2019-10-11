@@ -35,9 +35,16 @@ class StringFormatting(object):
             '$if1': 3,  # cannot use $if
             '$ifequal': 4,
             '$ifgreater': 4,
+            '$lower': 2,
         }
 
-    def ifgreater(self, int1,int2,met,unmet):
+
+    def lower(self, string):
+        ''' Make string lowercase
+        '''
+        return str(string).lower()
+
+    def ifgreater(self, int1, int2, met, unmet):
         # for convenience if int1 or int2 are None make 0
         int1 = 0 if int1 is None or int1 == '' else int1
         int2 = 0 if int2 is None or int2 == '' else int2
@@ -45,7 +52,7 @@ class StringFormatting(object):
         return result
 
 
-    def ifequal(self, int1,int2,met,unmet):
+    def ifequal(self, int1, int2, met, unmet):
         result = met if int(int1) == int(int2) else unmet
         return result
 
