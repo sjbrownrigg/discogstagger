@@ -475,7 +475,7 @@ class TaggerUtils(object):
             '%length_seconds%':'',
             '%length_seconds_fp%':'',
             '%length_samples%':'',
-            '%samplerate%':'',
+            '%samplerate%':self.album.codec,
 
             "%ALBTITLE%": self.album.title,
             "%ALBARTIST%": self.album.artist,
@@ -546,7 +546,13 @@ class TaggerUtils(object):
         for disc in self.album.discs:
             for track in disc.tracks:
                 metadata = MediaFile(track.full_path)
+                for field in metadata.readable_fields():
+                    print('fieldname: {}: {}'.format(field, getattr(metadata, field)))
+
                 self.album.codec = metadata.type
+                self.album.samplerate = metadata.samplerate
+                self.album.bitrate = metadata.bitrate
+                self.album.bitdepth = metadata.bitdepth
 
 
 
