@@ -493,7 +493,9 @@ class TaggerUtils(object):
         }
 
         for hashtag in property_map.keys():
-            format = format.replace(hashtag, str(property_map[hashtag]))
+            # escape the string to prevent wanted characters getting stripped
+            # by string formatting functions
+            format = format.replace(hashtag, re.escape(str(property_map[hashtag])))
 
         return format
 
@@ -547,7 +549,7 @@ class TaggerUtils(object):
             for track in disc.tracks:
                 metadata = MediaFile(track.full_path)
                 for field in metadata.readable_fields():
-                    print('fieldname: {}: {}'.format(field, getattr(metadata, field)))
+                    print('fieldname: {}: '.format(field)) #, getattr(metadata, field)
 
                 self.album.codec = metadata.type
                 self.album.samplerate = metadata.samplerate
@@ -662,21 +664,21 @@ class TaggerUtils(object):
 
         except (OSError) as e:
             if e.errno == errno.EEXIST:
-                logger.error("No such directory '%s'", self.sourcedir)
-                raise TaggerError("No such directory '%s'", self.sourcedir)
+                logger.error("No such directory '{}'".format(self.sourcedir))
+                raise TaggerError("No such directory '{}'".format(self.sourcedir))
             else:
-                raise TaggerError("General IO system error '%s'" % errno[e])
+                raise TaggerError("General IO system error '{}'".format(errno[e]))
 
     @property
     def dest_dir_name(self):
         """ generates new album directory name """
 
-        logger.debug("self.destdir: %s" % self.destdir)
+        logger.debug("self.destdir: {}".format(self.destdir))
 
         # determine if an absolute base path was specified.
         path_name = os.path.normpath(self.destdir)
 
-        logger.debug("path_name: %s" % path_name)
+        logger.debug("path_name: {}".format(path_name))
 
         dest_dir = ""
         for ddir in self.dir_format.split("/"):
@@ -686,7 +688,7 @@ class TaggerUtils(object):
             else:
                 dest_dir = os.path.join(dest_dir, d_dir)
 
-            logger.debug("d_dir: %s" % dest_dir)
+            logger.debug("d_dir: {}".format(dest_dir))
 
         dir_name = os.path.join(path_name, dest_dir)
 
@@ -715,7 +717,7 @@ class TaggerUtils(object):
         print('get_clean_filename')
 
         if not fileext in TaggerUtils.FILE_TYPE and not fileext in [".m3u", ".nfo"]:
-            logger.debug("fileext: %s" % fileext)
+            logger.debug("fileext: {}".format(fileext))
             filename = f
             fileext = ""
 
