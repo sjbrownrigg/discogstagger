@@ -78,10 +78,11 @@ class TagHandler(object):
 
         # read already existing (and still wanted) properties
         keepTags = {}
-        for name in self.keep_tags.split(","):
-            logger.debug("name %s" % name)
-            if getattr(metadata, name):
-                keepTags[name] = getattr(metadata, name)
+        if self.keep_tags is not None:
+            for name in self.keep_tags.split(","):
+                logger.debug("name %s" % name)
+                if getattr(metadata, name):
+                    keepTags[name] = getattr(metadata, name)
 
         # remove current metadata
         metadata.delete()
@@ -338,14 +339,17 @@ class FileHandler(object):
 
         if embed_coverart and os.path.exists(image_file):
             logger.debug("embed_coverart and image_file")
-            imgdata = open(image_file).read()
-            imgtype = imghdr.what(None, imgdata)#
+            print(image_file)
+            with open(image_file, 'rb') as f:
+                imgdata = f.read()
+                imgtype = imghdr.what(f)
+                print(imgtype)
 
-            if imgtype in ("jpeg", "png"):
-                logger.info("Embedding album art...")
-                for disc in self.album.discs:
-                    for track in disc.tracks:
-                        self.embed_coverart_track(disc, track, imgdata)
+                if imgtype in ("jpeg", "png"):
+                    logger.info("Embedding album art...")
+                    for disc in self.album.discs:
+                        for track in disc.tracks:
+                            self.embed_coverart_track(disc, track, imgdata)
 
     def embed_coverart_track(self, disc, track, imgdata):
         """
@@ -356,10 +360,17 @@ class FileHandler(object):
         else:
             track_dir = self.album.target_dir
 
+        print(track_dir)
         track_file = os.path.join(track_dir, track.new_file)
+        print(track_file)
         metadata = MediaFile(track_file)
-        metadata.art = imgdata
-        metadata.save()
+        print(metadata.album)
+        try:
+            metadata.art = imgdata
+            metadata.save()
+        except Exception as e:
+            logger.error("Unable to embed image '{}'".format(track_file))
+            print(e)
 
     def add_replay_gain_tags(self):
         """
