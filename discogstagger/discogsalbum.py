@@ -234,36 +234,44 @@ class DiscogsConnector(object):
 
         results = self.discogs_client.search(searchParams['artist'], type='artist')
         for result in results:
-            a = searchParams['artist'].lower()
-            # workaround for many artists with the same name, e.g. Deimos (3)
-            n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
-            # print(n)
-            if a == n:
-                for release in result.releases:
-                    r = release.title.lower()
-                    # print(r)
-                    s = searchParams['album'].lower()
-                    # print(s)
-                    if s == r or r in s or s in r:
-                        pp.pprint('matched title')
-                        pp.pprint(release.title)
-                        pp.pprint(release.tracklist)
-                        print()
-                        if hasattr(release, 'versions') == True:
-                            for version in release.versions:
-                                # pp.pprint(version.tracklist)
-                                trackInfo = self._getTrackInfo(version)
-                                # pp.pprint(trackInfo)
-                                # pp.pprint(searchParams)
-                                if len(searchParams['tracks']) == len(trackInfo):
-                                    if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
-                                        candidates.append(version)
+            if len(candidates) > 0:
+                continue
+            else:
+                found = []
+                a = searchParams['artist'].lower()
+                # workaround for many artists with the same name, e.g. Deimos (3)
+                n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
+                if a == n:
+                    for release in result.releases:
+                        if len(candidates) > 0:
+                            continue
                         else:
-                            trackInfo = self._getTrackInfo(release)
-                            if len(searchParams['tracks']) == len(trackInfo):
-                                if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
-                                    candidates.append(release)
-
+                            self._rateLimit()
+                            r = release.title.lower()
+                            s = searchParams['album'].lower()
+                            if s == r or r in s or s in r:
+                                found.append('title')
+                                pp.pprint('matched title')
+                                pp.pprint(release.title)
+                                print()
+                                if hasattr(release, 'versions') == False:
+                                    if self._compareRelease(searchParams, release) == True:
+                                        candidates.append(release)
+                                else:
+                                    # if we have a year, then limit the list that we check
+                                    if 'year' in searchParams.keys() and searchParams['year'] is not None:
+                                        for version in release.versions:
+                                            if searchParams['year'] == version.year:
+                                                print('got a year match')
+                                                pp.pprint(version.id)
+                                                pp.pprint(searchParams['year'])
+                                                pp.pprint(version.year)
+                                                if self._compareRelease(searchParams, version) == True:
+                                                    candidates.append(version)
+                                    else:
+                                        for version in release.versions:
+                                            if self._compareRelease(searchParams, version) == True:
+                                                candidates.append(version)
 
         if len(candidates) == 1:
             print(candidates[0].id)
@@ -281,6 +289,19 @@ class DiscogsConnector(object):
                         return version.id
         else:
             return None
+
+    def _compareRelease(self, searchParams, release):
+        self._rateLimit()
+        trackInfo = self._getTrackInfo(release)
+        pp.pprint(trackInfo)
+        pp.pprint(searchParams)
+        if len(searchParams['tracks']) == len(trackInfo):
+            if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
+                logger.debug('adding relid to the list of candidates: {}'.format(release.id))
+                return True
+        else:
+            return False
+
 
     def _paddedHMS(self, string):
         array = [int(s) for s in string.split(':')]
@@ -314,7 +335,7 @@ class DiscogsConnector(object):
                         tolerance = difference.total_seconds()
                 except Exception as e:
                     print(e)
-            logging.debug('tracklength tolerance for release (change if there are any matching issues) %s: ' % tolerance)
+            logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
 
     def _getTrackInfo(self, version):
@@ -322,14 +343,15 @@ class DiscogsConnector(object):
             to what we have got.  Remove extra info appearing with empty track
             number, e.g. Bonus tracks, or section titles.
         """
+        self._rateLimit()
         trackinfo = {}
         for track in version.tracklist:
             if str(track.position) == '':
-                logger.debug('ignoring non-track info: %s' % getattr(track, u'title'))
+                logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
             pos = str(track.position)
             trackinfo[pos] = {}
-            for key in [u'duration', u'title']:
+            for key in ['duration', 'title']:
                 trackinfo[pos][key] = getattr(track, key)
         return trackinfo
 
