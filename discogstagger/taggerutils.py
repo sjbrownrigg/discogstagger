@@ -7,6 +7,7 @@ import sys
 import logging
 import shutil
 import imghdr
+from datetime import datetime, timedelta
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -469,24 +470,22 @@ class TaggerUtils(object):
             '%album%': self.album.title,
             "%year%": self.album.year,
             '%artist%': self.album.disc(discno).track(trackno).artist,
-            '%discnumber%':discno,
-            '%totaldiscs%':'',
+            '%discnumber%': discno,
+            '%totaldiscs%': self.album.disctotal,
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,
             '%tracknumber%': "%.2d" % trackno,
             '%track number%': "%.2d" % trackno,
-            "%fileext%": filetype,
-            '%bitrate%':'',
-            '%channels%':'',
-            '%codec%': self.album.codec,
+            '%fileext%': filetype,
+            '%bitdepth%': self.album.disc(discno).track(trackno).bitdepth,
+            '%bitrate%': self.album.disc(discno).track(trackno).bitrate,
+            '%channels%': self.album.disc(discno).track(trackno).channels,
+            '%codec%': self.album.disc(discno).track(trackno).codec,
             '%filesize%':'',
             '%filesize_natural%':'',
-            '%length%':'',
-            '%length_ex%':'',
-            '%length_seconds%':'',
-            '%length_seconds_fp%':'',
             '%length_samples%':'',
-            '%samplerate%':self.album.codec,
+            '%samplerate%': self.album.disc(discno).track(trackno).samplerate,
+            '%channels%': self.album.disc(discno).track(trackno).channels,
 
             "%ALBTITLE%": self.album.title,
             "%ALBARTIST%": self.album.artist,
@@ -502,6 +501,18 @@ class TaggerUtils(object):
             "%LABEL%": self.album.labels[0],
             "%CODEC%": self.album.codec,
         }
+
+        # property_map['%length%'] = str(timedelta(seconds = int(self.album.disc(discno).track(trackno).length))) if self.album.disc(discno).track(trackno).length is not None else '',
+            # '%length_ex%': datetime.strptime(self.album.disc(discno).track(trackno).length, '%H:%M:%S.%f'),
+            # '%length_seconds%': int(self.album.disc(discno).track(trackno).length),
+            # '%length_seconds_fp%': self.album.disc(discno).track(trackno).length,
+
+
+        length_seconds_fp = self.album.disc(discno).track(trackno).length
+        property_map['%length_seconds_fp%'] = self.album.disc(discno).track(trackno).length
+        property_map['%length_seconds%'] = int(length_seconds_fp) if length_seconds_fp is not None else 0
+
+
 
         for hashtag in property_map.keys():
             # escape the string to prevent wanted characters getting stripped
@@ -557,15 +568,21 @@ class TaggerUtils(object):
         ''' Fetches additional technical information about the tracks
         '''
         for disc in self.album.discs:
+            dn = disc.discnumber
             for track in disc.tracks:
+                tn = track.tracknumber
                 metadata = MediaFile(track.full_path)
                 for field in metadata.readable_fields():
                     print('fieldname: {}: '.format(field)) #, getattr(metadata, field)
 
                 self.album.codec = metadata.type
-                self.album.samplerate = metadata.samplerate
-                self.album.bitrate = metadata.bitrate
-                self.album.bitdepth = metadata.bitdepth
+                self.album.disc(dn).track(tn).samplerate = metadata.samplerate
+                # print(metadata.samplerate)
+                # print(metadata.bitdepth)
+                self.album.disc(dn).track(tn).bitrate = metadata.bitrate
+                self.album.disc(dn).track(tn).bitdepth = metadata.bitdepth
+                self.album.disc(dn).track(tn).channels = metadata.channels
+                self.album.disc(dn).track(tn).length = metadata.length
 
 
 
