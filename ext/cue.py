@@ -40,10 +40,7 @@ class CUE:
 
     def load(self):
         f = open(self.file_name, 'r')
-        self.file_encoding = chardet.detect(''.join(f.readlines()))['encoding']
-        f.close()
-        f = codecs.open(self.file_name, encoding = self.file_encoding, \
-                            mode = 'r')
+        print(self.file_name)
         self.content = f.readlines()
         self.content = [ x.replace("/","\\") for x in self.content]
         f.close()
@@ -95,11 +92,10 @@ class CUE:
                 # Add dirname of CUE file if path to image is relative
                 if os.path.dirname(file_name_value)=="":
                     file_name_value = os.path.join( \
-                            unicode(os.path.dirname(self.file_name), 'UTF-8'), \
-                            unicode(file_name_value))
+                            os.path.dirname(self.file_name), \
+                            file_name_value)
                 self.image_file_name = file_name_value
-                self.image_file_directory = unicode(os.path.dirname(self.file_name), \
-                    'UTF-8')
+                self.image_file_directory = os.path.dirname(self.file_name)
                 if not self.image_file_format in allowed_formats:
                     print("WARNING: Image format %s is not allowed" % \
                     self.image_file_format)
