@@ -60,6 +60,7 @@ class DiscogsSearch(object):
                 searchParams['tracks'][track] = {}
             searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
             searchParams['tracks'][track]['title'] = metadata.title
+            searchParams['tracks'][track]['artist'] = metadata.artist # useful for compilations
         print(searchParams)
 
         return searchParams
@@ -232,13 +233,19 @@ class DiscogsConnector(object):
 
         candidates = []
 
-        results = self.discogs_client.search(searchParams['artist'], type='artist')
+        artist = ''
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists'):
+            artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
+        else:
+            artist = searchParams['artist']
+
+        results = self.discogs_client.search(artist, type='artist')
         for result in results:
-            if len(candidates) > 0:
+            if len(candidates) > 0: # stop if we have found some releases
                 continue
 
             found = []
-            a = searchParams['artist'].lower()
+            a = artist.lower()
             # workaround for many artists with the same name, e.g. Deimos (3)
             n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
             if a == n:
@@ -258,20 +265,7 @@ class DiscogsConnector(object):
                             if self._compareRelease(searchParams, release) == True:
                                 candidates.append(release)
                         else:
-                            # if we have a year, then limit the list that we check
-                            if 'year' in searchParams.keys() and searchParams['year'] is not None:
-                                for version in release.versions:
-                                    if searchParams['year'] == version.year:
-                                        print('got a year match')
-                                        pp.pprint(version.id)
-                                        pp.pprint(searchParams['year'])
-                                        pp.pprint(version.year)
-                                        if self._compareRelease(searchParams, version) == True:
-                                            candidates.append(version)
-                            else:
-                                for version in release.versions:
-                                    if self._compareRelease(searchParams, version) == True:
-                                        candidates.append(version)
+                            candidates = candidates + self._siftReleases(searchParams, release.versions)
 
         if len(candidates) == 1:
             print(candidates[0].id)
@@ -289,6 +283,30 @@ class DiscogsConnector(object):
                         return version.id
         else:
             return None
+
+
+    def _siftReleases(self, searchParams, releases):
+        candidates = []
+        # if we have a year, start by limiting the releases we sift
+        if 'year' in searchParams and searchParams['year'] is not None:
+            for release in releases:
+                if searchParams['year'] == release.year:
+                    print('got a year match')
+                    pp.pprint(release.id)
+                    pp.pprint(searchParams['year'])
+                    pp.pprint(release.year)
+                    if self._compareRelease(searchParams, release) == True:
+                        candidates.append(release)
+        # if no match by limiting on date, or there is no date ...
+        if len(candidates) == 0:
+            print('no candidates, trying without date limits')
+            for release in releases:
+                pp.pprint(release.id)
+                pp.pprint(release.year)
+                if self._compareRelease(searchParams, release) == True:
+                    candidates.append(release)
+
+        return candidates
 
     def _compareRelease(self, searchParams, release):
         self._rateLimit()
