@@ -35,6 +35,7 @@ class FileUtils(object):
         return releaseid
 
     def walk_dir_tree(self, start_dir, id_file):
+        source_dirs = []
         for root, dirs, files in os.walk(start_dir):
             if id_file in files:
                 logger.debug("found %s in %s" % (id_file, root))
