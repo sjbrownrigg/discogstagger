@@ -148,9 +148,9 @@ class DiscogsConnector(object):
         rate_limit_type = 'metadata'
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
                 logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(1)
+                time.sleep(5)
 
         rl = RateLimit()
         rl.lastcall = time.time()
@@ -217,9 +217,9 @@ class DiscogsConnector(object):
         rate_limit_type = 'metadata'
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
                 logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(1)
+                time.sleep(5)
 
         rl = RateLimit()
         rl.lastcall = time.time()
@@ -386,9 +386,9 @@ class DiscogsConnector(object):
             return
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
                 logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(1)
+                time.sleep(5)
 
         rl = RateLimit()
         rl.lastcall = time.time()
@@ -500,6 +500,7 @@ class DiscogsAlbum(object):
         album.labels = [name for name, catno in self.labels_and_numbers]
         album.images = self.images
         album.year = self.year
+        album.format = self.release.data["formats"][0]["name"]
         album.genres = self.release.data["genres"]
 
         try:
