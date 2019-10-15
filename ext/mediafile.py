@@ -2084,6 +2084,36 @@ class MediaFile(object):
         ASFStorageStyle('INITIALKEY'),
     )
 
+    # DiscogsTagger specific fields
+    # Discogs ID
+    discogs_id = MediaField(
+        MP3DescStorageStyle(u'DiscogsReleaseId'),
+        MP4StorageStyle('drid'),
+        StorageStyle('DISCOGSID'),
+        ASFStorageStyle('DT/Release Id'),
+    )
+    # Discogs Release URL
+    discogs_release_url = MediaField(
+        MP3DescStorageStyle(u'DISCOGS_RELEASE', 'WXXX'),
+        MP4StorageStyle('----:com.apple.iTunes:URL_DISCOGS_RELEASE_SITE	'),
+        StorageStyle('URL_DISCOGS_RELEASE_SITE'),
+        ASFStorageStyle('WM/DiscogsReleaseUrl'),
+    )
+    # FREEDB ID
+    freedb_id = MediaField(
+        MP3DescStorageStyle(u'DiscId'),
+        MP4StorageStyle('dId'),
+        StorageStyle('DISCID'),
+        ASFStorageStyle('DT/discid'),
+    )
+    # FOLDER (basically for grouping of tracks/albums)
+    folder = MediaField(
+        MP3DescStorageStyle(u'Folder'),
+        MP4StorageStyle('fld'),
+        StorageStyle('FOLDER'),
+        ASFStorageStyle('DT/Folder'),
+    )
+
     @property
     def length(self):
         """The duration of the audio in seconds (a float)."""
