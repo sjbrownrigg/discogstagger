@@ -37,8 +37,16 @@ class StringFormatting(object):
             '$ifgreater': 4,
             '$lower': 2,
             '$upper': 2,
+            '$substr': 3,
         }
 
+
+    def substr(self, string, start, finish):
+        string = '' if string is None else string
+        start = None if start == '' else int(start)
+        finish = None if finish == '' else int(finish)
+        s = string[start:finish]
+        return s
 
     def lower(self, string):
         ''' Make string lowercase
