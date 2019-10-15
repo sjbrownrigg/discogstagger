@@ -50,16 +50,18 @@ class StringFormatting(object):
         '''
         return str(string).upper()
 
-    def ifgreater(self, int1, int2, met, unmet):
+    def ifgreater(self, int1, int2, oui, non):
         # for convenience if int1 or int2 are None make 0
         int1 = 0 if int1 is None or int1 == '' else int1
         int2 = 0 if int2 is None or int2 == '' else int2
-        result = met if int(int1) > int(int2) else unmet
+        result = oui if int(int1) > int(int2) else non
         return result
 
 
-    def ifequal(self, int1, int2, met, unmet):
-        result = met if int(int1) == int(int2) else unmet
+    def ifequal(self, int1, int2, oui, non):
+        int1 = 0 if int1 is None or int1 == '' else int1
+        int2 = 0 if int2 is None or int2 == '' else int2
+        result = oui if int(int1) == int(int2) else non
         return result
 
 

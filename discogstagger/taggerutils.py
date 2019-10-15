@@ -484,8 +484,13 @@ class TaggerUtils(object):
             '%filesize%':'',
             '%filesize_natural%':'',
             '%length_samples%':'',
+            '%encoding%': self.album.disc(discno).track(trackno).encoding,
             '%samplerate%': self.album.disc(discno).track(trackno).samplerate,
             '%channels%': self.album.disc(discno).track(trackno).channels,
+            '%length_seconds_fp%': self.album.disc(discno).track(trackno).length_seconds_fp,
+            '%length%': self.album.disc(discno).track(trackno).length,
+            '%length_ex%': self.album.disc(discno).track(trackno).length_ex,
+            '%length_seconds%': self.album.disc(discno).track(trackno).length_seconds,
 
             "%ALBTITLE%": self.album.title,
             "%ALBARTIST%": self.album.artist,
@@ -502,17 +507,15 @@ class TaggerUtils(object):
             "%CODEC%": self.album.codec,
         }
 
-        # property_map['%length%'] = str(timedelta(seconds = int(self.album.disc(discno).track(trackno).length))) if self.album.disc(discno).track(trackno).length is not None else '',
-            # '%length_ex%': datetime.strptime(self.album.disc(discno).track(trackno).length, '%H:%M:%S.%f'),
-            # '%length_seconds%': int(self.album.disc(discno).track(trackno).length),
-            # '%length_seconds_fp%': self.album.disc(discno).track(trackno).length,
-
-
-        length_seconds_fp = self.album.disc(discno).track(trackno).length
-        property_map['%length_seconds_fp%'] = self.album.disc(discno).track(trackno).length
-        property_map['%length_seconds%'] = int(length_seconds_fp) if length_seconds_fp is not None else 0
-
-
+        print(property_map['%bitdepth%'])
+        print(property_map['%encoding%'])
+        print(property_map['%codec%'])
+        print(property_map['%samplerate%'])
+        print(property_map['%channels%'])
+        print(property_map['%length%'])
+        print(property_map['%length_seconds%'])
+        print(property_map['%length_seconds_fp%'])
+        print(property_map['%length_ex%'])
 
         for hashtag in property_map.keys():
             # escape the string to prevent wanted characters getting stripped
@@ -575,14 +578,34 @@ class TaggerUtils(object):
                 for field in metadata.readable_fields():
                     print('fieldname: {}: '.format(field)) #, getattr(metadata, field)
 
-                self.album.codec = metadata.type
+                self.album.disc(dn).track(tn).codec = metadata.type
+                codec = metadata.type
+                lossless = ('flac', 'alac', 'wma', 'ape', 'wav')
+                encod = 'lossless' if codec.lower() in lossless else 'lossy'
+                self.album.disc(dn).track(tn).encoding = encod
                 self.album.disc(dn).track(tn).samplerate = metadata.samplerate
                 # print(metadata.samplerate)
                 # print(metadata.bitdepth)
                 self.album.disc(dn).track(tn).bitrate = metadata.bitrate
                 self.album.disc(dn).track(tn).bitdepth = metadata.bitdepth
-                self.album.disc(dn).track(tn).channels = metadata.channels
-                self.album.disc(dn).track(tn).length = metadata.length
+                chans = metadata.channels
+                ch_opts = {1: 'mono', 2: 'stereo'}
+                self.album.disc(dn).track(tn).channels = ch_opts[chans] if chans in ch_opts else '{}ch'.format(chans)
+                self.album.disc(dn).track(tn).length_seconds_fp = metadata.length
+                length_seconds_fp = metadata.length
+                self.album.disc(dn).track(tn).length_seconds = int(length_seconds_fp)
+                self.album.disc(dn).track(tn).length = str(timedelta(seconds = int(length_seconds_fp)))
+                length_ex_str = str(timedelta(seconds = round(length_seconds_fp, 4)))
+                self.album.disc(dn).track(tn).length_ex = length_ex_str[:-2]
+
+
+
+
+        # property_map['%length%'] = str(timedelta(seconds = int(self.album.disc(discno).track(trackno).length))) if self.album.disc(discno).track(trackno).length is not None else '',
+            # '%length_ex%': datetime.strptime(self.album.disc(discno).track(trackno).length, '%H:%M:%S.%f'),
+            # '%length_seconds%': int(self.album.disc(discno).track(trackno).length),
+            # '%length_seconds_fp%': self.album.disc(discno).track(trackno).length,
+
 
 
 
