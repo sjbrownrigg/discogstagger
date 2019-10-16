@@ -234,7 +234,7 @@ class DiscogsConnector(object):
         candidates = []
 
         artist = ''
-        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists'):
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
             artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
         else:
             artist = searchParams['artist']
@@ -290,6 +290,7 @@ class DiscogsConnector(object):
         # if we have a year, start by limiting the releases we sift
         if 'year' in searchParams and searchParams['year'] is not None:
             for release in releases:
+                self._rateLimit()
                 if searchParams['year'] == release.year:
                     print('got a year match')
                     pp.pprint(release.id)
@@ -297,10 +298,15 @@ class DiscogsConnector(object):
                     pp.pprint(release.year)
                     if self._compareRelease(searchParams, release) == True:
                         candidates.append(release)
+                elif release.year is None or release.year == '':
+                    continue
+                elif release.year > searchParams['year']:
+                    break
         # if no match by limiting on date, or there is no date ...
         if len(candidates) == 0:
             print('no candidates, trying without date limits')
             for release in releases:
+                self._rateLimit()
                 pp.pprint(release.id)
                 pp.pprint(release.year)
                 if self._compareRelease(searchParams, release) == True:
