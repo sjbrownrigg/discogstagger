@@ -163,6 +163,7 @@ class FileHandler(object):
     def __init__(self, album, tagger_config):
         self.config = tagger_config
         self.album = album
+        self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
 
     def mkdir_p(self, path):
         try:
@@ -256,7 +257,10 @@ class FileHandler(object):
 
             if copy_files != None:
                 for fname in copy_files:
-                    shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
+                    if os.path.isdir(fname):
+                        shutil.copytree(src, dest, ignore= ignore_patterns(self.cue_done_dir)
+                    else:
+                        shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
 
             for disc in self.album.discs:
                 copy_files = disc.copy_files
@@ -586,8 +590,6 @@ class TaggerUtils(object):
                 encod = 'lossless' if codec.lower() in lossless else 'lossy'
                 self.album.disc(dn).track(tn).encoding = encod
                 self.album.disc(dn).track(tn).samplerate = metadata.samplerate
-                # print(metadata.samplerate)
-                # print(metadata.bitdepth)
                 self.album.disc(dn).track(tn).bitrate = metadata.bitrate
                 self.album.disc(dn).track(tn).bitdepth = metadata.bitdepth
                 chans = metadata.channels
@@ -599,17 +601,6 @@ class TaggerUtils(object):
                 self.album.disc(dn).track(tn).length = str(timedelta(seconds = int(length_seconds_fp)))
                 length_ex_str = str(timedelta(seconds = round(length_seconds_fp, 4)))
                 self.album.disc(dn).track(tn).length_ex = length_ex_str[:-2]
-
-
-
-
-        # property_map['%length%'] = str(timedelta(seconds = int(self.album.disc(discno).track(trackno).length))) if self.album.disc(discno).track(trackno).length is not None else '',
-            # '%length_ex%': datetime.strptime(self.album.disc(discno).track(trackno).length, '%H:%M:%S.%f'),
-            # '%length_seconds%': int(self.album.disc(discno).track(trackno).length),
-            # '%length_seconds_fp%': self.album.disc(discno).track(trackno).length,
-
-
-
 
     def _get_target_list(self):
         """
