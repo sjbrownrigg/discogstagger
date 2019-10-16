@@ -256,9 +256,10 @@ class FileHandler(object):
             copy_files = self.album.copy_files
 
             if copy_files != None:
+                copy_files.remove(self.cue_done_dir)
                 for fname in copy_files:
                     if os.path.isdir(fname):
-                        shutil.copytree(src, dest, ignore= ignore_patterns(self.cue_done_dir))
+                        shutil.copytree(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname)) #, ignore= ignore_patterns(self.cue_done_dir)
                     else:
                         shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
 
