@@ -94,8 +94,18 @@ class CUE:
                     file_name_value = os.path.join( \
                             os.path.dirname(self.file_name), \
                             file_name_value)
-                self.image_file_name = file_name_value
+
                 self.image_file_directory = os.path.dirname(self.file_name)
+                if os.path.exists(file_name_value):
+                    self.image_file_name = file_name_value
+                else:
+                    for r, d, f in os.walk(self.image_file_directory):
+                        for file in f:
+                            if file.endswith(('.flac', '.wav', '.ape', '.alac', 'wv')):
+                                if os.path.exists(os.path.join(self.image_file_directory, file)):
+                                    self.image_file_name = os.path.join(self.image_file_directory, file)
+                if self.image_file_directory is None:
+                    print("WARNING: image file not found: {}".format(file_name_value))
                 if not self.image_file_format in allowed_formats:
                     print("WARNING: Image format %s is not allowed" % \
                     self.image_file_format)
