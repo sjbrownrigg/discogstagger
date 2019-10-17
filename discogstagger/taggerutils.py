@@ -6,6 +6,7 @@ import re
 import sys
 import logging
 import shutil
+from shutil import copy2, copystat, Error, ignore_patterns
 import imghdr
 from datetime import datetime, timedelta
 
@@ -37,6 +38,7 @@ logger = logging
 #         self.version = user_agent
 #         FancyURLopener.__init__(self)
 #
+
 class TaggerError(Exception):
     """ A central exception for all errors happening during the tagging
     """
@@ -256,15 +258,21 @@ class FileHandler(object):
             copy_files = self.album.copy_files
 
             if copy_files != None:
-                copy_files.remove(self.cue_done_dir)
+
+                extf = (self.cue_done_dir)
+                copy_files[:] = [f for f in copy_files if f not in extf]
+
                 for fname in copy_files:
-                    if os.path.isdir(fname):
-                        shutil.copytree(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname)) #, ignore= ignore_patterns(self.cue_done_dir)
+                    if os.path.isdir(os.path.join(source_path, fname)):
+                        copytree_multi(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname)) #, ignore= ignore_patterns(self.cue_done_dir)
                     else:
                         shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
 
             for disc in self.album.discs:
                 copy_files = disc.copy_files
+
+                extf = (self.cue_done_dir)
+                copy_files[:] = [f for f in copy_files if f not in extf]
 
                 for fname in copy_files:
                     if not fname.endswith(".m3u"):
@@ -280,7 +288,11 @@ class FileHandler(object):
 
                         if not os.path.exists(target_path):
                             self.mkdir_p(target_path)
-                        shutil.copyfile(os.path.join(source_path, fname), os.path.join(target_path, fname))
+
+                        if os.path.isdir(os.path.join(source_path, fname)):
+                            copytree_multi(os.path.join(source_path, fname), os.path.join(target_path, fname))
+                        else:
+                            shutil.copyfile(os.path.join(source_path, fname), os.path.join(target_path, fname))
 
     def get_images(self, conn_mgr):
         """
@@ -513,16 +525,16 @@ class TaggerUtils(object):
             "%CODEC%": self.album.codec,
         }
 
-        print(property_map['%format%'])
-        print(property_map['%bitdepth%'])
-        print(property_map['%encoding%'])
-        print(property_map['%codec%'])
-        print(property_map['%samplerate%'])
-        print(property_map['%channels%'])
-        print(property_map['%length%'])
-        print(property_map['%length_seconds%'])
-        print(property_map['%length_seconds_fp%'])
-        print(property_map['%length_ex%'])
+        # print(property_map['%format%'])
+        # print(property_map['%bitdepth%'])
+        # print(property_map['%encoding%'])
+        # print(property_map['%codec%'])
+        # print(property_map['%samplerate%'])
+        # print(property_map['%channels%'])
+        # print(property_map['%length%'])
+        # print(property_map['%length_seconds%'])
+        # print(property_map['%length_seconds_fp%'])
+        # print(property_map['%length_ex%'])
 
         for hashtag in property_map.keys():
             # escape the string to prevent wanted characters getting stripped
@@ -542,7 +554,7 @@ class TaggerUtils(object):
         format = stringFormatting.parseString(format)
         format = self.get_clean_filename(format)
 
-        print(format)
+        # print(format)
 
         logger.debug("output: %s" % format)
 
@@ -582,8 +594,8 @@ class TaggerUtils(object):
             for track in disc.tracks:
                 tn = track.tracknumber
                 metadata = MediaFile(track.full_path)
-                for field in metadata.readable_fields():
-                    print('fieldname: {}: '.format(field)) #, getattr(metadata, field)
+                # for field in metadata.readable_fields():
+                #     print('fieldname: {}: '.format(field)) #, getattr(metadata, field)
 
                 self.album.disc(dn).track(tn).codec = metadata.type
                 codec = metadata.type
@@ -691,9 +703,9 @@ class TaggerUtils(object):
                 for position, filename in enumerate(target_list):
                     logger.debug("track position: %d" % position)
 
-                    print('position: {}'.format(position))
-                    print('filename: {}'.format(filename))
-
+                    # print('position: {}'.format(position))
+                    # print('filename: {}'.format(filename))
+                    #
                     track = disc.tracks[position]
 
                     logger.debug("mapping file %s --to--> %s - %s" % (filename,
@@ -837,3 +849,44 @@ def write_file(filecontents, filename):
         logger.error("Unable to write file '%s'" % filename)
 
     return True
+
+
+def copytree_multi(src, dst, symlinks=False, ignore=None):
+    names = os.listdir(src)
+    if ignore is not None:
+        ignored_names = ignore(src, names)
+    else:
+        ignored_names = set()
+
+    # -------- E D I T --------
+    # os.path.isdir(dst)
+    if not os.path.isdir(dst):
+        os.makedirs(dst)
+    # -------- E D I T --------
+
+    errors = []
+    for name in names:
+        if name in ignored_names:
+            continue
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if symlinks and os.path.islink(srcname):
+                linkto = os.readlink(srcname)
+                os.symlink(linkto, dstname)
+            elif os.path.isdir(srcname):
+                copytree_multi(srcname, dstname, symlinks, ignore)
+            else:
+                copy2(srcname, dstname)
+        except (IOError, os.error) as why:
+            errors.append((srcname, dstname, str(why)))
+        except Error as err:
+            errors.extend(err.args[0])
+    try:
+        copystat(src, dst)
+    except WindowsError:
+        pass
+    except OSError as why:
+        errors.extend((src, dst, str(why)))
+    if errors:
+        raise Error(errors)
