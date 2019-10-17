@@ -94,6 +94,8 @@ else:
 # initialize connection (could be a problem if using multiple sources...)
 discogs_connector = DiscogsConnector(tagger_config)
 local_discogs_connector = LocalDiscogsConnector(discogs_connector)
+# try to re-use search, may be useful if working with several releases by the same artist
+discogsSearch = DiscogsSearch(tagger_config)
 
 logger.info("start tagging")
 discs_with_errors = []
@@ -122,7 +124,6 @@ for source_dir in source_dirs:
             releaseid = file_utils.read_id_file(source_dir, id_file, options)
 
         if not releaseid:
-            discogsSearch = DiscogsSearch(tagger_config)
             searchParams = discogsSearch.getSearchParams(source_dir)
             release = discogs_connector.search_discogs(searchParams)
             # reuse the Discogs Release class, it saves re-fetching later
