@@ -76,7 +76,7 @@ def getSourceDirs():
         source_dirs = file_utils.walk_dir_tree(options.sourcedir, id_file)
     elif options.searchDiscogs:
         logger.debug("looking for audio files")
-        source_dirs = file_utils.get_audio_dirs(options.sourcedir)
+        source_dirs = file_utils.get_audio_dirs(options.sourcedir, options)
         pp.pprint(source_dirs)
     else:
         logger.debug("using sourcedir: %s" % options.sourcedir)

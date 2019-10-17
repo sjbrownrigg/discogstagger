@@ -15,10 +15,12 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 class FileUtils(object):
-    def __init__(self, tagger_config):
+    def __init__(self, tagger_config, options):
         self.config = tagger_config
         self.source_dirs = []
         self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
+        self.done_file = self.config.get("details", "done_file")
+        self.forceUpdate = options.forceUpdate
 
     def read_id_file(self, dir, file_name, options):
         # read tags from batch file if available
