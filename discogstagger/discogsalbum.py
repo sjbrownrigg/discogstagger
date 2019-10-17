@@ -102,6 +102,7 @@ class DiscogsConnector(object):
         self.tracklength_tolerance = self.config.getfloat("batch", "tracklength_tolerance")
         self.discogs_auth = False
         self.rate_limit_pool = {}
+        self.release_cache = {}
 
         skip_auth = self.config.get("discogs", "skip_auth")
 
@@ -239,33 +240,42 @@ class DiscogsConnector(object):
         else:
             artist = searchParams['artist']
 
-        results = self.discogs_client.search(artist, type='artist')
-        for result in results:
-            if len(candidates) > 0: # stop if we have found some releases
+        # reuse release data for this artist previously cached in this session
+        if artist in self.release_cache:
+            releases = self.release_cache[artist]
+            print('reusing cached artist data')
+        else:
+            results = self.discogs_client.search(artist, type='artist')
+            for result in results:
+                if len(candidates) > 0: # stop if we have found some candidates
+                    continue
+
+                found = []
+                a = artist.lower()
+                # workaround for many artists with the same name, e.g. Deimos (3)
+                n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
+                if a == n:
+                # session based cache to reuse artist release data
+                    self.release_cache['artist'] = result.releases
+                    releases = result.releases
+
+        for release in result.releases:
+            if len(candidates) > 0:
                 continue
 
-            found = []
-            a = artist.lower()
-            # workaround for many artists with the same name, e.g. Deimos (3)
-            n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
-            if a == n:
-                for release in result.releases:
-                    if len(candidates) > 0:
-                        continue
-
-                    self._rateLimit()
-                    r = release.title.lower()
-                    s = searchParams['album'].lower()
-                    if s == r or r in s or s in r:
-                        found.append('title')
-                        pp.pprint('matched title')
-                        pp.pprint(release.title)
-                        print()
-                        if hasattr(release, 'versions') == False:
-                            if self._compareRelease(searchParams, release) == True:
-                                candidates.append(release)
-                        else:
-                            candidates = candidates + self._siftReleases(searchParams, release.versions)
+            self._rateLimit()
+            r = release.title.lower()
+            s = searchParams['album'].lower()
+            if s == r or r in s or s in r:
+                found.append('title')
+                pp.pprint('matched title')
+                pp.pprint(release.title)
+                print()
+                if hasattr(release, 'versions') == False:
+                    if self._compareRelease(searchParams, release) == True:
+                        candidates.append(release)
+                else:
+                    candidates = candidates + self._siftReleases(searchParams, release.versions)
 
         if len(candidates) == 1:
             print(candidates[0].id)
