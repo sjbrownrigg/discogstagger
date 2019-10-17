@@ -689,7 +689,7 @@ class DiscogsAlbum(object):
 #            logger.debug("x: %s" % vars(x))
 #            logger.debug("join: %s" % x.data['join'])
 
-            if isinstance(x, basestring):
+            if isinstance(x, str):
                 logger.debug("x: %s" % x)
                 if last_artist:
                     last_artist = last_artist + " " + x
