@@ -18,8 +18,6 @@ from discogstagger.tagger_config import TaggerConfig
 from discogstagger.discogsalbum import DiscogsAlbum, DiscogsConnector, LocalDiscogsConnector, AlbumError, DiscogsSearch
 from discogstagger.taggerutils import TaggerUtils, TagHandler, FileHandler, TaggerError
 
-
-
 p = OptionParser(version="discogstagger3 3.0")
 p.add_option("-r", "--releaseid", action="store", dest="releaseid",
              help="The release id of the target album")
@@ -47,21 +45,13 @@ if len(sys.argv) == 1:
 
 (options, args) = p.parse_args()
 
-print(options.sourcedir)
-
 if not options.sourcedir or not os.path.exists(options.sourcedir):
     p.error("Please specify a valid source directory ('-s')")
 else:
     options.sourcedir = os.path.abspath(options.sourcedir)
 
-print(options.sourcedir)
-
-print(options.destdir)
-
 if options.destdir and os.path.exists(options.destdir):
     options.destdir = os.path.abspath(options.destdir)
-
-print(options.destdir)
 
 tagger_config = TaggerConfig(options.conffile)
 # options.replaygain = tagger_config.get("batch", "replaygain")
@@ -79,171 +69,180 @@ options.searchDiscogs = tagger_config.get('batch', 'searchDiscogs')
 
 file_utils = FileUtils(tagger_config)
 
-if options.recursive:
-    logger.debug("determine sourcedirs")
-    source_dirs = file_utils.walk_dir_tree(options.sourcedir, id_file)
-elif options.searchDiscogs:
-    logger.debug("looking for audio files")
-    source_dirs = file_utils.get_audio_dirs(options.sourcedir)
+def getSourceDirs():
+    source_dirs = None
+    if options.recursive:
+        logger.debug("determine sourcedirs")
+        source_dirs = file_utils.walk_dir_tree(options.sourcedir, id_file)
+    elif options.searchDiscogs:
+        logger.debug("looking for audio files")
+        source_dirs = file_utils.get_audio_dirs(options.sourcedir)
+        pp.pprint(source_dirs)
+    else:
+        logger.debug("using sourcedir: %s" % options.sourcedir)
+        source_dirs = [options.sourcedir]
+    return source_dirs
+
+
+def processSourceDirs(source_dirs, tagger_config):
+    # initialize connection (could be a problem if using multiple sources...)
+    discogs_connector = DiscogsConnector(tagger_config)
+    local_discogs_connector = LocalDiscogsConnector(discogs_connector)
+    # try to re-use search, may be useful if working with several releases by the same artist
+    discogsSearch = DiscogsSearch(tagger_config)
+
+    logger.info("start tagging")
+    discs_with_errors = []
+
+    converted_discs = 0
+
     pp.pprint(source_dirs)
-else:
-    logger.debug("using sourcedir: %s" % options.sourcedir)
-    source_dirs = [options.sourcedir]
 
+    for source_dir in source_dirs:
+        releaseid = None
+        release = None
+        connector = None
+        try:
+            done_file = tagger_config.get("details", "done_file")
+            done_file_path = os.path.join(source_dir, done_file)
 
-# initialize connection (could be a problem if using multiple sources...)
-discogs_connector = DiscogsConnector(tagger_config)
-local_discogs_connector = LocalDiscogsConnector(discogs_connector)
-# try to re-use search, may be useful if working with several releases by the same artist
-discogsSearch = DiscogsSearch(tagger_config)
+            if os.path.exists(done_file_path) and not options.forceUpdate:
+                logger.warn('Do not read {}, because {} exists and forceUpdate is false'.format(source_dir, done_file))
+                continue
 
-logger.info("start tagging")
-discs_with_errors = []
+            # reread config to make sure, that the album specific options are reset for each
+            # album
+            tagger_config = TaggerConfig(options.conffile)
 
-converted_discs = 0
+            if options.releaseid is not None:
+                releaseid = file_utils.read_id_file(source_dir, id_file, options)
 
-pp.pprint(source_dirs)
+            if not releaseid:
+                searchParams = discogsSearch.getSearchParams(source_dir)
+                release = discogs_connector.search_discogs(searchParams)
+                # reuse the Discogs Release class, it saves re-fetching later
+                if release is not None and type(release).__name__ in ('Release', 'Version'):
+                    releaseid = release.id
+                    connector = discogs_connector
 
-for source_dir in source_dirs:
-    releaseid = None
-    release = None
-    connector = None
-    try:
-        done_file = tagger_config.get("details", "done_file")
-        done_file_path = os.path.join(source_dir, done_file)
+            if not releaseid:
+                logger.warn('No releaseid for {}'.format(source_dir))
+                continue
 
-        if os.path.exists(done_file_path) and not options.forceUpdate:
-            logger.warn('Do not read {}, because {} exists and forceUpdate is false'.format(source_dir, done_file))
-            continue
+            # if not releaseid:
+            #     p.error("Please specify the discogs.com releaseid ('-r')")
 
-        # reread config to make sure, that the album specific options are reset for each
-        # album
-        tagger_config = TaggerConfig(options.conffile)
+            print('Found release ID: {} for source dir: {}'.format(releaseid, source_dir))
 
-        if options.releaseid is not None:
-            releaseid = file_utils.read_id_file(source_dir, id_file, options)
-
-        if not releaseid:
-            searchParams = discogsSearch.getSearchParams(source_dir)
-            release = discogs_connector.search_discogs(searchParams)
-            # reuse the Discogs Release class, it saves re-fetching later
-            if release is not None and type(release).__name__ in ('Release', 'Version'):
-                releaseid = release.id
-                connector = discogs_connector
-
-        if not releaseid:
-            logger.warn('No releaseid for {}'.format(source_dir))
-            continue
-
-        # if not releaseid:
-        #     p.error("Please specify the discogs.com releaseid ('-r')")
-
-        print('Found release ID: {} for source dir: {}'.format(releaseid, source_dir))
-
-        # read destination directory
-        # !TODO if both are the same, we are not copying anything,
-        # this should be "configurable"
-        if not options.destdir:
-            destdir = source_dir
-        else:
-            destdir = options.destdir
-            logger.debug('destdir set to {}'.format(options.destdir))
-
-        logger.info('Using destination directory: {}'.format(destdir))
-
-        logger.debug("starting tagging...")
-
-
-        if releaseid is not None and release is None:
-            #! TODO this is dirty, refactor it to be able to reuse it for later enhancements
-            if tagger_config.get("source", "name") == "local":
-                release = local_discogs_connector.fetch_release(releaseid, source_dir)
-                connector = local_discogs_connector
+            # read destination directory
+            # !TODO if both are the same, we are not copying anything,
+            # this should be "configurable"
+            if not options.destdir:
+                destdir = source_dir
             else:
-                release = discogs_connector.fetch_release(releaseid)
-                connector = discogs_connector
+                destdir = options.destdir
+                logger.debug('destdir set to {}'.format(options.destdir))
 
-        discogs_album = DiscogsAlbum(release)
+            logger.info('Using destination directory: {}'.format(destdir))
 
-        try:
-            album = discogs_album.map()
-        except AlbumError as ae:
-            msg = "Error during mapping ({0}), {1}: {2}".format(releaseid, source_dir, ae)
+            logger.debug("starting tagging...")
+
+
+            if releaseid is not None and release is None:
+                #! TODO this is dirty, refactor it to be able to reuse it for later enhancements
+                if tagger_config.get("source", "name") == "local":
+                    release = local_discogs_connector.fetch_release(releaseid, source_dir)
+                    connector = local_discogs_connector
+                else:
+                    release = discogs_connector.fetch_release(releaseid)
+                    connector = discogs_connector
+
+            discogs_album = DiscogsAlbum(release)
+
+            try:
+                album = discogs_album.map()
+            except AlbumError as ae:
+                msg = "Error during mapping ({0}), {1}: {2}".format(releaseid, source_dir, ae)
+                logger.error(msg)
+                discs_with_errors.append(msg)
+                continue
+
+            logger.info('Tagging album "{} - {}"'.format(album.artist, album.title))
+
+            taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
+
+            tagHandler = TagHandler(album, tagger_config)
+
+            fileHandler = FileHandler(album, tagger_config)
+            try:
+                taggerUtils._get_target_list()
+            except TaggerError as te:
+                msg = "Error during Tagging ({0}), {1}: {2}".format(releaseid, source_dir, te)
+                logger.error(msg)
+                discs_with_errors.append(msg)
+                continue
+
+            taggerUtils.gather_addional_properties()
+            # reset the target directory now that we have discogs metadata and
+            #  filedata - otherwise this is declared too early in the process
+            album.target_dir = taggerUtils.dest_dir_name
+
+            fileHandler.copy_files()
+
+            logger.debug("Tagging files")
+            tagHandler.tag_album()
+
+            logger.debug("Copy other interesting files (on request)")
+            fileHandler.copy_other_files()
+
+            logger.debug("Downloading and storing images")
+            fileHandler.get_images(connector)
+
+            logger.debug("Embedding Albumart")
+            fileHandler.embed_coverart_album()
+
+            if options.replaygain:
+                logger.debug("Add ReplayGain tags (if necessary)")
+                fileHandler.add_replay_gain_tags()
+
+        # !TODO make this more generic to use different templates and files,
+        # furthermore adopt to reflect multi-disc-albums
+            logger.debug("Generate m3u")
+            taggerUtils.create_m3u(album.target_dir)
+
+            logger.debug("Generate nfo")
+            taggerUtils.create_nfo(album.target_dir)
+
+            fileHandler.create_done_file()
+        except Exception as ex:
+            if releaseid:
+                msg = "Error during tagging ({0}), {1}: {2}".format(releaseid, source_dir, ex)
+            else:
+                msg = "Error during tagging (no relid) {0}: {1}".format(source_dir, ex)
             logger.error(msg)
             discs_with_errors.append(msg)
             continue
 
-        logger.info('Tagging album "{} - {}"'.format(album.artist, album.title))
+        # !TODO - make this a check during the taggerutils run
+        # ensure we were able to map the release appropriately.
+        #if not release.tag_map:
+        #    logger.error("Unable to match file list to discogs release '%s'" %
+        #                  releaseid)
+        #    sys.exit()
+        converted_discs = converted_discs + 1
+        logger.info("Converted %d/%d" % (converted_discs, len(source_dirs)))
 
-        taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
+    logger.info("Tagging complete.")
+    logger.info("converted successful: %d" % converted_discs)
+    logger.info("converted with Errors %d" % len(discs_with_errors))
+    logger.info("releases touched: %s" % len(source_dirs))
 
-        tagHandler = TagHandler(album, tagger_config)
-
-        fileHandler = FileHandler(album, tagger_config)
-        try:
-            taggerUtils._get_target_list()
-        except TaggerError as te:
-            msg = "Error during Tagging ({0}), {1}: {2}".format(releaseid, source_dir, te)
+    if discs_with_errors:
+        logger.error("The following discs could not get converted.")
+        for msg in discs_with_errors:
             logger.error(msg)
-            discs_with_errors.append(msg)
-            continue
 
-        taggerUtils.gather_addional_properties()
-        # reset the target directory now that we have discogs metadata and
-        #  filedata - otherwise this is declared too early in the process
-        album.target_dir = taggerUtils.dest_dir_name
-
-        fileHandler.copy_files()
-
-        logger.debug("Tagging files")
-        tagHandler.tag_album()
-
-        logger.debug("Copy other interesting files (on request)")
-        fileHandler.copy_other_files()
-
-        logger.debug("Downloading and storing images")
-        fileHandler.get_images(connector)
-
-        logger.debug("Embedding Albumart")
-        fileHandler.embed_coverart_album()
-
-        if options.replaygain:
-            logger.debug("Add ReplayGain tags (if necessary)")
-            fileHandler.add_replay_gain_tags()
-
-    # !TODO make this more generic to use different templates and files,
-    # furthermore adopt to reflect multi-disc-albums
-        logger.debug("Generate m3u")
-        taggerUtils.create_m3u(album.target_dir)
-
-        logger.debug("Generate nfo")
-        taggerUtils.create_nfo(album.target_dir)
-
-        fileHandler.create_done_file()
-    except Exception as ex:
-        if releaseid:
-            msg = "Error during tagging ({0}), {1}: {2}".format(releaseid, source_dir, ex)
-        else:
-            msg = "Error during tagging (no relid) {0}: {1}".format(source_dir, ex)
-        logger.error(msg)
-        discs_with_errors.append(msg)
-        continue
-
-    # !TODO - make this a check during the taggerutils run
-    # ensure we were able to map the release appropriately.
-    #if not release.tag_map:
-    #    logger.error("Unable to match file list to discogs release '%s'" %
-    #                  releaseid)
-    #    sys.exit()
-    converted_discs = converted_discs + 1
-    logger.info("Converted %d/%d" % (converted_discs, len(source_dirs)))
-
-logger.info("Tagging complete.")
-logger.info("converted successful: %d" % converted_discs)
-logger.info("converted with Errors %d" % len(discs_with_errors))
-logger.info("releases touched: %s" % len(source_dirs))
-
-if discs_with_errors:
-    logger.error("The following discs could not get converted.")
-    for msg in discs_with_errors:
-        logger.error(msg)
+if __name__ == "__main__":
+    source_dirs = getSourceDirs()
+    if len(source_dirs) > 0:
+        processSourceDirs(source_dirs, tagger_config)
