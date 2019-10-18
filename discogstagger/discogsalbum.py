@@ -242,22 +242,9 @@ class DiscogsConnector(object):
         print('Searching by artist and title: {}'.format(artistTitleSearch))
         results = self.discogs_client.search(artistTitleSearch, type='all')
 
-        print(results)
-
         for idx, result in enumerate(results):
-            # print('Search: {}; index: {}'.format(artistTitleSearch, idx))
-            # print(dir(result))
-            # print(dir(result.data))
-            # if hasattr(result, 'master'):
-            #     print(result.master)
-            #     print(result.id)
-            #     exit()
             if hasattr(result, 'versions'):
-                print(result.versions)
                 self._siftReleases(searchParams, result.versions, candidates)
-
-        # return candidates
-
 
     def search_artist(self, searchParams, candidates):
         self._rateLimit()
@@ -306,22 +293,16 @@ class DiscogsConnector(object):
                 else:
                     self._siftReleases(searchParams, release.versions, candidates)
 
-        # return candidates
-
-
     def search_discogs(self, searchParams):
         self._rateLimit()
 
         print('Searching discogs')
 
         candidates = {}
-
         self.search_artist_title(searchParams, candidates)
 
-        print('has searched for artist and title')
-        print(candidates)
-
         if len(candidates) == 0:
+            print('Nothing matched with artist/title search, trying artist only')
             self.search_artist(searchParams, candidates)
 
         print(candidates)
@@ -396,30 +377,43 @@ class DiscogsConnector(object):
     def _compareTracks(self, current, imported):
         """ Compare original tracklist against discogs tracklist, by comparing
             the track lengths. Some releases have tracks in different order,
-            so we need to weed those out.  Returns the highest value.
+            so we need to filter those out.  Returns the highest time discrepancy.
         """
         tolerance = 0.0
         curr_tracklist = current['tracks']
         for track in curr_tracklist.keys():
+            # print(track)
+            # print(imported.keys())
             """ some tracks have alphanumerical identifiers,
                 e.g. vinyl, cassettes
             """
-            if track not in imported.keys():
+            if track in imported.keys():
+                difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
+                if difference.total_seconds() > tolerance:
+                    tolerance = difference.total_seconds()
+            # some digital releases have disc number (1.1) but source may have (1-1)
+            elif re.sub('-', '.', track) in imported.keys():
+                t = re.sub('-', '.', track)
+                difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
+                if difference.total_seconds() > tolerance:
+                    tolerance = difference.total_seconds()
+            else:
                 logging.debug('track not present, numbering format different')
                 return 100
-            else:
-                try:
-                    a = self._paddedHMS(curr_tracklist[track]['duration'])
-                    b = self._paddedHMS(imported[track]['duration'])
-                    timea = datetime.strptime(a, '%H:%M:%S')
-                    timeb = datetime.strptime(b, '%H:%M:%S')
-                    difference = timea - timeb
-                    if difference.total_seconds() > tolerance:
-                        tolerance = difference.total_seconds()
-                except Exception as e:
-                    print(e)
-            logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
+        logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
+
+    def _compareTrackLengths(self, current, imported):
+        try:
+            a = self._paddedHMS(current['duration'])
+            b = self._paddedHMS(imported['duration'])
+            timea = datetime.strptime(a, '%H:%M:%S')
+            timeb = datetime.strptime(b, '%H:%M:%S')
+            difference = timea - timeb
+            return difference
+        except Exception as e:
+            print(e)
+
 
     def _getTrackInfo(self, version):
         """ Get the track values from the release, so that we can compare them
