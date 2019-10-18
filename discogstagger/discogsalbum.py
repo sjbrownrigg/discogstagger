@@ -230,7 +230,8 @@ class DiscogsConnector(object):
     def search_artist_title(self, searchParams, candidates):
         self._rateLimit()
 
-        album = searchParams['album']
+        # remove 'EP' from end of release title - can cause problems
+        album = re.sub('\s+EP$', '', searchParams['album'])
         artist = ''
         if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
             artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
