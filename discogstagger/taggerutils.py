@@ -9,6 +9,7 @@ import shutil
 from shutil import copy2, copystat, Error, ignore_patterns
 import imghdr
 from datetime import datetime, timedelta
+import subprocess
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -411,12 +412,28 @@ class FileHandler(object):
         else:
             pattern = pattern + "/**/*.flac"
 
-        cmd.append(pattern)
+        cmd.append(self._escape_string(pattern))
 
         line = subprocess.list2cmdline(cmd)
         p = subprocess.Popen(line, shell=True)
         return_code = p.wait()
         logging.debug("return %s" % str(return_code))
+
+    def _escape_string(self, string):
+        return '%s' % (
+            string
+            .replace('\\', '\\\\')
+            .replace(' ', '\\ ')
+            .replace('(', '\(')
+            .replace(')', '\)')
+            .replace(',', '\,')
+            .replace('"', '\"')
+            .replace('$', '\$')
+            .replace('&', '\&')
+            .replace('!', '\!')
+            .replace('`', '\`')
+            .replace("'", "\\'")
+        )
 
 
 class TaggerUtils(object):
