@@ -66,6 +66,9 @@ class FileUtils(object):
                             audio_files.append(file)
             dirs[:] = [d for d in dirs if d not in unwalk]
             for file in files:
+                # skip directory if it has been done
+                if self.done_file in files and self.forceUpdate == False:
+                    continue
                 if file.endswith('.cue'):
                     cue_files.append(file)
                 elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):

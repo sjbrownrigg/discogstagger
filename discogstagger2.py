@@ -67,7 +67,7 @@ id_file = tagger_config.get("batch", "id_file")
 options.searchDiscogs = tagger_config.get('batch', 'searchDiscogs')
 # options.parse_cue_files = tagger_config.get('cue', 'parse_cue_files')
 
-file_utils = FileUtils(tagger_config)
+file_utils = FileUtils(tagger_config, options)
 
 def getSourceDirs():
     source_dirs = None
@@ -76,7 +76,7 @@ def getSourceDirs():
         source_dirs = file_utils.walk_dir_tree(options.sourcedir, id_file)
     elif options.searchDiscogs:
         logger.debug("looking for audio files")
-        source_dirs = file_utils.get_audio_dirs(options.sourcedir, options)
+        source_dirs = file_utils.get_audio_dirs(options.sourcedir)
         pp.pprint(source_dirs)
     else:
         logger.debug("using sourcedir: %s" % options.sourcedir)
