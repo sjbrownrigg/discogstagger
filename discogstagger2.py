@@ -7,6 +7,10 @@ import logging.config
 import sys
 print(sys.version)
 
+import time
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -33,6 +37,8 @@ p.add_option("-f", "--force", action="store_true", dest="forceUpdate",
              help="Should albums be updated even though the done token exists?")
 p.add_option("-g", "--replay-gain", action="store_true", dest="replaygain",
              help="Should replaygain tags be added to the album? (metaflac needs to be installed)")
+p.add_option("-w", "--watch", action="store_true", dest="watch",
+             help="Watches for changes in the source directory (daemon mode)")
 
 p.set_defaults(conffile="conf/default.conf")
 p.set_defaults(recursive=False)
@@ -242,7 +248,54 @@ def processSourceDirs(source_dirs, tagger_config):
         for msg in discs_with_errors:
             logger.error(msg)
 
-if __name__ == "__main__":
+def process():
     source_dirs = getSourceDirs()
     if len(source_dirs) > 0:
         processSourceDirs(source_dirs, tagger_config)
+
+class DirectoryWatcher():
+
+    def __init__(self):
+        self.total_size = -1
+
+    def dir_size(self, root_dir):
+        total_size = -1
+        for (dirpath, dirs, files) in os.walk(root_dir):
+            for filename in files:
+                file_size = os.stat(os.path.join(dirpath, filename)).st_size
+                total_size += file_size
+        return total_size
+
+    def watch(self, root_dir):
+        while self.total_size != self.dir_size(root_dir):
+            self.total_size = self.dir_size(root_dir)
+            time.sleep(5)
+        # return 'Finished function'
+
+
+class MyHandler(FileSystemEventHandler):
+    def on_modified(self, event):
+        print(f'event type: {event.event_type}  path : {event.src_path}')
+        waitfor = DirectoryWatcher()
+        waitfor.watch(options.sourcedir)
+        print('Finished')
+        process()
+
+
+if __name__ == "__main__":
+    if options.watch == True:
+        print('Daemon mode')
+        event_handler = MyHandler()
+        observer = Observer()
+        observer.schedule(event_handler, path=options.sourcedir, recursive=False)
+        observer.start()
+
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
+    else:
+        source_dirs = getSourceDirs()
+        if len(source_dirs) > 0:
+            processSourceDirs(source_dirs, tagger_config)
