@@ -243,8 +243,15 @@ class DiscogsConnector(object):
         results = self.discogs_client.search(artistTitleSearch, type='all')
 
         for idx, result in enumerate(results):
+            # print(dir(result))
+            # exit()
             if hasattr(result, 'versions'):
                 self._siftReleases(searchParams, result.versions, candidates)
+            else:
+                if self._compareRelease(searchParams, result) == True:
+                    # print(result)
+                    candidates[result.id] = result
+                    # print(candidates)
 
     def search_artist(self, searchParams, candidates):
         self._rateLimit()
@@ -256,13 +263,21 @@ class DiscogsConnector(object):
         else:
             artist = searchParams['artist']
 
+        releases = None
         # reuse release data for this artist previously cached in this session
         if artist in self.release_cache:
             releases = self.release_cache[artist]
             print('reusing cached artist data')
         else:
             results = self.discogs_client.search(artist, type='artist')
+            print('result from Discogs:')
+            print(dir(results))
+            print(results.count)
+            if results.count == 0:
+                return None
+
             for result in results:
+                print(dir(result))
                 if len(candidates) > 0: # stop if we have found some candidates
                     continue
 
@@ -275,18 +290,21 @@ class DiscogsConnector(object):
                     self.release_cache['artist'] = result.releases
                     releases = result.releases
 
-        for release in result.releases:
+        if releases is None:
+            return None
+
+        for release in releases:
             if len(candidates) > 0:
                 continue
 
             self._rateLimit()
             r = release.title.lower()
             s = searchParams['album'].lower()
+            print('iterating through the releases')
             if s == r or r in s or s in r: # sometimes titles include extra info, e.g. EP
                 found.append('title')
                 pp.pprint('matched title')
                 pp.pprint(release.title)
-                print()
                 if not hasattr(release, 'versions'):
                     if self._compareRelease(searchParams, release) == True:
                         candidates[release.id] = release
@@ -307,7 +325,11 @@ class DiscogsConnector(object):
 
         print(candidates)
 
-        if len(candidates) == 1:
+        if len(candidates) == 0:
+            print('Nothing found on Discogs.  Try searching manually')
+            return None
+
+        elif len(candidates) == 1:
             return list(candidates.values())[0]
 
 # TODO: find a better way of sifting through multiple positive matches
@@ -364,6 +386,7 @@ class DiscogsConnector(object):
                 logger.debug('adding relid to the list of candidates: {}'.format(release.id))
                 return True
         else:
+            print('Number of tracks does not match between release and source')
             return False
 
 
@@ -394,6 +417,12 @@ class DiscogsConnector(object):
             # some digital releases have disc number (1.1) but source may have (1-1)
             elif re.sub('-', '.', track) in imported.keys():
                 t = re.sub('-', '.', track)
+                difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
+                if difference.total_seconds() > tolerance:
+                    tolerance = difference.total_seconds()
+            # some digital releases have disc number (1.1) but source may have (1)
+            elif '1.{}'.format(track) in imported.keys():
+                t = '1.{}'.format(track)
                 difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
                 if difference.total_seconds() > tolerance:
                     tolerance = difference.total_seconds()
