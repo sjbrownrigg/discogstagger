@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import shutil
 from mutagen.flac import FLAC
-
 import re
 from subprocess import Popen,PIPE
 from ext.cue import CUE, Track
