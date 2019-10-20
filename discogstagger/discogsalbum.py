@@ -37,15 +37,13 @@ class DiscogsSearch(object):
 
         files = self._getMusicFiles(source_dir)
 
+        pp.pprint(files)
+
         searchParams = {}
         for file in files:
-
             head, tail = os.path.split(file)
-
-            file = tail
-
             print(file)
-            metadata = MediaFile(os.path.join(source_dir, file))
+            metadata = MediaFile(os.path.join(file))
 
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
@@ -70,11 +68,12 @@ class DiscogsSearch(object):
         """
         extf = (self.cue_done_dir)
         found = []
-        for root,dirs,files in os.walk(source_dir):
+        for dirpath, dirs, files in os.walk(source_dir):
             dirs[:] = [d for d in dirs if d not in extf]
             for file in files:
                 if file.endswith(('.flac', '.mp3')):
-                    found.append(os.path.join(root, file))
+                    found.append(os.path.join(dirpath, file))
+                    pp.pprint(os.path.join(dirpath, file))
         return found
 
 class AlbumError(Exception):
@@ -227,8 +226,17 @@ class DiscogsConnector(object):
 
         self.rate_limit_pool[rate_limit_type] = rl
 
+    def get_master_release(self, release):
+        print(dir(release))
+        if hasattr(release, 'master'):
+            return release.master
+        else:
+            return release
+
+
     def search_artist_title(self, searchParams, candidates):
         self._rateLimit()
+        master = None
 
         # remove 'EP' from end of release title - can cause problems
         album = re.sub('\s+EP$', '', searchParams['album'])
@@ -244,14 +252,22 @@ class DiscogsConnector(object):
         results = self.discogs_client.search(artistTitleSearch, type='all')
 
         for idx, result in enumerate(results):
-            # print(dir(result))
-            # exit()
-            if hasattr(result, 'versions'):
-                self._siftReleases(searchParams, result.versions, candidates)
+            if len(candidates) > 0: # stop if we have already found some candidates
+                continue
+
+            if hasattr(result, '__class__') and 'Artist' in str(result.__class__):
+                print(result.__class__)
+                continue
+
+            master = self.get_master_release(result)
+            print(dir(master))
+
+            if hasattr(master, 'versions'):
+                self._siftReleases(searchParams, master.versions, candidates)
             else:
-                if self._compareRelease(searchParams, result) == True:
+                if self._compareRelease(searchParams, master) == True:
                     # print(result)
-                    candidates[result.id] = result
+                    candidates[master.id] = master
                     # print(candidates)
 
     def search_artist(self, searchParams, candidates):
