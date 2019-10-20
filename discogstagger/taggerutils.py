@@ -60,6 +60,7 @@ class TagHandler(object):
 
         self.keep_tags = self.config.get("details", "keep_tags")
         self.user_agent = self.config.get("common", "user_agent")
+        self.variousartists = self.config.get("details", "variousartists")
 
     def tag_album(self):
         """ tags all tracks in an album, the filenames are determined using
@@ -99,6 +100,8 @@ class TagHandler(object):
 
         # use list of albumartists
         metadata.albumartists = self.album.artists
+        if self.album.artist == 'Various' and self.album.is_compilation == True:
+            metadata.albumartist = self.variousartists
 
 # !TODO really, or should we generate this using a specific method?
         metadata.albumartist_sort = self.album.sort_artist
@@ -141,6 +144,8 @@ class TagHandler(object):
         # set track metadata
         metadata.title = track.title
         metadata.artists = track.artists
+        metadata.artist = track.artist
+
 
 # !TODO take care about sortartist ;-)
         metadata.artist_sort = track.sort_artist

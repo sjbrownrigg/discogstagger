@@ -228,7 +228,8 @@ class DiscogsConnector(object):
 
     def get_master_release(self, release):
         print(dir(release))
-        if hasattr(release, 'master'):
+        print(release.master)
+        if hasattr(release, 'master') and release.master is not None:
             return release.master
         else:
             return release
@@ -260,7 +261,6 @@ class DiscogsConnector(object):
                 continue
 
             master = self.get_master_release(result)
-            print(dir(master))
 
             if hasattr(master, 'versions'):
                 self._siftReleases(searchParams, master.versions, candidates)
@@ -328,13 +328,36 @@ class DiscogsConnector(object):
                 else:
                     self._siftReleases(searchParams, release.versions, candidates)
 
+    def search_album_title(self, searchParams, candidates):
+        album = re.sub('\s+EP$', '', searchParams['album'])
+        print('Searching by title: {}'.format(album))
+        results = self.discogs_client.search(album, type='release')
+        for result in results:
+            if len(candidates) == 0:
+                master = self.get_master_release(result)
+                print(dir(master))
+                if hasattr(master, 'versions'):
+                    print('sifting releases')
+                    self._siftReleases(searchParams, master.versions, candidates)
+                else:
+                    print('comparing release')
+                    if self._compareRelease(searchParams, master) == True:
+                        candidates[master.id] = master
+
     def search_discogs(self, searchParams):
         self._rateLimit()
-
-        print('Searching discogs')
+        print('Searching discogs...')
 
         candidates = {}
-        self.search_artist_title(searchParams, candidates)
+
+        unknown = ('unknown artist')
+        various = ('various', 'various artists', 'va')
+        if searchParams['artist'].lower() in unknown or searchParams['albumartist'].lower() in various:
+            self.search_album_title(searchParams, candidates)
+
+        if len(candidates) == 0:
+            print('Nothing matched with title search, trying artist only')
+            self.search_artist_title(searchParams, candidates)
 
         if len(candidates) == 0:
             print('Nothing matched with artist/title search, trying artist only')
@@ -399,6 +422,7 @@ class DiscogsConnector(object):
         pp.pprint(trackInfo)
         pp.pprint(searchParams)
         if len(searchParams['tracks']) == len(trackInfo):
+            print('releases have the same number of tracks')
             if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
                 logger.debug('adding relid to the list of candidates: {}'.format(release.id))
                 return True
@@ -428,6 +452,7 @@ class DiscogsConnector(object):
                 e.g. vinyl, cassettes
             """
             if track in imported.keys():
+                print('track {} present'.format(track))
                 difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
                 if difference.total_seconds() > tolerance:
                     tolerance = difference.total_seconds()
@@ -447,6 +472,7 @@ class DiscogsConnector(object):
                 logging.debug('track not present, numbering format different')
                 return 100
         logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
+        print('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
 
     def _compareTrackLengths(self, current, imported):
