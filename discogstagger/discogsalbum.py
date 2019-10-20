@@ -227,8 +227,6 @@ class DiscogsConnector(object):
         self.rate_limit_pool[rate_limit_type] = rl
 
     def get_master_release(self, release):
-        print(dir(release))
-        print(release.master)
         if hasattr(release, 'master') and release.master is not None:
             return release.master
         else:
@@ -352,8 +350,9 @@ class DiscogsConnector(object):
 
         unknown = ('unknown artist')
         various = ('various', 'various artists', 'va')
-        if searchParams['artist'].lower() in unknown or searchParams['albumartist'].lower() in various:
-            self.search_album_title(searchParams, candidates)
+        if (searchParams['artist'] is not None and searchParams['artist'].lower() in unknown) \
+            or (searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in various):
+                self.search_album_title(searchParams, candidates)
 
         if len(candidates) == 0:
             print('Nothing matched with title search, trying artist only')
@@ -627,11 +626,14 @@ class DiscogsAlbum(object):
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
-        album.catnumbers = [catno for name, catno in self.labels_and_numbers]
+        album.catnumbers = list(set([catno for name, catno in self.labels_and_numbers]))
         album.labels = [name for name, catno in self.labels_and_numbers]
         album.images = self.images
         album.year = self.year
         album.format = self.release.data["formats"][0]["name"]
+        for format in self.release.data["formats"]:
+            if format['name'] == 'Maxi-Single':
+                album.format = ''.join(album.format, 'M')
         album.genres = self.release.data["genres"]
 
         try:
