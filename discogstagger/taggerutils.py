@@ -492,9 +492,8 @@ class TaggerUtils(object):
         self.images_format = self.config.get("file-formatting", "image")
         self.m3u_format = self.config.get("file-formatting", "m3u")
         self.nfo_format = self.config.get("file-formatting", "nfo")
-
         self.disc_folder_name = self.config.get("file-formatting", "discs")
-
+        self.normalize = self.config.get("file-formatting", "normalize")
         self.use_lower = self.config.getboolean("details", "use_lower_filenames")
 
 #        self.first_image_name = "folder.jpg"
@@ -532,6 +531,7 @@ class TaggerUtils(object):
             '%album artist%': self.album.artist,
             '%albumartist%': self.album.artist,
             '%album%': self.album.title,
+            '%catno%': ', '.join(self.album.catnumbers),
             "%year%": self.album.year,
             '%artist%': self.album.disc(discno).track(trackno).artist,
             '%totaldiscs%': self.album.disctotal,
@@ -847,7 +847,8 @@ class TaggerUtils(object):
         for k, v in self.char_exceptions.items():
             a = a.replace(k, v)
 
-        a = normalize("NFKD", a)
+        if self.normalize == True:
+            a = normalize("NFKD", a)
         print(a)
 
         cf = re.compile(r"[^-\w.,()\[\]\s]")
