@@ -198,6 +198,12 @@ def processSourceDirs(source_dirs, tagger_config):
             logger.debug("Tagging files")
             tagHandler.tag_album()
 
+            # Do replaygain analysis before copying other files, the directory
+            #  contents are cleaner, less prone to mistakes
+            if options.replaygain:
+                logger.debug("Add ReplayGain tags (if necessary)")
+                fileHandler.add_replay_gain_tags()
+
             logger.debug("Copy other interesting files (on request)")
             fileHandler.copy_other_files()
 
@@ -206,10 +212,6 @@ def processSourceDirs(source_dirs, tagger_config):
 
             logger.debug("Embedding Albumart")
             fileHandler.embed_coverart_album()
-
-            if options.replaygain:
-                logger.debug("Add ReplayGain tags (if necessary)")
-                fileHandler.add_replay_gain_tags()
 
         # !TODO make this more generic to use different templates and files,
         # furthermore adopt to reflect multi-disc-albums
