@@ -80,7 +80,9 @@ class StringFormatting(object):
         return string
 
     def strcmp(self, string1, string2):
-        result = str(string1) == str(string2)
+        string1 = '' if string1 == 'None' else str(string1)
+        string2 = '' if string2 == 'None' else str(string2)
+        result = string1 == string2
         return result
 
     def if1(self, cond, string1, string2=''):
