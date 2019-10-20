@@ -9,7 +9,7 @@ import shutil
 from shutil import copy2, copystat, Error, ignore_patterns
 import imghdr
 from datetime import datetime, timedelta
-import subprocess
+# import subprocess
 
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
@@ -122,6 +122,7 @@ class TagHandler(object):
         setattr(metadata, self.config.id_tag_name, self.album.id)
         metadata.discogs_release_url = self.album.url
 
+        metadata.disctitle = track.discsubtitle
         metadata.disc = track.discnumber
         metadata.disctotal = len(self.album.discs)
 
@@ -398,25 +399,46 @@ class FileHandler(object):
             Uses the default metaflac command, therefor this has to be installed
             on your system, to be able to use this method.
         """
-        cmd = []
-        cmd.append("metaflac")
-        cmd.append("--preserve-modtime")
-        cmd.append("--add-replay-gain")
 
+        print('add_replay_gain_tags')
+
+        codecs = ['.flac', '.ogg', '.mp3']
         albumdir = self.album.target_dir
-        subdirs = next(os.walk(albumdir))[1]
+        print(albumdir)
+        # work out if this is a multidisc set.  Note that not all
+        #  subdirectories have music files, e.g. scans, covers, etc.
+        root_dir, subdirs, files = next(os.walk(albumdir))
+        multidisc = 0
+        singledisc = 0
 
-        pattern = albumdir
-        if not subdirs:
-            pattern = pattern + "/*.flac"
-        else:
-            pattern = pattern + "/**/*.flac"
+        for f in files:
+            print(f)
+            if list(filter(f.endswith, codecs)) != []:
+                singledisc += 1
+        for dir in subdirs:
+            print(dir)
+            subfiles = next(os.walk(os.path.join(albumdir, dir)))[2]
+            print(subfiles)
+            for f in subfiles:
+                print(f)
+                if list(filter(f.endswith, codecs)) != []:
+                    multidisc += 1
 
-        cmd.append(self._escape_string(pattern))
+        print(singledisc)
+        print(multidisc)
 
-        line = subprocess.list2cmdline(cmd)
-        p = subprocess.Popen(line, shell=True)
-        return_code = p.wait()
+        pattern = os.path.join(albumdir, '**', '*.flac') if multidisc > 0 else os.path.join(albumdir, '*.flac')
+            # pattern = pattern + "/*.flac"
+
+        print(pattern)
+        #
+        logger.debug('Adding replaygain to files')
+        cmd = 'metaflac --add-replay-gain {}'.format( \
+            self._escape_string(pattern))
+
+        # print(cmd)
+        return_code = os.system(cmd)
+
         logging.debug("return %s" % str(return_code))
 
     def _escape_string(self, string):
@@ -433,6 +455,9 @@ class FileHandler(object):
             .replace('!', '\!')
             .replace('`', '\`')
             .replace("'", "\\'")
+            .replace('[', '\[')
+            .replace(']', '\]')
+            .replace('-', '\-')
         )
 
 
@@ -504,8 +529,9 @@ class TaggerUtils(object):
             '%album%': self.album.title,
             "%year%": self.album.year,
             '%artist%': self.album.disc(discno).track(trackno).artist,
-            '%discnumber%': discno,
             '%totaldiscs%': self.album.disctotal,
+            '%discnumber%': discno,
+            '%disctitle%': self.album.disc(discno).disctitle,
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,
             '%tracknumber%': "%.2d" % trackno,
@@ -585,12 +611,12 @@ class TaggerUtils(object):
             these can be calculated without knowing the source (well, the
             filetype seems to be a different calibre)
         """
-
         for disc in self.album.discs:
             if not self.album.has_multi_disc:
                 disc.target_dir = None
             else:
-                disc.target_dir = self.get_clean_filename(self._value_from_tag_format(self.disc_folder_name, disc.discnumber))
+                target_dir = self._value_from_tag(self.disc_folder_name, disc.discnumber)
+                disc.target_dir = target_dir
 
             for track in disc.tracks:
                 # special handling for Various Artists discs
@@ -632,6 +658,22 @@ class TaggerUtils(object):
                 length_ex_str = str(timedelta(seconds = round(length_seconds_fp, 4)))
                 self.album.disc(dn).track(tn).length_ex = length_ex_str[:-2]
 
+
+    def _directory_has_audio_files(self, dir):
+        codecs = ['.flac', '.ogg', '.mp3']
+        files = next(os.walk(dir))[2]
+        found = 0
+        for f in files:
+            if list(filter(f.endswith, codecs)) != []:
+                found += 1
+        return False if found == 0 else True
+
+    def _directory_prune_unwanted(self, dir_list):
+        # Remove directories without audio files / in ignore list
+        extf = (self.cue_done_dir)
+        dir_list[:] = [d for d in dir_list if d not in extf]
+        # return dir_list
+
     def _get_target_list(self):
         """
             fetches a list of files with the defined file_type
@@ -651,16 +693,9 @@ class TaggerUtils(object):
         try:
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
-
-            print(dir_list)
-
-            # self.cue_done_dir = '.cue'
-            extf = (self.cue_done_dir)
-            dir_list[:] = [d for d in dir_list if d not in extf]
+            self._directory_prune_unwanted(dir_list)
 
             filetype = ""
-            print(dir_list)
-
             self.album.copy_files = []
 
             if self.album.has_multi_disc:
@@ -672,9 +707,10 @@ class TaggerUtils(object):
                 for y in dir_list:
                     logger.debug("is it a dir? %s" % y)
                     if os.path.isdir(os.path.join(sourcedir, y)):
-                        logger.debug("Setting disc(%s) sourcedir to: %s" % (dirno, y))
-                        self.album.discs[dirno].sourcedir = y
-                        dirno = dirno + 1
+                        if self._directory_has_audio_files(os.path.join(sourcedir, y)):
+                            logger.debug("Setting disc(%s) sourcedir to: %s" % (dirno, y))
+                            self.album.discs[dirno].sourcedir = y
+                            dirno = dirno + 1
                     else:
                         logger.debug("Setting copy_files instead of sourcedir")
                         self.album.copy_files.append(y)
@@ -684,8 +720,11 @@ class TaggerUtils(object):
 
             for disc in self.album.discs:
                 print('going through disc')
+                print(self.album.sourcedir)
+                print(disc.sourcedir)
                 try:
-                    disc_source_dir = disc.sourcedir
+                    disc_source_dir = os.path.join(self.album.sourcedir, disc.sourcedir) \
+                        if disc.sourcedir is not None else None
                 except AttributeError:
                     logger.error("there seems to be a problem in the meta-data, check if there are sub-tracks")
                     raise TaggerError("no disc sourcedir defined, does this release contain sub-tracks?")
@@ -785,10 +824,9 @@ class TaggerUtils(object):
 
     def get_clean_filename(self, f):
         """ Removes unwanted characters from file names """
+        print('get_clean_filename')
 
         filename, fileext = os.path.splitext(f)
-
-        print('get_clean_filename')
 
         if not fileext in TaggerUtils.FILE_TYPE and not fileext in [".m3u", ".nfo"]:
             logger.debug("fileext: {}".format(fileext))
@@ -807,7 +845,7 @@ class TaggerUtils(object):
         a = normalize("NFKD", a)
         print(a)
 
-        cf = re.compile(r"[^-\w.\(\)_\[\]\s]")
+        cf = re.compile(r"[^-\w.,()\[\]\s]")
         cf = cf.sub("", str(a))
 
         print(cf)
@@ -822,7 +860,7 @@ class TaggerUtils(object):
         if self.use_lower:
             cf = cf.lower()
 
-        print(cf)
+        print('cf: {}'.format(cf))
 
         return cf
 
