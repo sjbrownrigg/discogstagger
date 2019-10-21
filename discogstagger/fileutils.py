@@ -51,19 +51,11 @@ class FileUtils(object):
         parse_cue_files = self.config.getboolean('cue', 'parse_cue_files')
         extf = (self.cue_done_dir)
         source_dirs = []
-        for root, dirs, files in os.walk(start_dir):
+        for root, dirs, files in os.walk(start_dir, topdown=True):
             dirs[:] = [d for d in dirs if d not in extf]
             cue_files = []
             audio_files = []
             unwalk = []
-            for dir in dirs:
-                if re.search('^(?i)(cd|disc)\s*\d+$', dir):
-                    unwalk.append(dir)
-                    d = Path(os.path.join(root, dir))
-                    for file in d.iterdir():
-                        if str(file).endswith(('.flac', '.mp3', '.ape', '.wav')):
-                            audio_files.append(file)
-            dirs[:] = [d for d in dirs if d not in unwalk]
             for file in files:
                 # skip directory if it has been done
                 if self.done_file in files and self.forceUpdate == False:
@@ -72,11 +64,22 @@ class FileUtils(object):
                     cue_files.append(file)
                 elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
                     audio_files.append(file)
+            for dir in dirs:
+                if re.search('^(?i)(cd|disc)\s*\d+$', dir):
+                    unwalk.append(dir)
+                    d = Path(os.path.join(root, dir))
+                    for file in d.iterdir():
+                        # skip directory if it has been done
+                        if self.done_file in d.iterdir() and self.forceUpdate == False:
+                            continue
+                        if str(file).endswith(('.flac', '.mp3', '.ape', '.wav')):
+                            audio_files.append(file)
+            dirs[:] = [d for d in dirs if d not in unwalk]
             if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
                 result = self._processCueFiles(root, cue_files)
                 if result == 0:
                     source_dirs.append(root + '/')
-            elif len(audio_files) > 0:
+            elif len(audio_files) > 0 and self.done_file not in files:
                 source_dirs.append(root + '/')
                 logger.debug('found %s in %s' % (file, root + '/'))
 
