@@ -657,27 +657,14 @@ class DiscogsAlbum(object):
 
         return album
 
-
     @property
     def format_description(self):
         descriptions = []
-        map = {
-            'Maxi-Single': 'M',
-            'Single': 'S',
-            'Limited Edition': 'ltd',
-            'Numbered': 'num',
-        }
-        # album.format_description = ', '.join(self.release.data['formats'][0]['descriptions'])
-        # print(album.format_description)
+
         for format in self.release.data["formats"]:
             descriptions.extend(format['descriptions'])
 
-        for i, description in enumerate(descriptions):
-            descriptions[i] = map[description] if description in map.keys() else description
-
-        print(descriptions)
-
-        return ', '.join(descriptions)
+        return descriptions
 
 
     @property

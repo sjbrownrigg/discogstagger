@@ -38,8 +38,20 @@ class StringFormatting(object):
             '$lower': 2,
             '$upper': 2,
             '$substr': 3,
+            '$inarray': 3
         }
 
+
+    def inarray(self, l, i):
+        ''' Returns True or False if item is in array. List passed in as
+            an escaped string, so needs parsing
+        '''
+        itm = '' if i == 'None' else str(i)
+        l = re.sub(r'\\', '', l)
+        lst = eval(l)
+        result = itm in lst
+
+        return result
 
     def substr(self, string, start, finish):
         string = '' if string is None else string

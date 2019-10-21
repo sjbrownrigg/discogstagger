@@ -508,6 +508,10 @@ class TaggerUtils(object):
         else:
             raise RuntimeException('Cannot tag, no album given')
 
+        self.map_format_description()
+        # self.format_mapping = None
+        pp.pprint(self.format_mapping)
+
         self.album.sourcedir = sourcedir
         # the album is stored in a directory beneath the destination directory
         # and following the given dir_format
@@ -517,6 +521,24 @@ class TaggerUtils(object):
 
         # add template functionality ;-)
         self.template_lookup = TemplateLookup(directories=["templates"])
+
+    def map_format_description(self):
+        """ Gets format desription, and maps to user defined variations,
+            e.g. Limited Edition -> ltd
+        """
+        self.format_mapping = {}
+        self.media_desc_formatting = self.config.items('media_description')
+
+        # get the mapping from config and convert to dict
+        for i in self.media_desc_formatting:
+            self.format_mapping[i[0]] = i[1] if i[1] != '' else None
+
+        for i, desc in enumerate(self.album.format_description):
+            if desc.lower() in self.format_mapping.keys():
+                if self.format_mapping[desc.lower()] is not None:
+                    self.album.format_description[i] = self.format_mapping[desc.lower()]
+
+        pp.pprint(self.album.format_description)
 
     def _value_from_tag_format(self, format, discno=1, trackno=1, filetype=".mp3"):
         """ Fill in the used variables using the track information
