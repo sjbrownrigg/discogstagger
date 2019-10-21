@@ -626,14 +626,12 @@ class DiscogsAlbum(object):
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
-        album.catnumbers = list(set([catno for name, catno in self.labels_and_numbers]))
-        album.labels = [name for name, catno in self.labels_and_numbers]
+        album.catnumbers = self.remove_duplicate_items([catno for name, catno in self.labels_and_numbers])
+        album.labels = self.remove_duplicate_items([name for name, catno in self.labels_and_numbers])
         album.images = self.images
         album.year = self.year
         album.format = self.release.data["formats"][0]["name"]
-        for format in self.release.data["formats"]:
-            if format['name'] == 'Maxi-Single':
-                album.format = ''.join(album.format, 'M')
+        album.format_description = self.format_description
         album.genres = self.release.data["genres"]
 
         try:
@@ -658,6 +656,29 @@ class DiscogsAlbum(object):
         album.discs = self.discs_and_tracks(album)
 
         return album
+
+
+    @property
+    def format_description(self):
+        descriptions = []
+        map = {
+            'Maxi-Single': 'M',
+            'Single': 'S',
+            'Limited Edition': 'ltd',
+            'Numbered': 'num',
+        }
+        # album.format_description = ', '.join(self.release.data['formats'][0]['descriptions'])
+        # print(album.format_description)
+        for format in self.release.data["formats"]:
+            descriptions.extend(format['descriptions'])
+
+        for i, description in enumerate(descriptions):
+            descriptions[i] = map[description] if description in map.keys() else description
+
+        print(descriptions)
+
+        return ', '.join(descriptions)
+
 
     @property
     def url(self):
@@ -895,6 +916,10 @@ class DiscogsAlbum(object):
         disc_list.append(disc)
 
         return disc_list
+
+    def remove_duplicate_items(self, duplicates_list):
+        """ remove duplicates from an n item list """
+        return list(set(duplicates_list))
 
     def clean_duplicate_handling(self, clean_target):
         """ remove discogs duplicate handling eg : John (1) """

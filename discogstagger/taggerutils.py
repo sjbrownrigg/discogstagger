@@ -542,6 +542,7 @@ class TaggerUtils(object):
             '%tracknumber%': "%.2d" % trackno,
             '%track number%': "%.2d" % trackno,
             '%format%': self.album.format,
+            '%format_description%': self.album.format_description,
             '%fileext%': filetype,
             '%bitdepth%': self.album.disc(discno).track(trackno).bitdepth,
             '%bitrate%': self.album.disc(discno).track(trackno).bitrate,
@@ -573,6 +574,7 @@ class TaggerUtils(object):
             "%CODEC%": self.album.codec,
         }
 
+        print(property_map['%format_description%'])
         # print(property_map['%format%'])
         # print(property_map['%bitdepth%'])
         # print(property_map['%encoding%'])
