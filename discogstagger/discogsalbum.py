@@ -242,9 +242,9 @@ class DiscogsConnector(object):
         artist = ''
         if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
             artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
-        elif searchParams['albumartist'] is not None:
+        elif searchParams['albumartist'] is not None and searchParams['albumartist'] != '':
             artist = searchParams['albumartist']
-        elif searchParams['artist'] is not None:
+        elif searchParams['artist'] is not None and searchParams['artist'] != '':
             artist = searchParams['artist']
         else:
             # can't find artist, cannot continue
@@ -253,6 +253,7 @@ class DiscogsConnector(object):
         artistTitleSearch = ' '.join((artist, album))
 
         print('Searching by artist and title: {}'.format(artistTitleSearch))
+
         results = self.discogs_client.search(artistTitleSearch, type='all')
 
         for idx, result in enumerate(results):
@@ -260,7 +261,6 @@ class DiscogsConnector(object):
                 continue
 
             if hasattr(result, '__class__') and 'Artist' in str(result.__class__):
-                print(result.__class__)
                 continue
 
             master = self.get_master_release(result)
@@ -360,7 +360,7 @@ class DiscogsConnector(object):
                 self.search_album_title(searchParams, candidates)
 
         if len(candidates) == 0:
-            print('Nothing matched with title search, trying artist only')
+            print('Nothing matched with Various Artists search, trying artist only')
             self.search_artist_title(searchParams, candidates)
 
         if len(candidates) == 0:
@@ -639,6 +639,8 @@ class DiscogsAlbum(object):
         album.format_description = self.format_description
         album.genres = self.release.data["genres"]
         album.sourcemedia = self.sourcemedia
+
+        print(album.sourcemedia)
 
         try:
             album.styles = self.release.data["styles"]
