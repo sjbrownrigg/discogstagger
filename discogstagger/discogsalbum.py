@@ -242,8 +242,13 @@ class DiscogsConnector(object):
         artist = ''
         if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
             artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
-        else:
+        elif searchParams['albumartist'] is not None:
+            artist = searchParams['albumartist']
+        elif searchParams['artist'] is not None:
             artist = searchParams['artist']
+        else:
+            # can't find artist, cannot continue
+            return
 
         artistTitleSearch = ' '.join((artist, album))
 
@@ -633,6 +638,7 @@ class DiscogsAlbum(object):
         album.format = self.release.data["formats"][0]["name"]
         album.format_description = self.format_description
         album.genres = self.release.data["genres"]
+        album.sourcemedia = self.sourcemedia
 
         try:
             album.styles = self.release.data["styles"]
@@ -656,6 +662,20 @@ class DiscogsAlbum(object):
         album.discs = self.discs_and_tracks(album)
 
         return album
+
+    @property
+    def sourcemedia(self):
+        ''' the recording media the track came from.
+            eg, CD, Cassette, Radio Broadcast, LP, CD Single
+        '''
+        source = [self.release.data["formats"][0]["name"]]
+
+        for format in self.release.data["formats"]:
+            source.extend(format['descriptions'])
+
+        return ' '.join(source)
+
+
 
     @property
     def format_description(self):

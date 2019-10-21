@@ -108,6 +108,8 @@ class TagHandler(object):
 
 # !TODO should be joined
         metadata.label = self.album.labels[0]
+        metadata.source = self.album.sourcemedia
+        metadata.sourcemedia = self.album.sourcemedia
 
         metadata.year = self.album.year
         metadata.country = self.album.country
