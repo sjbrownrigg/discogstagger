@@ -423,15 +423,15 @@ class DiscogsConnector(object):
     def _compareRelease(self, searchParams, release):
         self._rateLimit()
         trackInfo = self._getTrackInfo(release)
-        pp.pprint(trackInfo)
-        pp.pprint(searchParams)
+        # pp.pprint(trackInfo)
+        # pp.pprint(searchParams)
         if len(searchParams['tracks']) == len(trackInfo):
             print('releases have the same number of tracks')
             if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
                 logger.debug('adding relid to the list of candidates: {}'.format(release.id))
                 return True
         else:
-            print('Number of tracks does not match between release and source')
+            print('Number of tracks does not match between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
             return False
 
 
@@ -449,14 +449,13 @@ class DiscogsConnector(object):
         """
         tolerance = 0.0
         curr_tracklist = current['tracks']
+        # try averaging the tracklength variation out by the number of tracks
+        tracktotal = len(curr_tracklist)
         for track in curr_tracklist.keys():
-            # print(track)
-            # print(imported.keys())
             """ some tracks have alphanumerical identifiers,
                 e.g. vinyl, cassettes
             """
             if track in imported.keys():
-                print('track {} present'.format(track))
                 difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
                 if difference.total_seconds() > tolerance:
                     tolerance = difference.total_seconds()
@@ -475,6 +474,9 @@ class DiscogsConnector(object):
             else:
                 logging.debug('track not present, numbering format different')
                 return 100
+
+        print('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
+        tolerance = tolerance / tracktotal
         logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         print('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
