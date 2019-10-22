@@ -473,7 +473,7 @@ class DiscogsConnector(object):
                     tolerance = difference.total_seconds()
             else:
                 logging.debug('track not present, numbering format different')
-                return 100
+                return 999
 
         print('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
         tolerance = tolerance / tracktotal
@@ -482,15 +482,22 @@ class DiscogsConnector(object):
         return tolerance
 
     def _compareTrackLengths(self, current, imported):
-        try:
-            a = self._paddedHMS(current['duration'])
-            b = self._paddedHMS(imported['duration'])
-            timea = datetime.strptime(a, '%H:%M:%S')
-            timeb = datetime.strptime(b, '%H:%M:%S')
-            difference = timea - timeb
-            return difference
-        except Exception as e:
-            print(e)
+        """ Compare the tracklengths between the gathered audio data and the
+            Discogs tracklengths. Expect variation.  If no tracklengths return
+            999
+        """
+        if 'duration' in current.keys() and 'duration' in imported.keys():
+            try:
+                a = self._paddedHMS(current['duration'])
+                b = self._paddedHMS(imported['duration'])
+                timea = datetime.strptime(a, '%H:%M:%S')
+                timeb = datetime.strptime(b, '%H:%M:%S')
+                difference = timea - timeb
+                return difference
+            except Exception as e:
+                print(e)
+        else:
+            return 999
 
 
     def _getTrackInfo(self, version):
