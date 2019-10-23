@@ -175,6 +175,22 @@ class CUE:
                 if len(value)>80:
                     print("WARNING: Title should be limited \
                     to 80 character or less")
+            if cmd=="DISCID":
+                value = line[7:]
+                if value[0] == '"': value = value[1:]
+                if value[-1] == '"': value = value[:-1]
+                if scope=="global":
+                    self.discid = value
+                if scope=="track":
+                    current_track.discid = value
+            if cmd=="DISCNUMBER":
+                value = line[11:]
+                if value[0] == '"': value = value[1:]
+                if value[-1] == '"': value = value[:-1]
+                if scope=="global":
+                    self.discnumber = value
+                if scope=="track":
+                    current_track.discnumber = value
             if cmd=="TRACK":
                 scope = "track"
                 self.tracks.append(current_track)
