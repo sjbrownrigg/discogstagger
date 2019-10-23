@@ -108,7 +108,7 @@ class FileUtils(object):
         """ Tags files with the metadata present in cue file
         """
         file_path = cue.image_file_directory
-        if cue.disctotal is not None and cue.disctotal > 1:
+        if cue.disctotal is not None and int(cue.disctotal) > 1:
             file_path = os.path.join(file_path, 'cd' + str(cue.discnumber))
         for track in cue.tracks:
             if not track.number==None:
@@ -138,14 +138,15 @@ class FileUtils(object):
                     audio["disctotal"] = cue.disctotal
                 # 0th track left blank
                 audio["tracktotal"] = str(len(cue.tracks) - 1)
-                # audio.pprint()
+
+                audio.pprint()
                 audio.save()
 
     def _splitCueFile(self, cue):
         """ Handles the splitting and tidy up of cue files and associated audio
         """
         destination = cue.image_file_directory
-        if cue.disctotal is not None and cue.disctotal > 1:
+        if cue.disctotal is not None and int(cue.disctotal) > 1:
             destination = os.path.join(cue.image_file_directory, 'cd' + str(cue.discnumber))
         p = Path(destination)
         if not p.exists():
