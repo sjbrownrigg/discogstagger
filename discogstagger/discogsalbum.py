@@ -30,36 +30,38 @@ class DiscogsSearch(object):
         self.cue_done_dir = '.cue'
 
     def getSearchParams(self, source_dir):
-        """ get search parameters to find release on discogs
+        """ get search parameters from exiting tags to find release on discogs.
+            Minimum tags = artist, album title, date is also helpful.
+            If track numbers are not present they are guessed by their index.
         """
 
-        print('Setting original metadata for search purposes')
+        logger.info('Setting original metadata for search purposes')
 
         files = self._getMusicFiles(source_dir)
-
-        pp.pprint(files)
+        files.sort()
 
         searchParams = {}
-        for file in files:
+        for i, file in enumerate(files):
             head, tail = os.path.split(file)
-            print(file)
             metadata = MediaFile(os.path.join(file))
-
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
             searchParams['disc'] = metadata.disc
+            if metadata.disctotal is not None and metadata.disctotal == 1:
+                searchParams['disc'] = None
             if 'tracks' not in searchParams:
                 searchParams['tracks'] = {}
-            track = str(metadata.disc) + '-' + str(metadata.track) if metadata.disc else str(metadata.track)
+            track = str(searchParams['disc']) + '-' + str(metadata.track) if searchParams['disc'] else str(metadata.track)
+            if track is None or track == 'None':
+                track = str(searchParams['disc']) + '-' + str(metadata.track) if searchParams['disc'] else str(i + 1)
             if track not in searchParams['tracks']:
                 searchParams['tracks'][track] = {}
             searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
             searchParams['tracks'][track]['title'] = metadata.title
             searchParams['tracks'][track]['artist'] = metadata.artist # useful for compilations
-        print(searchParams)
 
         return searchParams
 
@@ -449,6 +451,8 @@ class DiscogsConnector(object):
         """
         tolerance = 0.0
         curr_tracklist = current['tracks']
+        pp.pprint(curr_tracklist)
+        pp.pprint(imported)
         # try averaging the tracklength variation out by the number of tracks
         tracktotal = len(curr_tracklist)
         for track in curr_tracklist.keys():
@@ -486,7 +490,7 @@ class DiscogsConnector(object):
             Discogs tracklengths. Expect variation.  If no tracklengths return
             999
         """
-        if 'duration' in current.keys() and 'duration' in imported.keys():
+        if 'duration' in imported.keys() and imported['duration'] != '':
             try:
                 a = self._paddedHMS(current['duration'])
                 b = self._paddedHMS(imported['duration'])
@@ -497,7 +501,7 @@ class DiscogsConnector(object):
             except Exception as e:
                 print(e)
         else:
-            return 999
+            return timedelta(seconds = 999)
 
 
     def _getTrackInfo(self, version):
