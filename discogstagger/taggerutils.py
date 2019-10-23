@@ -175,6 +175,8 @@ class FileHandler(object):
         self.config = tagger_config
         self.album = album
         self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
+        self.rg_process = self.config.getboolean('replaygain', 'add_tags')
+        self.rg_application = self.config.get('replaygain', 'application')
 
     def mkdir_p(self, path):
         try:
@@ -407,7 +409,8 @@ class FileHandler(object):
             on your system, to be able to use this method.
         """
 
-        print('add_replay_gain_tags')
+        if self.rg_process == False:
+            return
 
         codecs = ['.flac', '.ogg', '.mp3']
         albumdir = self.album.target_dir
@@ -417,11 +420,13 @@ class FileHandler(object):
         root_dir, subdirs, files = next(os.walk(albumdir))
         multidisc = 0
         singledisc = 0
+        codec = ''
 
         for f in files:
             print(f)
             if list(filter(f.endswith, codecs)) != []:
                 singledisc += 1
+                codec = list(filter(f.endswith, codecs))[0]
         for dir in subdirs:
             print(dir)
             subfiles = next(os.walk(os.path.join(albumdir, dir)))[2]
@@ -430,23 +435,26 @@ class FileHandler(object):
                 print(f)
                 if list(filter(f.endswith, codecs)) != []:
                     multidisc += 1
+                    codec = list(filter(f.endswith, codecs))[0]
 
-        print(singledisc)
-        print(multidisc)
-
-        pattern = os.path.join(albumdir, '**', '*.flac') if multidisc > 0 else os.path.join(albumdir, '*.flac')
-            # pattern = pattern + "/*.flac"
+        pattern = os.path.join(albumdir, '**', '*.flac') if multidisc > 0 else os.path.join(albumdir, '*' + codec)
 
         print(pattern)
-        #
-        logger.debug('Adding replaygain to files')
-        cmd = 'metaflac --add-replay-gain {}'.format( \
-            self._escape_string(pattern))
 
-        # print(cmd)
-        return_code = os.system(cmd)
+        return_code = None
+        logger.debug('Adding replaygain to files: {}'.format(pattern))
+        if self.rg_application == 'metafalc':
+            cmd = 'metaflac --add-replay-gain {}'.format( \
+                self._escape_string(pattern))
+            return_code = os.system(cmd)
+        elif self.rg_application == 'loudgain':
+            cmd = 'loudgain -a -k -s e {}'.format( \
+                self._escape_string(pattern))
+            return_code = os.system(cmd)
+        else:
+            return_code = -1
 
-        logging.debug("return %s" % str(return_code))
+        logging.debug("Replaygain return code %s" % str(return_code))
 
     def _escape_string(self, string):
         return '%s' % (
@@ -855,7 +863,6 @@ class TaggerUtils(object):
 
     def get_clean_filename(self, f):
         """ Removes unwanted characters from file names """
-        print('get_clean_filename')
 
         filename, fileext = os.path.splitext(f)
 
@@ -864,23 +871,17 @@ class TaggerUtils(object):
             filename = f
             fileext = ""
 
-
-        print(filename)
         a = str(filename)
-        print(a)
-
 
         for k, v in self.char_exceptions.items():
             a = a.replace(k, v)
 
         if self.normalize == True:
             a = normalize("NFKD", a)
-        print(a)
 
-        cf = re.compile(r"[^-\w.,()\[\]\s]")
+        cf = re.compile(r"[^-\w.,()\[\]\s#]")
         cf = cf.sub("", str(a))
 
-        print(cf)
         # Don't force space/underscore replacement. If the user want's this it
         # can be done via config. The user may want spaces.
         # cf = cf.replace(" ", "_")
@@ -891,8 +892,6 @@ class TaggerUtils(object):
 
         if self.use_lower:
             cf = cf.lower()
-
-        print('cf: {}'.format(cf))
 
         return cf
 
