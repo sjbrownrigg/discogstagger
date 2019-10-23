@@ -31,7 +31,7 @@ class DiscogsSearch(object):
 
     def getSearchParams(self, source_dir):
         """ get search parameters from exiting tags to find release on discogs.
-            Minimum tags = artist, album title, date is also helpful.
+            Minimum tags = artist, album title, disc, tracknumber and date is also helpful.
             If track numbers are not present they are guessed by their index.
         """
 
@@ -43,6 +43,12 @@ class DiscogsSearch(object):
         searchParams = {}
         for i, file in enumerate(files):
             head, tail = os.path.split(file)
+            print(source_dir)
+            print(head)
+            print(tail)
+            if head != source_dir: # probably multidisc set in separate dirs
+                difference = head.replace(source_dir, '')
+                print(difference)
             metadata = MediaFile(os.path.join(file))
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
@@ -75,7 +81,6 @@ class DiscogsSearch(object):
             for file in files:
                 if file.endswith(('.flac', '.mp3')):
                     found.append(os.path.join(dirpath, file))
-                    pp.pprint(os.path.join(dirpath, file))
         return found
 
 class AlbumError(Exception):
@@ -462,19 +467,19 @@ class DiscogsConnector(object):
             if track in imported.keys():
                 difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
                 if difference.total_seconds() > tolerance:
-                    tolerance = difference.total_seconds()
+                    tolerance += difference.total_seconds()
             # some digital releases have disc number (1.1) but source may have (1-1)
             elif re.sub('-', '.', track) in imported.keys():
                 t = re.sub('-', '.', track)
                 difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
                 if difference.total_seconds() > tolerance:
-                    tolerance = difference.total_seconds()
+                    tolerance += difference.total_seconds()
             # some digital releases have disc number (1.1) but source may have (1)
             elif '1.{}'.format(track) in imported.keys():
                 t = '1.{}'.format(track)
                 difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
                 if difference.total_seconds() > tolerance:
-                    tolerance = difference.total_seconds()
+                    tolerance += difference.total_seconds()
             else:
                 logging.debug('track not present, numbering format different')
                 return 999
