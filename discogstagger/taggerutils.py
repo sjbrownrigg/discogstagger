@@ -274,7 +274,7 @@ class FileHandler(object):
                 copy_files[:] = [f for f in copy_files if f not in extf]
 
                 for fname in copy_files:
-                    if os.path.isdir(os.path.join(source_path, fname)):
+                    if os.path.isdir(os.path.join(self.album.sourcedir, fname)):
                         copytree_multi(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname)) #, ignore= ignore_patterns(self.cue_done_dir)
                     else:
                         shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
