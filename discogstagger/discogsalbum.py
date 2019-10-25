@@ -29,6 +29,20 @@ class DiscogsSearch(object):
         self.config = tagger_config
         self.cue_done_dir = '.cue'
 
+    def _fetchUniqeSubdirectories(self, source_dir, filepaths):
+        """ Receives an array of files (with full pathname), if the paths
+            are not all the same, will return the subdirectories that differ,
+            relative to the source_dir
+        """
+        paths = set()
+        for filepath in filepaths:
+            path, file = os.path.split(filepath)
+            paths.add(path)
+        if paths > 1:
+            return [dir.replace(source_dir, '') for dir in enumerate(list(paths))].sort()
+        else:
+            return []
+
     def getSearchParams(self, source_dir):
         """ get search parameters from exiting tags to find release on discogs.
             Minimum tags = artist, album title, disc, tracknumber and date is also helpful.
@@ -39,15 +53,20 @@ class DiscogsSearch(object):
 
         files = self._getMusicFiles(source_dir)
         files.sort()
+        subdirectories = self._fetchUniqeSubdirectories(source_dir, files)
+        print(subdirectories)
 
         searchParams = {}
         for i, file in enumerate(files):
             head, tail = os.path.split(file)
+
+
             print(source_dir)
             print(head)
             print(tail)
             if head != source_dir: # probably multidisc set in separate dirs
                 difference = head.replace(source_dir, '')
+
                 print(difference)
             metadata = MediaFile(os.path.join(file))
             searchParams['artist'] = metadata.artist
