@@ -29,17 +29,19 @@ class DiscogsSearch(object):
         self.config = tagger_config
         self.cue_done_dir = '.cue'
 
-    def _fetchUniqeSubdirectories(self, source_dir, filepaths):
+    def _fetchSubdirectories(self, source_dir, filepaths):
         """ Receives an array of files (with full pathname), if the paths
             are not all the same, will return the subdirectories that differ,
             relative to the source_dir
         """
-        paths = set()
+        paths = list()
         for filepath in filepaths:
             path, file = os.path.split(filepath)
-            paths.add(path)
-        if paths > 1:
-            return [dir.replace(source_dir, '') for dir in enumerate(list(paths))].sort()
+            paths.append(path)
+        if len(set(paths)) > 1:
+            subdirs = [dir.replace(source_dir, '') for dir in paths]
+            subdirs.sort()
+            return subdirs
         else:
             return []
 
@@ -49,45 +51,45 @@ class DiscogsSearch(object):
             If track numbers are not present they are guessed by their index.
         """
 
-        logger.info('Setting original metadata for search purposes')
+        logger.info('Retrieving original metadata for search purposes')
 
         files = self._getMusicFiles(source_dir)
         files.sort()
-        subdirectories = self._fetchUniqeSubdirectories(source_dir, files)
-        print(subdirectories)
+        subdirectories = self._fetchSubdirectories(source_dir, files)
 
         searchParams = {}
+        trackcount = 0
+        discnumber = 0
         for i, file in enumerate(files):
-            head, tail = os.path.split(file)
-
-
-            print(source_dir)
-            print(head)
-            print(tail)
-            if head != source_dir: # probably multidisc set in separate dirs
-                difference = head.replace(source_dir, '')
-
-                print(difference)
+            trackcount = trackcount + 1
             metadata = MediaFile(os.path.join(file))
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
-            searchParams['disc'] = metadata.disc
-            if metadata.disctotal is not None and metadata.disctotal == 1:
-                searchParams['disc'] = None
+            if metadata.disc is not None and int(metadata.disc) > 1:
+                searchParams['disc'] = metadata.disc
+            elif metadata.disc is None and len(subdirectories) > 1:
+                disc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
+                searchParams['disc'] = int(disc[2])
+            if searchParams['disc'] is not None and searchParams['disc'] != discnumber:
+                trackcount = 1
             if 'tracks' not in searchParams:
-                searchParams['tracks'] = {}
-            track = str(searchParams['disc']) + '-' + str(metadata.track) if searchParams['disc'] else str(metadata.track)
-            if track is None or track == 'None':
-                track = str(searchParams['disc']) + '-' + str(metadata.track) if searchParams['disc'] else str(i + 1)
-            if track not in searchParams['tracks']:
-                searchParams['tracks'][track] = {}
-            searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
-            searchParams['tracks'][track]['title'] = metadata.title
-            searchParams['tracks'][track]['artist'] = metadata.artist # useful for compilations
+                searchParams['tracks'] = []
+            tracknumber = str(searchParams['disc']) + '-' if searchParams['disc'] else ''
+            if metadata.track is not None:
+                tracknumber += str(metadata.track)
+            else:
+                tracknumber += str(trackcount)
 
+            trackInfo = {}
+            trackInfo['position'] = tracknumber
+            trackInfo['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
+            trackInfo['title'] = metadata.title
+            trackInfo['artist'] = metadata.artist # useful for compilations
+            searchParams['tracks'].append(trackInfo)
+        pp.pprint(searchParams)
         return searchParams
 
     def _getMusicFiles(self, source_dir):
@@ -364,9 +366,8 @@ class DiscogsConnector(object):
         for result in results:
             if len(candidates) == 0:
                 master = self.get_master_release(result)
-                print(dir(master))
                 if hasattr(master, 'versions'):
-                    print('sifting releases')
+                    logger.info('sifting through releases')
                     self._siftReleases(searchParams, master.versions, candidates)
                 else:
                     print('comparing release')
@@ -375,7 +376,7 @@ class DiscogsConnector(object):
 
     def search_discogs(self, searchParams):
         self._rateLimit()
-        print('Searching discogs...')
+        logger.info('Searching discogs...')
 
         candidates = {}
 
@@ -423,7 +424,7 @@ class DiscogsConnector(object):
                 if release.id in candidates.keys():
                     continue
 
-                self._rateLimit()
+                # self._rateLimit()
                 if searchParams['year'] == release.year:
                     print('got a year match')
                     pp.pprint(release.id)
@@ -439,7 +440,6 @@ class DiscogsConnector(object):
         if len(candidates) == 0:
             print('no candidates, trying without date limits')
             for release in releases:
-                self._rateLimit()
                 pp.pprint(release.id)
                 pp.pprint(release.year)
                 if self._compareRelease(searchParams, release) == True:
@@ -448,12 +448,12 @@ class DiscogsConnector(object):
 
     def _compareRelease(self, searchParams, release):
         self._rateLimit()
+        pp.pprint(searchParams)
         trackInfo = self._getTrackInfo(release)
-        # pp.pprint(trackInfo)
-        # pp.pprint(searchParams)
+        pp.pprint(trackInfo)
         if len(searchParams['tracks']) == len(trackInfo):
-            print('releases have the same number of tracks')
-            if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
+            print('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
+            if self._compareTrackLengths(searchParams['tracks'], trackInfo) < self.tracklength_tolerance:
                 logger.debug('adding relid to the list of candidates: {}'.format(release.id))
                 return True
         else:
@@ -468,40 +468,44 @@ class DiscogsConnector(object):
         narray = ['{:0>2}'.format(d) for d in array ]
         return ':'.join(narray)
 
-    def _compareTracks(self, current, imported):
+    def _compareTrackLengths(self, current, imported):
         """ Compare original tracklist against discogs tracklist, by comparing
             the track lengths. Some releases have tracks in different order,
             so we need to filter those out.  Returns the highest time discrepancy.
         """
         tolerance = 0.0
-        curr_tracklist = current['tracks']
-        pp.pprint(curr_tracklist)
+
+        pp.pprint(current)
         pp.pprint(imported)
+        print('comparing track lengths')
+        print(len(current))
         # try averaging the tracklength variation out by the number of tracks
-        tracktotal = len(curr_tracklist)
-        for track in curr_tracklist.keys():
+        tracktotal = len(current)
+        for i, track in enumerate(current):
             """ some tracks have alphanumerical identifiers,
                 e.g. vinyl, cassettes
             """
-            if track in imported.keys():
-                difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
-                if difference.total_seconds() > tolerance:
-                    tolerance += difference.total_seconds()
-            # some digital releases have disc number (1.1) but source may have (1-1)
-            elif re.sub('-', '.', track) in imported.keys():
-                t = re.sub('-', '.', track)
-                difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
-                if difference.total_seconds() > tolerance:
-                    tolerance += difference.total_seconds()
-            # some digital releases have disc number (1.1) but source may have (1)
-            elif '1.{}'.format(track) in imported.keys():
-                t = '1.{}'.format(track)
-                difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
-                if difference.total_seconds() > tolerance:
-                    tolerance += difference.total_seconds()
-            else:
-                logging.debug('track not present, numbering format different')
-                return 999
+            print(track)
+            difference = self._compareTimeDifference(track['duration'], imported[i]['duration'])
+            if difference.total_seconds() > tolerance:
+                tolerance += difference.total_seconds()
+            # if track in imported.keys():
+            #     difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
+            # # some digital releases have disc number (1.1) but source may have (1-1)
+            # elif re.sub('-', '.', track) in imported.keys():
+            #     t = re.sub('-', '.', track)
+            #     difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
+            #     if difference.total_seconds() > tolerance:
+            #         tolerance += difference.total_seconds()
+            # # some digital releases have disc number (1.1) but source may have (1)
+            # elif '1.{}'.format(track) in imported.keys():
+            #     t = '1.{}'.format(track)
+            #     difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
+            #     if difference.total_seconds() > tolerance:
+            #         tolerance += difference.total_seconds()
+            # else:
+            #     logging.debug('track not present, numbering format different')
+            #     return 999
 
         print('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
         tolerance = tolerance / tracktotal
@@ -509,15 +513,15 @@ class DiscogsConnector(object):
         print('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
 
-    def _compareTrackLengths(self, current, imported):
+    def _compareTimeDifference(self, current, imported):
         """ Compare the tracklengths between the gathered audio data and the
             Discogs tracklengths. Expect variation.  If no tracklengths return
             999
         """
-        if 'duration' in imported.keys() and imported['duration'] != '':
+        if current is not None and current != '' and imported is not None and imported != '':
             try:
-                a = self._paddedHMS(current['duration'])
-                b = self._paddedHMS(imported['duration'])
+                a = self._paddedHMS(current)
+                b = self._paddedHMS(imported)
                 timea = datetime.strptime(a, '%H:%M:%S')
                 timeb = datetime.strptime(b, '%H:%M:%S')
                 difference = timea - timeb
@@ -533,16 +537,20 @@ class DiscogsConnector(object):
             to what we have got.  Remove extra info appearing with empty track
             number, e.g. Bonus tracks, or section titles.
         """
+        print('getting track info')
         self._rateLimit()
-        trackinfo = {}
-        for track in version.tracklist:
+        trackinfo = []
+        discogs_tracks = version.tracklist
+        print(discogs_tracks)
+        for track in discogs_tracks:
+            logger.info('Discogs track position: {}'.format(track.position))
             if str(track.position) == '':
-                logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
+                logger.info('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
-            pos = str(track.position)
-            trackinfo[pos] = {}
-            for key in ['duration', 'title']:
-                trackinfo[pos][key] = getattr(track, key)
+            discogs_info = {}
+            for key in ['position', 'duration', 'title']:
+                discogs_info[key] = getattr(track, key)
+            trackinfo.append(discogs_info)
         return trackinfo
 
     def fetch_image(self, image_dir, image_url):
