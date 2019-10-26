@@ -193,4 +193,7 @@ Options:
                         exists?
   -g, --replay-gain     Should replaygain tags be added to the album?
                         (metaflac needs to be installed)
+                        
+  -w, --watch           Daemon mode, will watch for changes to the source
+                        directory
 ```
