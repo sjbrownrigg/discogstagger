@@ -73,12 +73,10 @@ class TagHandler(object):
             #     target_folder = self.album.target_dir
             #
             for track in disc.tracks:
-                print(dir(track))
-                print(track.full_path)
-                print(track.new_file)
-                print(track.orig_file)
+                print('Full path: {}'.format(track.full_path))
+                print('New file: {}'.format(track.new_file))
+                print('Orignal file: {}'.format(track.orig_file))
                 path, file = os.path.split(track.full_path)
-                print(path)
                 self.tag_single_track(path, track)
 
     def tag_single_track(self, target_folder, track):
@@ -108,6 +106,8 @@ class TagHandler(object):
         metadata.albumartists = self.album.artists
         if self.album.artist == 'Various' and self.album.is_compilation == True:
             metadata.albumartist = self.variousartists
+        else:
+            metadata.albumartist = self.album.artist
 
 # !TODO really, or should we generate this using a specific method?
         metadata.albumartist_sort = self.album.sort_artist
@@ -133,12 +133,9 @@ class TagHandler(object):
         setattr(metadata, self.config.id_tag_name, self.album.id)
         metadata.discogs_release_url = self.album.url
 
-        # # metadata.discsubtitle = track.discsubtitle
-        # print('metadata: disc title: {}'.format(track.metadata.discsubtitle))
+        metadata.disctitle = track.discsubtitle
         metadata.disc = track.discnumber
-        print('metadata: disc number: {}'.format(metadata.disc))
         metadata.disctotal = len(self.album.discs)
-        print('metadata: disctotal: {}'.format(len(self.album.discs)))
 
         if self.album.is_compilation:
             metadata.comp = True
@@ -284,7 +281,7 @@ class FileHandler(object):
 
                 for fname in copy_files:
                     if os.path.isdir(os.path.join(self.album.sourcedir, fname)):
-                        copytree_multi(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname)) #, ignore= ignore_patterns(self.cue_done_dir)
+                        copytree_multi(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
                     else:
                         shutil.copyfile(os.path.join(self.album.sourcedir, fname), os.path.join(self.album.target_dir, fname))
 
@@ -377,11 +374,9 @@ class FileHandler(object):
 
         if embed_coverart and os.path.exists(image_file):
             logger.debug("embed_coverart and image_file")
-            print(image_file)
             with open(image_file, 'rb') as f:
                 imgdata = f.read()
-                imgtype = imghdr.what(f)
-                print(imgtype)
+                imgtype = imghdr.what(image_file)
 
                 if imgtype in ("jpeg", "png"):
                     logger.info("Embedding album art...")
@@ -393,16 +388,14 @@ class FileHandler(object):
         """
             Embed cover art into a single file
         """
+
         if disc.target_dir != None:
             track_dir = os.path.join(self.album.target_dir, disc.target_dir)
         else:
             track_dir = self.album.target_dir
 
-        print(track_dir)
         track_file = os.path.join(track_dir, track.new_file)
-        print(track_file)
         metadata = MediaFile(track_file)
-        print(metadata.album)
         try:
             metadata.art = imgdata
             metadata.save()
@@ -421,35 +414,28 @@ class FileHandler(object):
         if self.rg_process == False:
             return
 
-        codecs = ['.flac', '.ogg', '.mp3']
+        codecs = ['.flac', '.ogg', '.mp3', '.ape']
         albumdir = self.album.target_dir
-        print(albumdir)
         # work out if this is a multidisc set.  Note that not all
         #  subdirectories have music files, e.g. scans, covers, etc.
         root_dir, subdirs, files = next(os.walk(albumdir))
         multidisc = 0
         singledisc = 0
         codec = ''
+        files.sort()
 
         for f in files:
-            print(f)
             if list(filter(f.endswith, codecs)) != []:
                 singledisc += 1
                 codec = list(filter(f.endswith, codecs))[0]
         for dir in subdirs:
-            print(dir)
             subfiles = next(os.walk(os.path.join(albumdir, dir)))[2]
-            print(subfiles)
             for f in subfiles:
-                print(f)
                 if list(filter(f.endswith, codecs)) != []:
                     multidisc += 1
                     codec = list(filter(f.endswith, codecs))[0]
 
         pattern = os.path.join(albumdir, '**', '*.flac') if multidisc > 0 else os.path.join(albumdir, '*' + codec)
-
-        print(pattern)
-
         return_code = None
         logger.debug('Adding replaygain to files: {}'.format(pattern))
         if self.rg_application == 'metafalc':
@@ -730,7 +716,7 @@ class TaggerUtils(object):
         """
         copy_files = []
         target_list = []
-
+        disc_source_dir = None
         print('_get_target_list')
 
         sourcedir = self.album.sourcedir
@@ -768,21 +754,26 @@ class TaggerUtils(object):
 
             for disc in self.album.discs:
                 print('going through disc')
-                print(self.album.sourcedir)
-                print(disc.sourcedir)
-                try:
-                    disc_source_dir = os.path.join(self.album.sourcedir, disc.sourcedir) \
-                        if disc.sourcedir is not None else None
-                except AttributeError:
-                    logger.error("there seems to be a problem in the meta-data, check if there are sub-tracks")
-                    raise TaggerError("no disc sourcedir defined, does this release contain sub-tracks?")
+                print('self.album.sourcedir: {}'.format(self.album.sourcedir))
+                # print('disc.sourcedir: {}'.format(disc.sourcedir))
+                # try:
+                #     disc_source_dir = os.path.join(self.album.sourcedir, disc.sourcedir) \
+                #         if disc.sourcedir is not None else None
+                # except AttributeError:
+                #     logger.error("there seems to be a problem in the meta-data, check if there are sub-tracks")
+                #     raise TaggerError("no disc sourcedir defined, does this release contain sub-tracks?")
 
-                if disc_source_dir == None:
+                if hasattr(disc, 'sourcedir') and disc.sourcedir is not None:
+                    disc_source_dir = os.path.join(self.album.sourcedir, disc.sourcedir)
+                else:
                     disc_source_dir = self.album.sourcedir
+
+                # if disc_source_dir == None:
+                #     disc_source_dir = self.album.sourcedir
 
                 print(disc_source_dir)
                 logger.debug("discno: %d" % disc.discnumber)
-                logger.debug("sourcedir: %s" % disc.sourcedir)
+                logger.debug("sourcedir: %s" % disc_source_dir)
 
                 # strip unwanted files
                 disc_list = os.listdir(disc_source_dir)
@@ -797,7 +788,7 @@ class TaggerUtils(object):
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
-                print(target_list)
+                pp.pprint(target_list)
 
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)
@@ -888,7 +879,7 @@ class TaggerUtils(object):
         if self.normalize == True:
             a = normalize("NFKD", a)
 
-        cf = re.compile(r"[^-\w.,()\[\]\s#]")
+        cf = re.compile(r"[^-\w.,()\[\]\s#@]")
         cf = cf.sub("", str(a))
 
         # Don't force space/underscore replacement. If the user want's this it
