@@ -5,7 +5,6 @@ import errno
 import logging
 import logging.config
 import sys
-print(sys.version)
 
 import time
 from watchdog.observers import Observer
