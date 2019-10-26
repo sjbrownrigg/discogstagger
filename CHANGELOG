@@ -4,7 +4,7 @@ Version 3.0-alpha
 
 * feature: add Discogs searching based on original metadata
 
-* feature: add CUE file parsing
+* feature: add CUE file parsing, using the CUE libary from lolcut project: https://pypi.org/project/lolcut/
 
 * feature: daemon mode, watches for changes to the source directory
 
