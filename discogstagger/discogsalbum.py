@@ -912,8 +912,6 @@ class DiscogsAlbum(object):
         discsubtitle = None
         disc = Disc(1)
 
-        discsubtitle = None
-
         for i, t in enumerate(x for x in self.release.tracklist):
 
             if t.position is None:
@@ -956,7 +954,6 @@ class DiscogsAlbum(object):
                 logger.error(msg)
                 raise AlbumError(msg)
 
-#            logger.debug("discsubtitle: {0}".format(discsubtitle))
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 
@@ -967,7 +964,9 @@ class DiscogsAlbum(object):
                 disc = Disc(track.discnumber)
 
             disc.tracks.append(track)
-
+            disc.discsubtitle = discsubtitle
+            logger.info("discsubtitle: {0}".format(disc.discsubtitle))
+            print(dir(disc))
         disc_list.append(disc)
 
         return disc_list

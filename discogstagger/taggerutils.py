@@ -133,10 +133,10 @@ class TagHandler(object):
         setattr(metadata, self.config.id_tag_name, self.album.id)
         metadata.discogs_release_url = self.album.url
 
-        metadata.disctitle = track.discsubtitle
-        print('metadata: disc title: {}'.format(track.discsubtitle))
+        # # metadata.discsubtitle = track.discsubtitle
+        # print('metadata: disc title: {}'.format(track.metadata.discsubtitle))
         metadata.disc = track.discnumber
-        print('metadata: disc number: {}'.format(track.discnumber))
+        print('metadata: disc number: {}'.format(metadata.disc))
         metadata.disctotal = len(self.album.discs)
         print('metadata: disctotal: {}'.format(len(self.album.discs)))
 
@@ -577,7 +577,7 @@ class TaggerUtils(object):
             '%artist%': self.album.disc(discno).track(trackno).artist,
             '%totaldiscs%': self.album.disctotal,
             '%discnumber%': discno,
-            '%disctitle%': self.album.disc(discno).disctitle,
+            '%disctitle%': self.album.disc(discno).discsubtitle,
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,
             '%tracknumber%': "%.2d" % trackno,

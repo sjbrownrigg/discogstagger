@@ -30,7 +30,7 @@ class Disc(BaseObject):
 
     def __init__(self, discnumber):
         self.discnumber = discnumber
-        self.disctitle = None
+        self.discsubtitle = None
         self.tracks = []
 
     def track(self, trackno):
