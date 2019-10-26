@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 import shutil
 from mutagen.flac import FLAC
-
 import re
 from subprocess import Popen,PIPE
 from ext.cue import CUE, Track
@@ -15,10 +14,12 @@ import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
 class FileUtils(object):
-    def __init__(self, tagger_config):
+    def __init__(self, tagger_config, options):
         self.config = tagger_config
         self.source_dirs = []
         self.cue_done_dir = self.config.get('cue', 'cue_done_dir')
+        self.done_file = self.config.get("details", "done_file")
+        self.forceUpdate = options.forceUpdate
 
     def read_id_file(self, dir, file_name, options):
         # read tags from batch file if available
@@ -35,6 +36,7 @@ class FileUtils(object):
         return releaseid
 
     def walk_dir_tree(self, start_dir, id_file):
+        source_dirs = []
         for root, dirs, files in os.walk(start_dir):
             if id_file in files:
                 logger.debug("found %s in %s" % (id_file, root))
@@ -49,29 +51,35 @@ class FileUtils(object):
         parse_cue_files = self.config.getboolean('cue', 'parse_cue_files')
         extf = (self.cue_done_dir)
         source_dirs = []
-        for root, dirs, files in os.walk(start_dir):
+        for root, dirs, files in os.walk(start_dir, topdown=True):
             dirs[:] = [d for d in dirs if d not in extf]
             cue_files = []
             audio_files = []
             unwalk = []
+            for file in files:
+                # skip directory if it has been done
+                if self.done_file in files and self.forceUpdate == False:
+                    continue
+                if file.endswith('.cue'):
+                    cue_files.append(file)
+                elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
+                    audio_files.append(file)
             for dir in dirs:
                 if re.search('^(?i)(cd|disc)\s*\d+$', dir):
                     unwalk.append(dir)
                     d = Path(os.path.join(root, dir))
                     for file in d.iterdir():
+                        # skip directory if it has been done
+                        if self.done_file in d.iterdir() and self.forceUpdate == False:
+                            continue
                         if str(file).endswith(('.flac', '.mp3', '.ape', '.wav')):
                             audio_files.append(file)
             dirs[:] = [d for d in dirs if d not in unwalk]
-            for file in files:
-                if file.endswith('.cue'):
-                    cue_files.append(file)
-                elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
-                    audio_files.append(file)
             if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
                 result = self._processCueFiles(root, cue_files)
                 if result == 0:
                     source_dirs.append(root + '/')
-            elif len(audio_files) > 0:
+            elif len(audio_files) > 0 and self.done_file not in files:
                 source_dirs.append(root + '/')
                 logger.debug('found %s in %s' % (file, root + '/'))
 
@@ -81,6 +89,7 @@ class FileUtils(object):
         """ Process CUE files.  Work out multi-disc sets
         """
         logger.debug('processing cue files found')
+        files.sort()
         for idx, file in enumerate(files):
             cue_in = os.path.join(dir, file)
             cue = CUE(cue_in)
@@ -100,7 +109,7 @@ class FileUtils(object):
         """ Tags files with the metadata present in cue file
         """
         file_path = cue.image_file_directory
-        if cue.disctotal is not None and cue.disctotal > 1:
+        if cue.disctotal is not None and int(cue.disctotal) > 1:
             file_path = os.path.join(file_path, 'cd' + str(cue.discnumber))
         for track in cue.tracks:
             if not track.number==None:
@@ -130,14 +139,15 @@ class FileUtils(object):
                     audio["disctotal"] = cue.disctotal
                 # 0th track left blank
                 audio["tracktotal"] = str(len(cue.tracks) - 1)
-                # audio.pprint()
+
+                audio.pprint()
                 audio.save()
 
     def _splitCueFile(self, cue):
         """ Handles the splitting and tidy up of cue files and associated audio
         """
         destination = cue.image_file_directory
-        if cue.disctotal is not None and cue.disctotal > 1:
+        if cue.disctotal is not None and int(cue.disctotal) > 1:
             destination = os.path.join(cue.image_file_directory, 'cd' + str(cue.discnumber))
         p = Path(destination)
         if not p.exists():

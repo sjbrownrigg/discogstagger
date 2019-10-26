@@ -40,10 +40,7 @@ class CUE:
 
     def load(self):
         f = open(self.file_name, 'r')
-        self.file_encoding = chardet.detect(''.join(f.readlines()))['encoding']
-        f.close()
-        f = codecs.open(self.file_name, encoding = self.file_encoding, \
-                            mode = 'r')
+        print(self.file_name)
         self.content = f.readlines()
         self.content = [ x.replace("/","\\") for x in self.content]
         f.close()
@@ -95,11 +92,24 @@ class CUE:
                 # Add dirname of CUE file if path to image is relative
                 if os.path.dirname(file_name_value)=="":
                     file_name_value = os.path.join( \
-                            unicode(os.path.dirname(self.file_name), 'UTF-8'), \
-                            unicode(file_name_value))
-                self.image_file_name = file_name_value
-                self.image_file_directory = unicode(os.path.dirname(self.file_name), \
-                    'UTF-8')
+                            os.path.dirname(self.file_name), \
+                            file_name_value)
+                self.image_file_directory = os.path.dirname(self.file_name)
+                if os.path.exists(file_name_value):
+                    self.image_file_name = file_name_value
+                else:
+                    '''sometimes files are compressed after CUE has been created
+                    '''
+                    file_name_full = os.path.split(file_name_value)[1]
+                    file_name_common = os.path.splitext(file_name_full)[0]
+                    for r, d, f in os.walk(self.image_file_directory):
+                        for file in f:
+                            file_test = os.path.splitext(file)[0]
+                            if file.startswith(file_name_common) and file.endswith( ('.flac', '.wav', '.ape', '.alac', '.wv')):
+                                if os.path.exists(os.path.join(self.image_file_directory, file)):
+                                    self.image_file_name = os.path.join(self.image_file_directory, file)
+                if self.image_file_directory is None:
+                    print("WARNING: image file not found: {}".format(file_name_value))
                 if not self.image_file_format in allowed_formats:
                     print("WARNING: Image format %s is not allowed" % \
                     self.image_file_format)
@@ -169,6 +179,22 @@ class CUE:
                 if len(value)>80:
                     print("WARNING: Title should be limited \
                     to 80 character or less")
+            if cmd=="DISCID":
+                value = line[7:]
+                if value[0] == '"': value = value[1:]
+                if value[-1] == '"': value = value[:-1]
+                if scope=="global":
+                    self.discid = value
+                if scope=="track":
+                    current_track.discid = value
+            if cmd=="DISCNUMBER":
+                value = line[11:]
+                if value[0] == '"': value = value[1:]
+                if value[-1] == '"': value = value[:-1]
+                if scope=="global":
+                    self.discnumber = value
+                if scope=="track":
+                    current_track.discnumber = value
             if cmd=="TRACK":
                 scope = "track"
                 self.tracks.append(current_track)

@@ -32,6 +32,8 @@ Optionally discogstagger will embed the found album art into the file meta data
 For detailed configuration options, take a look in the conf/default.conf file, there you will be
 able to see default values as well as a short explanation for each config option.
 
+Added support for loudgain: https://wiki.hydrogenaud.io/index.php?title=Loudgain
+
 ## Why this version?
 
 I have the ambition of setting this script running as a cron job, so that it proccesses any new releases that are dropped into a folder.  I have used other tagging tools in the past, mp3tag being my favourite, but they all still require a lot of manual input.

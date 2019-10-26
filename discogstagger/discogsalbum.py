@@ -2,6 +2,7 @@ import logging
 import re
 import os
 import urllib
+import urllib.request
 import string
 
 import pprint
@@ -28,39 +29,66 @@ class DiscogsSearch(object):
         self.config = tagger_config
         self.cue_done_dir = '.cue'
 
+    def _fetchSubdirectories(self, source_dir, filepaths):
+        """ Receives an array of files (with full pathname), if the paths
+            are not all the same, will return the subdirectories that differ,
+            relative to the source_dir
+        """
+        paths = list()
+        for filepath in filepaths:
+            path, file = os.path.split(filepath)
+            paths.append(path)
+        if len(set(paths)) > 1:
+            subdirs = [dir.replace(source_dir, '') for dir in paths]
+            subdirs.sort()
+            return subdirs
+        else:
+            return []
+
     def getSearchParams(self, source_dir):
-        """ get search parameters to find release on discogs
+        """ get search parameters from exiting tags to find release on discogs.
+            Minimum tags = artist, album title, disc, tracknumber and date is also helpful.
+            If track numbers are not present they are guessed by their index.
         """
 
-        print('Setting original metadata for search purposes')
+        logger.info('Retrieving original metadata for search purposes')
 
         files = self._getMusicFiles(source_dir)
-
+        files.sort()
+        subdirectories = self._fetchSubdirectories(source_dir, files)
         searchParams = {}
-        for file in files:
-
-            head, tail = os.path.split(file)
-
-            file = tail
-
-            print(file)
-            metadata = MediaFile(os.path.join(source_dir, file))
-
+        trackcount = 0
+        discnumber = 0
+        for i, file in enumerate(files):
+            trackcount = trackcount + 1
+            metadata = MediaFile(os.path.join(file))
             searchParams['artist'] = metadata.artist
             searchParams['albumartist'] = metadata.albumartist
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
-            searchParams['disc'] = metadata.disc
+            if metadata.disc is not None and int(metadata.disc) > 1:
+                searchParams['disc'] = metadata.disc
+            elif metadata.disc is None and len(subdirectories) > 1:
+                trackdisc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
+                searchParams['disc'] = int(trackdisc[2])
+            if 'disc' in searchParams.keys() and searchParams['disc'] != discnumber:
+                trackcount = 1
             if 'tracks' not in searchParams:
-                searchParams['tracks'] = {}
-            track = str(metadata.disc) + '-' + str(metadata.track) if metadata.disc else str(metadata.track)
-            if track not in searchParams['tracks']:
-                searchParams['tracks'][track] = {}
-            searchParams['tracks'][track]['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
-            searchParams['tracks'][track]['title'] = metadata.title
-        print(searchParams)
+                searchParams['tracks'] = []
+            tracknumber = str(searchParams['disc']) + '-' if 'disc' in searchParams.keys() else ''
+            if metadata.track is not None:
+                tracknumber += str(metadata.track)
+            else:
+                tracknumber += str(trackcount)
 
+            trackInfo = {}
+            trackInfo['position'] = tracknumber
+            trackInfo['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
+            trackInfo['title'] = metadata.title
+            trackInfo['artist'] = metadata.artist # useful for compilations
+            searchParams['tracks'].append(trackInfo)
+        pp.pprint(searchParams)
         return searchParams
 
     def _getMusicFiles(self, source_dir):
@@ -68,11 +96,11 @@ class DiscogsSearch(object):
         """
         extf = (self.cue_done_dir)
         found = []
-        for root,dirs,files in os.walk(source_dir):
+        for dirpath, dirs, files in os.walk(source_dir):
             dirs[:] = [d for d in dirs if d not in extf]
             for file in files:
                 if file.endswith(('.flac', '.mp3')):
-                    found.append(os.path.join(root, file))
+                    found.append(os.path.join(dirpath, file))
         return found
 
 class AlbumError(Exception):
@@ -100,6 +128,7 @@ class DiscogsConnector(object):
         self.tracklength_tolerance = self.config.getfloat("batch", "tracklength_tolerance")
         self.discogs_auth = False
         self.rate_limit_pool = {}
+        self.release_cache = {}
 
         skip_auth = self.config.get("discogs", "skip_auth")
 
@@ -146,9 +175,9 @@ class DiscogsConnector(object):
         rate_limit_type = 'metadata'
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
                 logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(1)
+                time.sleep(5)
 
         rl = RateLimit()
         rl.lastcall = time.time()
@@ -224,62 +253,216 @@ class DiscogsConnector(object):
 
         self.rate_limit_pool[rate_limit_type] = rl
 
-    def search_discogs(self, searchParams):
+    def get_master_release(self, release):
+        if hasattr(release, 'master') and release.master is not None:
+            return release.master
+        else:
+            return release
+
+
+    def search_artist_title(self, searchParams, candidates):
+        self._rateLimit()
+        master = None
+
+        # remove 'EP' from end of release title - can cause problems
+        album = re.sub('\s+EP$', '', searchParams['album'])
+        artist = ''
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
+            artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
+        elif searchParams['albumartist'] is not None and searchParams['albumartist'] != '':
+            artist = searchParams['albumartist']
+        elif searchParams['artist'] is not None and searchParams['artist'] != '':
+            artist = searchParams['artist']
+        else:
+            # can't find artist, cannot continue
+            return
+
+        artistTitleSearch = ' '.join((artist, album))
+
+        logger.info('Searching by artist and title: {}'.format(artistTitleSearch))
+
+        results = self.discogs_client.search(artistTitleSearch, type='all')
+
+        for idx, result in enumerate(results):
+            if len(candidates) > 0: # stop if we have already found some candidates
+                continue
+
+            if hasattr(result, '__class__') and 'Artist' in str(result.__class__):
+                continue
+
+            master = self.get_master_release(result)
+
+            if hasattr(master, 'versions'):
+                self._siftReleases(searchParams, master.versions, candidates)
+            else:
+                if self._compareRelease(searchParams, master) == True:
+                    # print(result)
+                    candidates[master.id] = master
+                    # print(candidates)
+
+    def search_artist(self, searchParams, candidates):
         self._rateLimit()
 
-        print('Searching discogs')
+        album = searchParams['album']
+        artist = ''
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
+            artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
+        else:
+            artist = searchParams['artist']
 
-        candidates = []
+        logger.info('Searching by artist: {}'.format(artist))
 
-        results = self.discogs_client.search(searchParams['artist'], type='artist')
+        releases = None
+        # reuse release data for this artist previously cached in this session
+        if artist in self.release_cache:
+            releases = self.release_cache[artist]
+            logger.debug('Reusing cached artist data')
+        else:
+            results = self.discogs_client.search(artist, type='artist')
+
+            if results.count == 0:
+                return None
+
+            for result in results:
+                if len(candidates) > 0: # stop if we have found some candidates
+                    continue
+
+                found = []
+                a = artist.lower()
+                # workaround for many artists with the same name, e.g. Deimos (3)
+                n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
+                if a == n:
+                # session based cache to reuse artist release data
+                    self.release_cache['artist'] = result.releases
+                    releases = result.releases
+
+        if releases is None:
+            return None
+
+        for release in releases:
+            if len(candidates) > 0:
+                continue
+
+            self._rateLimit()
+            r = release.title.lower()
+            s = searchParams['album'].lower()
+
+            if s == r or r in s or s in r: # sometimes titles include extra info, e.g. EP
+                if not hasattr(release, 'versions'):
+                    if self._compareRelease(searchParams, release) == True:
+                        candidates[release.id] = release
+                else:
+                    self._siftReleases(searchParams, release.versions, candidates)
+
+    def search_album_title(self, searchParams, candidates):
+        album = re.sub('\s+EP$', '', searchParams['album'])
+
+        logger.info('Searching by title: {}'.format(album))
+
+        results = self.discogs_client.search(album, type='release')
         for result in results:
-            a = searchParams['artist'].lower()
-            # workaround for many artists with the same name, e.g. Deimos (3)
-            n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
-            # print(n)
-            if a == n:
-                for release in result.releases:
-                    r = release.title.lower()
-                    # print(r)
-                    s = searchParams['album'].lower()
-                    # print(s)
-                    if s == r or r in s or s in r:
-                        pp.pprint('matched title')
-                        pp.pprint(release.title)
-                        pp.pprint(release.tracklist)
-                        print()
-                        if hasattr(release, 'versions') == True:
-                            for version in release.versions:
-                                # pp.pprint(version.tracklist)
-                                trackInfo = self._getTrackInfo(version)
-                                # pp.pprint(trackInfo)
-                                # pp.pprint(searchParams)
-                                if len(searchParams['tracks']) == len(trackInfo):
-                                    if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
-                                        candidates.append(version)
-                        else:
-                            trackInfo = self._getTrackInfo(release)
-                            if len(searchParams['tracks']) == len(trackInfo):
-                                if self._compareTracks(searchParams, trackInfo) < self.tracklength_tolerance:
-                                    candidates.append(release)
+            if len(candidates) == 0:
+                master = self.get_master_release(result)
+                if hasattr(master, 'versions'):
+                    logger.info('sifting through releases')
+                    self._siftReleases(searchParams, master.versions, candidates)
+                else:
+                    if self._compareRelease(searchParams, master) == True:
+                        candidates[master.id] = master
 
+    def search_discogs(self, searchParams):
+        self._rateLimit()
+        logger.info('Searching discogs...')
 
-        if len(candidates) == 1:
-            print(candidates[0].id)
-            return candidates[0]
+        candidates = {}
 
-# TODO: better comparison of releases, maybe based on quality of the metadata
+        unknown = ('unknown artist')
+        various = ('various', 'various artists', 'va')
+        if (searchParams['artist'] is not None and searchParams['artist'].lower() in unknown) \
+            or (searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in various):
+                self.search_album_title(searchParams, candidates)
+
+        if len(candidates) == 0:
+            logger.info('Nothing matched with Various Artists search, trying artist only')
+            self.search_artist_title(searchParams, candidates)
+
+        if len(candidates) == 0:
+            logger.info('Nothing matched with artist/title search, trying artist only')
+            self.search_artist(searchParams, candidates)
+
+        if len(candidates) == 0:
+            logger.info('Nothing found on Discogs.  Try searching manually')
+            return None
+
+        elif len(candidates) == 1:
+            return list(candidates.values())[0]
+
+# TODO: find a better way of sifting through multiple positive matches
         elif len(candidates) > 1:
-            return candidates[0]
-            if searchParams['year'] is not None:
-                for version in candidates:
-                    print(version.id)
-                    if searchParams['year'] == version.year:
-                        return version.id
-            elif version.format == 'CD':
-                        return version.id
+            qual = {}
+            for id in candidates.keys():
+                qual[id] = {}
+                qual[id] = {
+                    'format': candidates[id].data["formats"][0]["name"],
+                    'year': candidates[id].year
+                    }
+
+            ''' Prioritise year match and CD formats,
+                QUESTION: How do we prioritrise vinyl or other formats?
+            '''
+            for k in qual.keys():
+                if searchParams['year'] == qual[k]['year'] and qual[k]['format'] in ('CD'):
+                    return candidates[k]
+
+            for k in qual.keys():
+                if searchParams['year'] == qual[k]['year']:
+                    return candidates[k]
+
+            for k in qual.keys():
+                if qual[k]['format'] in ('CD'):
+                    return candidates[k]
+
+            # last resort, return the first one
+            return list(candidates.values())[0]
+
         else:
             return None
+
+
+    def _siftReleases(self, searchParams, releases, candidates):
+        # if we have a year, start by limiting the releases we sift
+        if 'year' in searchParams and searchParams['year'] is not None:
+            for release in releases:
+                if release.id in candidates.keys():
+                    continue
+
+                # self._rateLimit()
+                if searchParams['year'] == release.year:
+                    if self._compareRelease(searchParams, release) == True:
+                        candidates[release.id] = release
+                elif release.year is None or release.year == '':
+                    continue
+                elif release.year > searchParams['year']:
+                    break
+        # if no match by limiting on date, or there is no date ...
+        if len(candidates) == 0:
+            for release in releases:
+                if self._compareRelease(searchParams, release) == True:
+                    candidates[release.id] = release
+        # return candidates
+
+    def _compareRelease(self, searchParams, release):
+        self._rateLimit()
+        trackInfo = self._getTrackInfo(release)
+        if len(searchParams['tracks']) == len(trackInfo):
+            logger.debug('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
+            if self._compareTrackLengths(searchParams['tracks'], trackInfo) < self.tracklength_tolerance:
+                logger.debug('adding relid to the list of candidates: {}'.format(release.id))
+                return True
+        else:
+            logger.debug('Number of tracks does not match between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
+            return False
+
 
     def _paddedHMS(self, string):
         array = [int(s) for s in string.split(':')]
@@ -288,48 +471,67 @@ class DiscogsConnector(object):
         narray = ['{:0>2}'.format(d) for d in array ]
         return ':'.join(narray)
 
-    def _compareTracks(self, current, imported):
+    def _compareTrackLengths(self, current, imported):
         """ Compare original tracklist against discogs tracklist, by comparing
             the track lengths. Some releases have tracks in different order,
-            so we need to weed those out.  Returns the highest value.
+            so we need to filter those out.  Returns the highest time discrepancy.
         """
         tolerance = 0.0
-        curr_tracklist = current['tracks']
-        for track in curr_tracklist.keys():
+
+        # try averaging the tracklength variation out by the number of tracks
+        tracktotal = len(current)
+        for i, track in enumerate(current):
             """ some tracks have alphanumerical identifiers,
                 e.g. vinyl, cassettes
             """
-            if track not in imported.keys():
-                logging.debug('track not present, numbering format different')
-                return 100
-            else:
-                try:
-                    a = self._paddedHMS(curr_tracklist[track]['duration'])
-                    b = self._paddedHMS(imported[track]['duration'])
-                    timea = datetime.strptime(a, '%H:%M:%S')
-                    timeb = datetime.strptime(b, '%H:%M:%S')
-                    difference = timea - timeb
-                    if difference.total_seconds() > tolerance:
-                        tolerance = difference.total_seconds()
-                except Exception as e:
-                    print(e)
-            logging.debug('tracklength tolerance for release (change if there are any matching issues) %s: ' % tolerance)
+            difference = self._compareTimeDifference(track['duration'], imported[i]['duration'])
+            if difference.total_seconds() > tolerance:
+                tolerance += difference.total_seconds()
+
+        logger.info('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
+        tolerance = tolerance / tracktotal
+        logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
+        logger.info('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
+
+    def _compareTimeDifference(self, current, imported):
+        """ Compare the tracklengths between the gathered audio data and the
+            Discogs tracklengths. Expect variation.  If no tracklengths return
+            999
+        """
+        if current is not None and current != '' and imported is not None and imported != '':
+            try:
+                a = self._paddedHMS(current)
+                b = self._paddedHMS(imported)
+                timea = datetime.strptime(a, '%H:%M:%S')
+                timeb = datetime.strptime(b, '%H:%M:%S')
+                difference = timea - timeb
+                return difference
+            except Exception as e:
+                print(e)
+        else:
+            return timedelta(seconds = 999)
+
 
     def _getTrackInfo(self, version):
         """ Get the track values from the release, so that we can compare them
             to what we have got.  Remove extra info appearing with empty track
             number, e.g. Bonus tracks, or section titles.
         """
-        trackinfo = {}
-        for track in version.tracklist:
+
+        self._rateLimit()
+        trackinfo = []
+        discogs_tracks = version.tracklist
+
+        for track in discogs_tracks:
+            logger.info('Discogs track position: {}'.format(track.position))
             if str(track.position) == '':
-                logger.debug('ignoring non-track info: %s' % getattr(track, u'title'))
+                logger.info('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
-            pos = str(track.position)
-            trackinfo[pos] = {}
-            for key in [u'duration', u'title']:
-                trackinfo[pos][key] = getattr(track, key)
+            discogs_info = {}
+            for key in ['position', 'duration', 'title']:
+                discogs_info[key] = getattr(track, key)
+            trackinfo.append(discogs_info)
         return trackinfo
 
     def fetch_image(self, image_dir, image_url):
@@ -345,15 +547,16 @@ class DiscogsConnector(object):
             return
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
                 logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(1)
+                time.sleep(5)
 
         rl = RateLimit()
         rl.lastcall = time.time()
 
         try:
-            urllib.urlretrieve(image_url,  image_dir)
+            urllib.request.urlretrieve(image_url,  image_dir)
+            # urllib.urlretrieve(image_url,  image_dir)
 
             self.rate_limit_pool[rate_limit_type] = rl
         except Exception as e:
@@ -454,11 +657,16 @@ class DiscogsAlbum(object):
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
-        album.catnumbers = [catno for name, catno in self.labels_and_numbers]
-        album.labels = [name for name, catno in self.labels_and_numbers]
+        album.catnumbers = self.remove_duplicate_items([catno for name, catno in self.labels_and_numbers])
+        album.labels = self.remove_duplicate_items([name for name, catno in self.labels_and_numbers])
         album.images = self.images
         album.year = self.year
+        album.format = self.release.data["formats"][0]["name"]
+        album.format_description = self.format_description
         album.genres = self.release.data["genres"]
+        album.sourcemedia = self.sourcemedia
+
+        print(album.sourcemedia)
 
         try:
             album.styles = self.release.data["styles"]
@@ -482,6 +690,32 @@ class DiscogsAlbum(object):
         album.discs = self.discs_and_tracks(album)
 
         return album
+
+    @property
+    def sourcemedia(self):
+        ''' the recording media the track came from.
+            eg, CD, Cassette, Radio Broadcast, LP, CD Single
+        '''
+        source = [self.release.data["formats"][0]["name"]]
+
+        for format in self.release.data["formats"]:
+            if 'descriptions' in format:
+                source.extend(format['descriptions'])
+
+        return ' '.join(source)
+
+
+
+    @property
+    def format_description(self):
+        descriptions = []
+
+        for format in self.release.data["formats"]:
+            if 'descriptions' in format:
+                descriptions.extend(format['descriptions'])
+
+        return descriptions
+
 
     @property
     def url(self):
@@ -528,7 +762,9 @@ class DiscogsAlbum(object):
         if self.release.data["formats"][0]["name"] == "File":
             discno = 1
         else:
-            discno = int(self.release.data["formats"][0]["qty"])
+            for format in self.release.data["formats"]:
+                if format['name'] in ['CD']:
+                    discno += int(format['qty'])
 
         logger.info("determined %d no of discs total" % discno)
         return discno
@@ -581,7 +817,7 @@ class DiscogsAlbum(object):
 #            logger.debug("x: %s" % vars(x))
 #            logger.debug("join: %s" % x.data['join'])
 
-            if isinstance(x, basestring):
+            if isinstance(x, str):
                 logger.debug("x: %s" % x)
                 if last_artist:
                     last_artist = last_artist + " " + x
@@ -660,8 +896,6 @@ class DiscogsAlbum(object):
         discsubtitle = None
         disc = Disc(1)
 
-        discsubtitle = None
-
         for i, t in enumerate(x for x in self.release.tracklist):
 
             if t.position is None:
@@ -704,7 +938,6 @@ class DiscogsAlbum(object):
                 logger.error(msg)
                 raise AlbumError(msg)
 
-#            logger.debug("discsubtitle: {0}".format(discsubtitle))
             if discsubtitle:
                 track.discsubtitle = discsubtitle
 
@@ -715,10 +948,16 @@ class DiscogsAlbum(object):
                 disc = Disc(track.discnumber)
 
             disc.tracks.append(track)
-
+            disc.discsubtitle = discsubtitle
+            logger.info("discsubtitle: {0}".format(disc.discsubtitle))
+            print(dir(disc))
         disc_list.append(disc)
 
         return disc_list
+
+    def remove_duplicate_items(self, duplicates_list):
+        """ remove duplicates from an n item list """
+        return list(set(duplicates_list))
 
     def clean_duplicate_handling(self, clean_target):
         """ remove discogs duplicate handling eg : John (1) """

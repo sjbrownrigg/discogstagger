@@ -56,6 +56,10 @@ class TaggerConfig(RawConfigParser):
 
         return config_value
 
+    def items(self, section, **kw):
+        items = RawConfigParser.items(self, section, raw=True)
+        return items
+
     @memoized_property
     def get_character_exceptions(self):
         """ placeholders for special characters within character exceptions. """
