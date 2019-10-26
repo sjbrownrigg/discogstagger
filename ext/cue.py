@@ -107,7 +107,6 @@ class CUE:
                             file_test = os.path.splitext(file)[0]
                             if file.startswith(file_name_common) and file.endswith( ('.flac', '.wav', '.ape', '.alac', '.wv')):
                                 if os.path.exists(os.path.join(self.image_file_directory, file)):
-                                    print('adding file to image_file_name')
                                     self.image_file_name = os.path.join(self.image_file_directory, file)
                 if self.image_file_directory is None:
                     print("WARNING: image file not found: {}".format(file_name_value))
