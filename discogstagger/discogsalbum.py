@@ -318,13 +318,11 @@ class DiscogsConnector(object):
         else:
             results = self.discogs_client.search(artist, type='artist')
             print('result from Discogs:')
-            print(dir(results))
             print(results.count)
             if results.count == 0:
                 return None
 
             for result in results:
-                print(dir(result))
                 if len(candidates) > 0: # stop if we have found some candidates
                     continue
 
@@ -404,14 +402,32 @@ class DiscogsConnector(object):
 
 # TODO: find a better way of sifting through multiple positive matches
         elif len(candidates) > 1:
+            qual = {}
+            for id in candidates.keys():
+                qual[id] = {}
+                qual[id] = {
+                    'format': candidates[id].data["formats"][0]["name"],
+                    'year': candidates[id].year
+                    }
+
+            ''' Prioritise year match and CD formats,
+                QUESTION: How do we prioritrise vinyl or other formats?
+            '''
+            for k in qual.keys():
+                if searchParams['year'] == qual[k]['year'] and qual[k]['format'] in ('CD'):
+                    return candidates[k]
+
+            for k in qual.keys():
+                if searchParams['year'] == qual[k]['year']:
+                    return candidates[k]
+
+            for k in qual.keys():
+                if qual[k]['format'] in ('CD'):
+                    return candidates[k]
+
+            # last resort, return the first one
             return list(candidates.values())[0]
-            if searchParams['year'] is not None:
-                for version in candidates:
-                    print(version.id)
-                    if searchParams['year'] == version.year:
-                        return version.id
-            elif version.format == 'CD':
-                        return version.id
+
         else:
             return None
 
@@ -439,17 +455,13 @@ class DiscogsConnector(object):
         if len(candidates) == 0:
             print('no candidates, trying without date limits')
             for release in releases:
-                pp.pprint(release.id)
-                pp.pprint(release.year)
                 if self._compareRelease(searchParams, release) == True:
                     candidates[release.id] = release
         # return candidates
 
     def _compareRelease(self, searchParams, release):
         self._rateLimit()
-        pp.pprint(searchParams)
         trackInfo = self._getTrackInfo(release)
-        pp.pprint(trackInfo)
         if len(searchParams['tracks']) == len(trackInfo):
             print('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
             if self._compareTrackLengths(searchParams['tracks'], trackInfo) < self.tracklength_tolerance:
@@ -474,17 +486,12 @@ class DiscogsConnector(object):
         """
         tolerance = 0.0
 
-        pp.pprint(current)
-        pp.pprint(imported)
-        print('comparing track lengths')
-        print(len(current))
         # try averaging the tracklength variation out by the number of tracks
         tracktotal = len(current)
         for i, track in enumerate(current):
             """ some tracks have alphanumerical identifiers,
                 e.g. vinyl, cassettes
             """
-            print(track)
             difference = self._compareTimeDifference(track['duration'], imported[i]['duration'])
             if difference.total_seconds() > tolerance:
                 tolerance += difference.total_seconds()
@@ -717,7 +724,8 @@ class DiscogsAlbum(object):
         source = [self.release.data["formats"][0]["name"]]
 
         for format in self.release.data["formats"]:
-            source.extend(format['descriptions'])
+            if 'descriptions' in format:
+                source.extend(format['descriptions'])
 
         return ' '.join(source)
 
@@ -728,7 +736,8 @@ class DiscogsAlbum(object):
         descriptions = []
 
         for format in self.release.data["formats"]:
-            descriptions.extend(format['descriptions'])
+            if 'descriptions' in format:
+                descriptions.extend(format['descriptions'])
 
         return descriptions
 
