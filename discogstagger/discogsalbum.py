@@ -778,7 +778,10 @@ class DiscogsAlbum(object):
         if self.release.data["formats"][0]["name"] == "File":
             discno = 1
         else:
-            discno = int(self.release.data["formats"][0]["qty"])
+            for format in self.release.data["formats"]:
+                if format['name'] in ['CD']:
+                    discno += int(format['qty'])
+            # discno = int(self.release.data["formats"][0]["qty"])
 
         logger.info("determined %d no of discs total" % discno)
         return discno
