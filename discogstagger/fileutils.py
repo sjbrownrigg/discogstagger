@@ -89,6 +89,7 @@ class FileUtils(object):
         """ Process CUE files.  Work out multi-disc sets
         """
         logger.debug('processing cue files found')
+        files.sort()
         for idx, file in enumerate(files):
             cue_in = os.path.join(dir, file)
             cue = CUE(cue_in)
