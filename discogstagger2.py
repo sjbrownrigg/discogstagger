@@ -175,11 +175,12 @@ def processSourceDirs(source_dirs, tagger_config):
 
             logger.info('Tagging album "{} - {}"'.format(album.artist, album.title))
 
-            taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
-
             tagHandler = TagHandler(album, tagger_config)
 
+            taggerUtils = TaggerUtils(source_dir, destdir, tagger_config, album)
+
             fileHandler = FileHandler(album, tagger_config)
+
             try:
                 taggerUtils._get_target_list()
             except TaggerError as te:
@@ -188,6 +189,7 @@ def processSourceDirs(source_dirs, tagger_config):
                 discs_with_errors.append(msg)
                 continue
 
+            tagHandler.tag_album()
             taggerUtils.gather_addional_properties()
             # reset the target directory now that we have discogs metadata and
             #  filedata - otherwise this is declared too early in the process
@@ -196,7 +198,6 @@ def processSourceDirs(source_dirs, tagger_config):
             fileHandler.copy_files()
 
             logger.debug("Tagging files")
-            tagHandler.tag_album()
 
             # Do replaygain analysis before copying other files, the directory
             #  contents are cleaner, less prone to mistakes

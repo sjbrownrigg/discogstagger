@@ -67,19 +67,25 @@ class TagHandler(object):
             the given properties on the tracks
         """
         for disc in self.album.discs:
-            if disc.target_dir != None:
-                target_folder = os.path.join(self.album.target_dir, disc.target_dir)
-            else:
-                target_folder = self.album.target_dir
-
+            # if disc.target_dir != None:
+            #     target_folder = os.path.join(self.album.target_dir, disc.target_dir)
+            # else:
+            #     target_folder = self.album.target_dir
+            #
             for track in disc.tracks:
-                self.tag_single_track(target_folder, track)
+                print(dir(track))
+                print(track.full_path)
+                print(track.new_file)
+                print(track.orig_file)
+                path, file = os.path.split(track.full_path)
+                print(path)
+                self.tag_single_track(path, track)
 
     def tag_single_track(self, target_folder, track):
         # load metadata information
         logger.debug("target_folder: %s" % target_folder)
 
-        metadata = MediaFile(os.path.join(target_folder, track.new_file))
+        metadata = MediaFile(os.path.join(target_folder, track.orig_file))
 
         # read already existing (and still wanted) properties
         keepTags = {}
@@ -128,8 +134,11 @@ class TagHandler(object):
         metadata.discogs_release_url = self.album.url
 
         metadata.disctitle = track.discsubtitle
+        print('metadata: disc title: {}'.format(track.discsubtitle))
         metadata.disc = track.discnumber
+        print('metadata: disc number: {}'.format(track.discnumber))
         metadata.disctotal = len(self.album.discs)
+        print('metadata: disctotal: {}'.format(len(self.album.discs)))
 
         if self.album.is_compilation:
             metadata.comp = True
