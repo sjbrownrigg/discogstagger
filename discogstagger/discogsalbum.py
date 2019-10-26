@@ -56,7 +56,6 @@ class DiscogsSearch(object):
         files = self._getMusicFiles(source_dir)
         files.sort()
         subdirectories = self._fetchSubdirectories(source_dir, files)
-
         searchParams = {}
         trackcount = 0
         discnumber = 0
@@ -71,13 +70,13 @@ class DiscogsSearch(object):
             if metadata.disc is not None and int(metadata.disc) > 1:
                 searchParams['disc'] = metadata.disc
             elif metadata.disc is None and len(subdirectories) > 1:
-                disc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
-                searchParams['disc'] = int(disc[2])
-            if searchParams['disc'] is not None and searchParams['disc'] != discnumber:
+                trackdisc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
+                searchParams['disc'] = int(trackdisc[2])
+            if 'disc' in searchParams.keys() and searchParams['disc'] != discnumber:
                 trackcount = 1
             if 'tracks' not in searchParams:
                 searchParams['tracks'] = []
-            tracknumber = str(searchParams['disc']) + '-' if searchParams['disc'] else ''
+            tracknumber = str(searchParams['disc']) + '-' if 'disc' in searchParams.keys() else ''
             if metadata.track is not None:
                 tracknumber += str(metadata.track)
             else:
