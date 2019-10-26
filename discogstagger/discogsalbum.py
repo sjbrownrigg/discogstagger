@@ -279,7 +279,7 @@ class DiscogsConnector(object):
 
         artistTitleSearch = ' '.join((artist, album))
 
-        print('Searching by artist and title: {}'.format(artistTitleSearch))
+        logger.info('Searching by artist and title: {}'.format(artistTitleSearch))
 
         results = self.discogs_client.search(artistTitleSearch, type='all')
 
@@ -310,15 +310,16 @@ class DiscogsConnector(object):
         else:
             artist = searchParams['artist']
 
+        logger.info('Searching by artist: {}'.format(artist))
+
         releases = None
         # reuse release data for this artist previously cached in this session
         if artist in self.release_cache:
             releases = self.release_cache[artist]
-            print('reusing cached artist data')
+            logger.debug('Reusing cached artist data')
         else:
             results = self.discogs_client.search(artist, type='artist')
-            print('result from Discogs:')
-            print(results.count)
+
             if results.count == 0:
                 return None
 
@@ -345,11 +346,8 @@ class DiscogsConnector(object):
             self._rateLimit()
             r = release.title.lower()
             s = searchParams['album'].lower()
-            print('iterating through the releases')
+
             if s == r or r in s or s in r: # sometimes titles include extra info, e.g. EP
-                found.append('title')
-                pp.pprint('matched title')
-                pp.pprint(release.title)
                 if not hasattr(release, 'versions'):
                     if self._compareRelease(searchParams, release) == True:
                         candidates[release.id] = release
@@ -358,7 +356,9 @@ class DiscogsConnector(object):
 
     def search_album_title(self, searchParams, candidates):
         album = re.sub('\s+EP$', '', searchParams['album'])
-        print('Searching by title: {}'.format(album))
+
+        logger.info('Searching by title: {}'.format(album))
+
         results = self.discogs_client.search(album, type='release')
         for result in results:
             if len(candidates) == 0:
@@ -367,7 +367,6 @@ class DiscogsConnector(object):
                     logger.info('sifting through releases')
                     self._siftReleases(searchParams, master.versions, candidates)
                 else:
-                    print('comparing release')
                     if self._compareRelease(searchParams, master) == True:
                         candidates[master.id] = master
 
@@ -384,17 +383,15 @@ class DiscogsConnector(object):
                 self.search_album_title(searchParams, candidates)
 
         if len(candidates) == 0:
-            print('Nothing matched with Various Artists search, trying artist only')
+            logger.info('Nothing matched with Various Artists search, trying artist only')
             self.search_artist_title(searchParams, candidates)
 
         if len(candidates) == 0:
-            print('Nothing matched with artist/title search, trying artist only')
+            logger.info('Nothing matched with artist/title search, trying artist only')
             self.search_artist(searchParams, candidates)
 
-        print(candidates)
-
         if len(candidates) == 0:
-            print('Nothing found on Discogs.  Try searching manually')
+            logger.info('Nothing found on Discogs.  Try searching manually')
             return None
 
         elif len(candidates) == 1:
@@ -441,10 +438,6 @@ class DiscogsConnector(object):
 
                 # self._rateLimit()
                 if searchParams['year'] == release.year:
-                    print('got a year match')
-                    pp.pprint(release.id)
-                    pp.pprint(searchParams['year'])
-                    pp.pprint(release.year)
                     if self._compareRelease(searchParams, release) == True:
                         candidates[release.id] = release
                 elif release.year is None or release.year == '':
@@ -453,7 +446,6 @@ class DiscogsConnector(object):
                     break
         # if no match by limiting on date, or there is no date ...
         if len(candidates) == 0:
-            print('no candidates, trying without date limits')
             for release in releases:
                 if self._compareRelease(searchParams, release) == True:
                     candidates[release.id] = release
@@ -463,12 +455,12 @@ class DiscogsConnector(object):
         self._rateLimit()
         trackInfo = self._getTrackInfo(release)
         if len(searchParams['tracks']) == len(trackInfo):
-            print('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
+            logger.debug('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
             if self._compareTrackLengths(searchParams['tracks'], trackInfo) < self.tracklength_tolerance:
                 logger.debug('adding relid to the list of candidates: {}'.format(release.id))
                 return True
         else:
-            print('Number of tracks does not match between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
+            logger.debug('Number of tracks does not match between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
             return False
 
 
@@ -495,28 +487,11 @@ class DiscogsConnector(object):
             difference = self._compareTimeDifference(track['duration'], imported[i]['duration'])
             if difference.total_seconds() > tolerance:
                 tolerance += difference.total_seconds()
-            # if track in imported.keys():
-            #     difference = self._compareTrackLengths(curr_tracklist[track], imported[track])
-            # # some digital releases have disc number (1.1) but source may have (1-1)
-            # elif re.sub('-', '.', track) in imported.keys():
-            #     t = re.sub('-', '.', track)
-            #     difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
-            #     if difference.total_seconds() > tolerance:
-            #         tolerance += difference.total_seconds()
-            # # some digital releases have disc number (1.1) but source may have (1)
-            # elif '1.{}'.format(track) in imported.keys():
-            #     t = '1.{}'.format(track)
-            #     difference = self._compareTrackLengths(curr_tracklist[track], imported[t])
-            #     if difference.total_seconds() > tolerance:
-            #         tolerance += difference.total_seconds()
-            # else:
-            #     logging.debug('track not present, numbering format different')
-            #     return 999
 
-        print('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
+        logger.info('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
         tolerance = tolerance / tracktotal
         logging.debug('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
-        print('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
+        logger.info('tracklength tolerance for release (change if there are any matching issues):  {}'.format(tolerance))
         return tolerance
 
     def _compareTimeDifference(self, current, imported):
@@ -543,11 +518,11 @@ class DiscogsConnector(object):
             to what we have got.  Remove extra info appearing with empty track
             number, e.g. Bonus tracks, or section titles.
         """
-        print('getting track info')
+
         self._rateLimit()
         trackinfo = []
         discogs_tracks = version.tracklist
-        print(discogs_tracks)
+
         for track in discogs_tracks:
             logger.info('Discogs track position: {}'.format(track.position))
             if str(track.position) == '':

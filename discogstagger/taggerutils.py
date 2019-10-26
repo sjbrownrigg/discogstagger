@@ -73,9 +73,6 @@ class TagHandler(object):
             #     target_folder = self.album.target_dir
             #
             for track in disc.tracks:
-                print('Full path: {}'.format(track.full_path))
-                print('New file: {}'.format(track.new_file))
-                print('Orignal file: {}'.format(track.orig_file))
                 path, file = os.path.split(track.full_path)
                 self.tag_single_track(path, track)
 
@@ -601,7 +598,7 @@ class TaggerUtils(object):
             "%CODEC%": self.album.codec,
         }
 
-        print(property_map['%format_description%'])
+        # print(property_map['%format_description%'])
         # print(property_map['%format%'])
         # print(property_map['%bitdepth%'])
         # print(property_map['%encoding%'])
@@ -625,13 +622,10 @@ class TaggerUtils(object):
             avoid usage of file extension here already, could lead to problems
         """
 
-        print('_value_from_tag')
         stringFormatting = StringFormatting()
         format = self._value_from_tag_format(format, discno, trackno, filetype)
         format = stringFormatting.parseString(format)
         format = self.get_clean_filename(format)
-
-        # print(format)
 
         logger.debug("output: %s" % format)
 
@@ -717,7 +711,6 @@ class TaggerUtils(object):
         copy_files = []
         target_list = []
         disc_source_dir = None
-        print('_get_target_list')
 
         sourcedir = self.album.sourcedir
 
@@ -733,7 +726,6 @@ class TaggerUtils(object):
             self.album.copy_files = []
 
             if self.album.has_multi_disc:
-                print('album identified as having multiple discs')
                 logger.debug("is multi disc album, looping discs")
 
                 logger.debug("dir_list: %s" % dir_list)
@@ -753,8 +745,6 @@ class TaggerUtils(object):
                 self.album.discs[0].sourcedir = None
 
             for disc in self.album.discs:
-                print('going through disc')
-                print('self.album.sourcedir: {}'.format(self.album.sourcedir))
                 # print('disc.sourcedir: {}'.format(disc.sourcedir))
                 # try:
                 #     disc_source_dir = os.path.join(self.album.sourcedir, disc.sourcedir) \
@@ -771,16 +761,12 @@ class TaggerUtils(object):
                 # if disc_source_dir == None:
                 #     disc_source_dir = self.album.sourcedir
 
-                print(disc_source_dir)
                 logger.debug("discno: %d" % disc.discnumber)
                 logger.debug("sourcedir: %s" % disc_source_dir)
 
                 # strip unwanted files
                 disc_list = os.listdir(disc_source_dir)
-                print(disc_list)
                 disc_list.sort()
-
-                print('disc_list.sort')
 
                 disc.copy_files = [x for x in disc_list
                                 if not x.lower().endswith(TaggerUtils.FILE_TYPE)]
@@ -798,17 +784,12 @@ class TaggerUtils(object):
                 for position, filename in enumerate(target_list):
                     logger.debug("track position: %d" % position)
 
-                    # print('position: {}'.format(position))
-                    # print('filename: {}'.format(filename))
-                    #
                     track = disc.tracks[position]
 
                     logger.debug("mapping file %s --to--> %s - %s" % (filename,
                                  track.artists[0], track.title))
 
                     track.orig_file = os.path.basename(filename)
-                    # multidisc target path is in filename, not track.orig_file
-                    # track.full_path = self.album.sourcedir + track.orig_file
                     track.full_path = os.path.join(self.album.sourcedir, filename)
                     filetype = os.path.splitext(filename)[1]
 
