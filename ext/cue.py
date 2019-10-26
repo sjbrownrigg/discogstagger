@@ -94,15 +94,20 @@ class CUE:
                     file_name_value = os.path.join( \
                             os.path.dirname(self.file_name), \
                             file_name_value)
-
                 self.image_file_directory = os.path.dirname(self.file_name)
                 if os.path.exists(file_name_value):
                     self.image_file_name = file_name_value
                 else:
+                    '''sometimes files are compressed after CUE has been created
+                    '''
+                    file_name_full = os.path.split(file_name_value)[1]
+                    file_name_common = os.path.splitext(file_name_full)[0]
                     for r, d, f in os.walk(self.image_file_directory):
                         for file in f:
-                            if file.endswith(('.flac', '.wav', '.ape', '.alac', 'wv')):
+                            file_test = os.path.splitext(file)[0]
+                            if file.startswith(file_name_common) and file.endswith( ('.flac', '.wav', '.ape', '.alac', '.wv')):
                                 if os.path.exists(os.path.join(self.image_file_directory, file)):
+                                    print('adding file to image_file_name')
                                     self.image_file_name = os.path.join(self.image_file_directory, file)
                 if self.image_file_directory is None:
                     print("WARNING: image file not found: {}".format(file_name_value))
