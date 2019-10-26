@@ -1,5 +1,22 @@
 ## Changelog
 
+Version 3.0-alpha
+
+* feature: add Discogs searching based on original metadata
+
+* feature: add CUE file parsing
+
+* feature: daemon mode, watches for changes to the source directory
+
+* feature: add Foobar2000-style string formatting commands (basics)
+
+* improvement: refactored replaygain, now works with loudgain or metaflac
+
+* improvement: updated to python3
+
+
+
+
 Version 2.2.1
 
 * improvement: Use field mapping used by Jaikoz (https://docs.google.com/spreadsheets/d/1afugW3R1FRDN-mwt5SQLY4R7aLAu3RqzjN3pR1497Ok/htmlview),
