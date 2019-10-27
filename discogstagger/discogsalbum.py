@@ -282,28 +282,6 @@ class DiscogsConnector(object):
         else:
             return release
 
-    def search(self, searchParams, search_string, search_type='all', candidates={}):
-        ''' carries our actual search, all parameters through'''
-        logger.info('Searching: type: {}; search string: {}'.format(search_type, search_string))
-
-        results = self.discogs_client.search(search_string, type=search_type)
-
-        for idx, result in enumerate(results):
-            if len(candidates) > 0: # stop if we have already found some candidates
-                continue
-
-            if hasattr(result, '__class__') and 'Artist' in str(result.__class__):
-                continue
-
-            master = self.get_master_release(result)
-
-            if hasattr(master, 'versions'):
-                self._siftReleases(searchParams, master.versions, candidates)
-            else:
-                if self._compareRelease(searchParams, master) == True:
-                    # print(result)
-                    candidates[master.id] = master
-                    print(candidates)
 
     def search_artist_title(self, searchParams, candidates):
         self._rateLimit()
@@ -323,10 +301,31 @@ class DiscogsConnector(object):
             return
 
         artistTitleSearch = ' '.join(self.removeStopwords(' '.join((artist, album))))
-        self.search(searchParams, artistTitleSearch, 'master', candidates)
 
-        if len(candidates) == 0:
-            self.search(searchParams, artistTitleSearch, 'all', candidates)
+        logger.info('Searching by artist and title: {}'.format(artistTitleSearch))
+
+        results = self.discogs_client.search(artistTitleSearch, type='master')
+
+        if len(results) == 0:
+            results = self.discogs_client.search(artistTitleSearch, type='all')
+
+        for idx, result in enumerate(results):
+            if len(candidates) > 0: # stop if we have already found some candidates
+                continue
+
+            if hasattr(result, '__class__') and 'Artist' in str(result.__class__):
+                continue
+
+            master = self.get_master_release(result)
+
+            if hasattr(master, 'versions'):
+                self._siftReleases(searchParams, master.versions, candidates)
+            else:
+                if self._compareRelease(searchParams, master) == True:
+                    # print(result)
+                    candidates[master.id] = master
+                    # print(candidates)
+
 
     def search_artist(self, searchParams, candidates):
         self._rateLimit()
