@@ -42,6 +42,7 @@ class CUE:
     def load(self):
         with open(self.file_name, 'r', encoding=self.file_encoding) as f:
             self.content = f.readlines()
+            self.content = [ x.replace("/","\\") for x in self.content]
 
     def parse(self):
         scope = 'global'
