@@ -412,6 +412,10 @@ class FileHandler(object):
             return
 
         codecs = ['.flac', '.ogg', '.mp3', '.ape']
+        lg_options = {
+                    '.flac': '-a -k -s e',
+                    '.mp3': '-I 4 -S -L -a -k -s e'
+                    }
         albumdir = self.album.target_dir
         # work out if this is a multidisc set.  Note that not all
         #  subdirectories have music files, e.g. scans, covers, etc.
@@ -432,7 +436,7 @@ class FileHandler(object):
                     multidisc += 1
                     codec = list(filter(f.endswith, codecs))[0]
 
-        pattern = os.path.join(albumdir, '**', '*.flac') if multidisc > 0 else os.path.join(albumdir, '*' + codec)
+        pattern = os.path.join(albumdir, '**', '*' + codec) if multidisc > 0 else os.path.join(albumdir, '*' + codec)
         return_code = None
         logger.debug('Adding replaygain to files: {}'.format(pattern))
         if self.rg_application == 'metafalc':
@@ -440,8 +444,10 @@ class FileHandler(object):
                 self._escape_string(pattern))
             return_code = os.system(cmd)
         elif self.rg_application == 'loudgain':
-            cmd = 'loudgain -a -k -s e {}'.format( \
-                self._escape_string(pattern))
+            options = lg_options[codec] if codec in lg_options.keys() else ''
+            cmd = 'loudgain {} {}'.format( \
+                options, self._escape_string(pattern))
+            print(cmd)
             return_code = os.system(cmd)
         else:
             return_code = -1
