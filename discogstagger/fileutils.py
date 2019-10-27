@@ -4,7 +4,6 @@ from pathlib import Path
 import shutil
 from mutagen.flac import FLAC
 import re
-from subprocess import Popen,PIPE
 from ext.cue import CUE, Track
 
 import logging
@@ -76,6 +75,7 @@ class FileUtils(object):
                             audio_files.append(file)
             dirs[:] = [d for d in dirs if d not in unwalk]
             if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
+                print(cue_files)
                 result = self._processCueFiles(root, cue_files)
                 if result == 0:
                     source_dirs.append(root + '/')
@@ -93,7 +93,8 @@ class FileUtils(object):
         for idx, file in enumerate(files):
             cue_in = os.path.join(dir, file)
             cue = CUE(cue_in)
-            cue.title = re.sub('(?i)\s+(cd|disc)\s*\d+$', '', cue.title)
+            if cue.title is not None:
+                cue.title = re.sub('(?i)\s+(cd|disc)\s*\d+$', '', cue.title)
             cue.output_format = str(idx + 1) + '-%n' if len(files) > 1 else '%n'
             if len(files) > 1:
                 cue.discnumber = str(idx + 1)
