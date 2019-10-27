@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # This Python file uses the following encoding: utf-8
 
 # CUE-sheet file syntax can be found here:
@@ -13,6 +13,7 @@ allowed_formats = ["BINARY", "MOTOROLA", "AIFF", "WAVE", "MP3"]
 allowed_flags = ["DCP", "4CH", "PRE", "SCMS"]
 allowed_datatypes = ["AUDIO", "CDG", "MODE1/2048", "MODE1/2352", \
 "MODE2/2336", "MODE2/2352", "CDI/2336", "CDI/2352"]
+allowed_extensions = ('.flac', '.wav', '.ape', '.alac', '.wv')
 
 class Track:
     def __init__(self):
@@ -27,10 +28,10 @@ class Track:
         self.number = None
         self.datatype = None
 
-
 class CUE:
     def __init__(self, file_name):
         self.file_name = file_name
+        self.file_encoding = self.file_encoding()
         self.content = None
         self.load()
         self.parse()
@@ -39,11 +40,8 @@ class CUE:
         return self.content
 
     def load(self):
-        f = open(self.file_name, 'r')
-        print(self.file_name)
-        self.content = f.readlines()
-        self.content = [ x.replace("/","\\") for x in self.content]
-        f.close()
+        with open(self.file_name, 'r', encoding=self.file_encoding) as f:
+            self.content = f.readlines()
 
     def parse(self):
         scope = 'global'
@@ -98,16 +96,7 @@ class CUE:
                 if os.path.exists(file_name_value):
                     self.image_file_name = file_name_value
                 else:
-                    '''sometimes files are compressed after CUE has been created
-                    '''
-                    file_name_full = os.path.split(file_name_value)[1]
-                    file_name_common = os.path.splitext(file_name_full)[0]
-                    for r, d, f in os.walk(self.image_file_directory):
-                        for file in f:
-                            file_test = os.path.splitext(file)[0]
-                            if file.startswith(file_name_common) and file.endswith( ('.flac', '.wav', '.ape', '.alac', '.wv')):
-                                if os.path.exists(os.path.join(self.image_file_directory, file)):
-                                    self.image_file_name = os.path.join(self.image_file_directory, file)
+                    self.image_file_name = self.locate_image(file_name_value)
                 if self.image_file_directory is None:
                     print("WARNING: image file not found: {}".format(file_name_value))
                 if not self.image_file_format in allowed_formats:
@@ -208,6 +197,23 @@ class CUE:
                     print("WARNING: Track datatype %s is not allowed" \
                     % current_track.datatype)
         self.tracks.append(current_track)
+
+    def locate_image(self, file_name_value):
+        ''' Sometimes files are compressed after CUE has been created,
+            but the FILE details have not been updated
+        '''
+        file = os.path.split(file_name_value)[1]
+        file_name = os.path.splitext(file)[0]
+        for r, d, f in os.walk(self.image_file_directory):
+            for file in f:
+                if file.startswith(file_name) and file.endswith(allowed_extensions):
+                    if os.path.exists(os.path.join(self.image_file_directory, file)):
+                        return os.path.join(self.image_file_directory, file)
+
+    def file_encoding(self):
+        with open(self.file_name,'rb') as f:
+            data = f.read()
+            return chardet.detect(data).get("encoding")
 
     def get_temporary_copy(self):
         (fd, fname) = tempfile.mkstemp(suffix='.cue', prefix='tmp', dir='/tmp', text=True)
