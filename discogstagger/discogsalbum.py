@@ -5,12 +5,6 @@ import urllib
 import urllib.request
 import string
 
-import nltk
-from nltk.corpus import stopwords
-nltk.download('stopwords');
-nltk.download('punkt')
-stops = set(stopwords.words('english'))
-
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 from ext.mediafile import MediaFile
@@ -261,20 +255,13 @@ class DiscogsConnector(object):
     def removeStopwords(self, string):
         ''' Remove stopwords and other problem words from search strings
         '''
-        custom_list = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds']
-        stops = list(stopwords.words("english"))
-        stops.extend(custom_list)
-        print(stops)
-        stop_words = set(stops)
-        print(stop_words)
-        print(string)
+        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds']
         string = re.sub('[\.\,\'\"\-\_\\\\]', '', string)
-        print(string)
-        tokens = nltk.word_tokenize(string.lower())
+        tokens = string.split(' ')
         print(tokens)
         token_words = [w for w in tokens if w.isalpha()]
         print(token_words)
-        return [w for w in token_words if not w in stop_words]
+        return ' '.join([w for w in token_words if not w in stop_words])
 
     def get_master_release(self, release):
         if hasattr(release, 'master') and release.master is not None:
@@ -300,7 +287,7 @@ class DiscogsConnector(object):
             # can't find artist, cannot continue
             return
 
-        artistTitleSearch = ' '.join(self.removeStopwords(' '.join((artist, album))))
+        artistTitleSearch = self.removeStopwords(' '.join((artist, album)))
 
         logger.info('Searching by artist and title: {}'.format(artistTitleSearch))
 
