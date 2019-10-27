@@ -546,8 +546,6 @@ class TaggerUtils(object):
                 if self.format_mapping[desc.lower()] is not None:
                     self.album.format_description[i] = self.format_mapping[desc.lower()]
 
-        pp.pprint(self.album.format_description)
-
     def _value_from_tag_format(self, format, discno=1, trackno=1, filetype=".mp3"):
         """ Fill in the used variables using the track information
             Transform all variables and use them in the given format string, make this

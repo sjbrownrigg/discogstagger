@@ -5,6 +5,12 @@ import urllib
 import urllib.request
 import string
 
+import nltk
+from nltk.corpus import stopwords
+nltk.download('stopwords');
+nltk.download('punkt')
+stops = set(stopwords.words('english'))
+
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 from ext.mediafile import MediaFile
@@ -88,7 +94,6 @@ class DiscogsSearch(object):
             trackInfo['title'] = metadata.title
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
-        pp.pprint(searchParams)
         return searchParams
 
     def _getMusicFiles(self, source_dir):
@@ -253,35 +258,35 @@ class DiscogsConnector(object):
 
         self.rate_limit_pool[rate_limit_type] = rl
 
+    def removeStopwords(self, string):
+        ''' Remove stopwords and other problem words from search strings
+        '''
+        custom_list = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds']
+        stops = list(stopwords.words("english"))
+        stops.extend(custom_list)
+        print(stops)
+        stop_words = set(stops)
+        print(stop_words)
+        print(string)
+        string = re.sub('[\.\,\'\"\-\_\\\\]', '', string)
+        print(string)
+        tokens = nltk.word_tokenize(string.lower())
+        print(tokens)
+        token_words = [w for w in tokens if w.isalpha()]
+        print(token_words)
+        return [w for w in token_words if not w in stop_words]
+
     def get_master_release(self, release):
         if hasattr(release, 'master') and release.master is not None:
             return release.master
         else:
             return release
 
+    def search(self, searchParams, search_string, search_type='all', candidates={}):
+        ''' carries our actual search, all parameters through'''
+        logger.info('Searching: type: {}; search string: {}'.format(search_type, search_string))
 
-    def search_artist_title(self, searchParams, candidates):
-        self._rateLimit()
-        master = None
-
-        # remove 'EP' from end of release title - can cause problems
-        album = re.sub('\s+EP$', '', searchParams['album'])
-        artist = ''
-        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
-            artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
-        elif searchParams['albumartist'] is not None and searchParams['albumartist'] != '':
-            artist = searchParams['albumartist']
-        elif searchParams['artist'] is not None and searchParams['artist'] != '':
-            artist = searchParams['artist']
-        else:
-            # can't find artist, cannot continue
-            return
-
-        artistTitleSearch = ' '.join((artist, album))
-
-        logger.info('Searching by artist and title: {}'.format(artistTitleSearch))
-
-        results = self.discogs_client.search(artistTitleSearch, type='all')
+        results = self.discogs_client.search(search_string, type=search_type)
 
         for idx, result in enumerate(results):
             if len(candidates) > 0: # stop if we have already found some candidates
@@ -298,7 +303,30 @@ class DiscogsConnector(object):
                 if self._compareRelease(searchParams, master) == True:
                     # print(result)
                     candidates[master.id] = master
-                    # print(candidates)
+                    print(candidates)
+
+    def search_artist_title(self, searchParams, candidates):
+        self._rateLimit()
+        master = None
+
+        # remove 'EP' from end of release title - can cause problems
+        album = searchParams['album']
+        artist = ''
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
+            artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
+        elif searchParams['albumartist'] is not None and searchParams['albumartist'] != '':
+            artist = searchParams['albumartist']
+        elif searchParams['artist'] is not None and searchParams['artist'] != '':
+            artist = searchParams['artist']
+        else:
+            # can't find artist, cannot continue
+            return
+
+        artistTitleSearch = ' '.join(self.removeStopwords(' '.join((artist, album))))
+        self.search(searchParams, artistTitleSearch, 'master', candidates)
+
+        if len(candidates) == 0:
+            self.search(searchParams, artistTitleSearch, 'all', candidates)
 
     def search_artist(self, searchParams, candidates):
         self._rateLimit()
@@ -383,7 +411,7 @@ class DiscogsConnector(object):
                 self.search_album_title(searchParams, candidates)
 
         if len(candidates) == 0:
-            logger.info('Nothing matched with Various Artists search, trying artist only')
+            logger.info('Nothing matched with Various Artists search, trying artist/title only')
             self.search_artist_title(searchParams, candidates)
 
         if len(candidates) == 0:
@@ -524,9 +552,9 @@ class DiscogsConnector(object):
         discogs_tracks = version.tracklist
 
         for track in discogs_tracks:
-            logger.info('Discogs track position: {}'.format(track.position))
+            logger.debug('Discogs track position: {}'.format(track.position))
             if str(track.position) == '':
-                logger.info('ignoring non-track info: {}'.format(getattr(track, 'title')))
+                logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
             discogs_info = {}
             for key in ['position', 'duration', 'title']:
@@ -950,7 +978,6 @@ class DiscogsAlbum(object):
             disc.tracks.append(track)
             disc.discsubtitle = discsubtitle
             logger.info("discsubtitle: {0}".format(disc.discsubtitle))
-            print(dir(disc))
         disc_list.append(disc)
 
         return disc_list
