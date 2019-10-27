@@ -466,7 +466,9 @@ class DiscogsConnector(object):
         # return candidates
 
     def _compareRelease(self, searchParams, release):
-        self._rateLimit()
+        ''' Compare the current track with a single release from Discogs.
+            Current strategy is to compare track numbers and track lengths.
+        '''
         trackInfo = self._getTrackInfo(release)
         if len(searchParams['tracks']) == len(trackInfo):
             logger.debug('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
@@ -479,11 +481,22 @@ class DiscogsConnector(object):
 
 
     def _paddedHMS(self, string):
-        array = [int(s) for s in string.split(':')]
-        while len(array) < 3:
-            array.insert(0, 0)
-        narray = ['{:0>2}'.format(d) for d in array ]
-        return ':'.join(narray)
+        ''' Returns a time string formatted "hh:mm:ss" cmpatible with
+            strptime. If a Discogs track is over 60 minutes it is formatted
+            as 63:00, we need to recalculate this as hh:mm:ss.
+        '''
+        dur = 0
+        a = [int(s) for s in string.split(':')]
+        while len(a) < 3:
+            a.insert(0, 0)
+        # recalculate: discogs tracks over 60 mins (i.e 61+ minutes)
+        dur = (a[0] * 3600) + (a[1] * 60) + a[2]
+        t = str(timedelta(seconds = dur))
+        b = [int(s) for s in t.split(':')]
+        while len(b) < 3:
+            b.insert(0, 0)
+        c = ['{:0>2}'.format(d) for d in b]
+        return ':'.join(c)
 
     def _compareTrackLengths(self, current, imported):
         """ Compare original tracklist against discogs tracklist, by comparing
@@ -500,7 +513,7 @@ class DiscogsConnector(object):
             """
             difference = self._compareTimeDifference(track['duration'], imported[i]['duration'])
             if difference.total_seconds() > tolerance:
-                tolerance += difference.total_seconds()
+                tolerance = tolerance + difference.total_seconds()
 
         logger.info('tracklength tolerance before averaging out by the number of tracks:  {}'.format(tolerance))
         tolerance = tolerance / tracktotal
@@ -532,7 +545,6 @@ class DiscogsConnector(object):
             to what we have got.  Remove extra info appearing with empty track
             number, e.g. Bonus tracks, or section titles.
         """
-
         self._rateLimit()
         trackinfo = []
         discogs_tracks = version.tracklist
