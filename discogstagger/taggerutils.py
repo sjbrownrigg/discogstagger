@@ -562,6 +562,7 @@ class TaggerUtils(object):
             '%albumartist%': self.album.artist,
             '%album%': self.album.title,
             '%catno%': ', '.join(self.album.catnumbers),
+            '%catnosorted%': ', '.join(self.album.catnumbers_sorted),
             "%year%": self.album.year,
             '%artist%': self.album.disc(discno).track(trackno).artist,
             '%totaldiscs%': self.album.disctotal,

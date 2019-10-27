@@ -658,6 +658,7 @@ class DiscogsAlbum(object):
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
         album.catnumbers = self.remove_duplicate_items([catno for name, catno in self.labels_and_numbers])
+        album.catnumbers_sorted = album.catnumbers.sort()
         album.labels = self.remove_duplicate_items([name for name, catno in self.labels_and_numbers])
         album.images = self.images
         album.year = self.year
