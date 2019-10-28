@@ -46,7 +46,8 @@ With this version I am developing:
 
   * string formatting functions
   * cue file processing
-  * searching discogs for release data
+  * searching discogs for release data (based on existing metadata)
+  * choice of replaygain processors
 
 This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
 
