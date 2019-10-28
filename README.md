@@ -44,12 +44,13 @@ I also have a large collection of music in cue files, so I wanted to automate th
 
 With this version I am developing:
 
-  * string formatting functions
-  * cue file processing
+  * string formatting functions (Foobar2000 & mp3Tag style)
+  * making technical information available using placeholders (Foobar2000 & mp3Tag style)
+  * cue* file processing
   * searching discogs for release data (based on existing metadata)
-  * choice of replaygain processors
+  * choice of replaygain processors (metaflac & loudgain)
 
-This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
+*This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
 
 ## Develop on discogstagger
 
