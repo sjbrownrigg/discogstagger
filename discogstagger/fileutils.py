@@ -50,15 +50,20 @@ class FileUtils(object):
         parse_cue_files = self.config.getboolean('cue', 'parse_cue_files')
         extf = (self.cue_done_dir)
         source_dirs = []
+
         for root, dirs, files in os.walk(start_dir, topdown=True):
             dirs[:] = [d for d in dirs if d not in extf]
+            done = []
             cue_files = []
             audio_files = []
             unwalk = []
+            for dir in dirs:
+                if os.path.exists(os.path.join(root, dir, self.done_file)):
+                    done.append(dir)
+            if len(done) > 0:
+                dirs[:] = [d for d in dirs if d not in done]
+
             for file in files:
-                # skip directory if it has been done
-                if self.done_file in files and self.forceUpdate == False:
-                    continue
                 if file.endswith('.cue'):
                     cue_files.append(file)
                 elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
@@ -68,14 +73,12 @@ class FileUtils(object):
                     unwalk.append(dir)
                     d = Path(os.path.join(root, dir))
                     for file in d.iterdir():
-                        # skip directory if it has been done
-                        if self.done_file in d.iterdir() and self.forceUpdate == False:
-                            continue
+                        if str(file).endswith('.cue'):
+                            cue_files.append(str(file))
                         if str(file).endswith(('.flac', '.mp3', '.ape', '.wav')):
-                            audio_files.append(file)
+                            audio_files.append(str(file))
             dirs[:] = [d for d in dirs if d not in unwalk]
             if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
-                print(cue_files)
                 result = self._processCueFiles(root, cue_files)
                 if result == 0:
                     source_dirs.append(root + '/')
