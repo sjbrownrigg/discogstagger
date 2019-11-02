@@ -69,7 +69,8 @@ class FileUtils(object):
                 elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
                     audio_files.append(file)
             for dir in dirs:
-                if re.search('^(?i)(cd|disc)\s*\d+$', dir):
+                if re.search('^(?i)(cd|disc)\s*\d+', dir):
+                    logger.info('Directory has cd/disc subdirectories')
                     unwalk.append(dir)
                     d = Path(os.path.join(root, dir))
                     for file in d.iterdir():
