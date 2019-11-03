@@ -23,11 +23,7 @@ from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.album import Album, Disc, Track
 from discogstagger.stringformatting import StringFormatting
 
-from ext.mediafile import MediaFile, ListStorageStyle
-
-# commenting these out (python3)
-# reload(sys)
-# sys.setdefaultencoding("utf-8")
+from ext.mediafile import MediaFile
 
 logger = logging
 
