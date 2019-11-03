@@ -14,6 +14,12 @@ Version 3.0-alpha
 
 * improvement: updated to python3
 
+* improvement: updated metadata fields:
+               * added MEDIA - original media information
+               * updated ALBUMARTIST and ARTIST storage as lists, now able to save multiple artists e.g. on split discs
+               * removed ALBUM ARTIST from MediaFile library, was causing duplication and not in the mapping on Hydrogen Audio (https://wiki.hydrogenaud.io/index.php?title=Tag_Mapping#cite_note-vorbis-field-names-13)
+               * added CATNUMBERS_SORTED - available in tagging fields
+
 
 
 
