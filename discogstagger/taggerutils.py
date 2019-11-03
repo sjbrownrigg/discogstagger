@@ -564,7 +564,7 @@ class TaggerUtils(object):
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,
             '%tracknumber%': "%.2d" % trackno,
-            '%track number%': "%.2d" % trackno,
+            '%track number%': trackno,
             '%format%': self.album.format,
             '%format_description%': self.album.format_description,
             '%fileext%': filetype,
