@@ -262,7 +262,7 @@ class DiscogsConnector(object):
         string = re.sub('[\.\,\'\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
-        string = re.sub('\d{1}', '', string)
+        string = re.sub('\s\d{1}\s', ' ', string)
         tokens = set(string.split(' '))
         return ' '.join([w for w in tokens if not w.lower() in stop_words])
 
