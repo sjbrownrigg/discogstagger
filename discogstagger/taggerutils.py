@@ -97,7 +97,7 @@ class TagHandler(object):
 
         # use list of albumartists
         if 'Various' in self.album.artists and self.album.is_compilation == True:
-            metadata.albumartist = self.variousartists
+            metadata.albumartist = [ self.variousartists ]
         else:
             metadata.albumartist = self.album.artists
 
@@ -134,7 +134,6 @@ class TagHandler(object):
 
         metadata.comments = self.album.notes
         metadata.media = self.album.media
-
 
         tags = self.config.get_configured_tags
         logger.debug("tags: %s" % tags)
