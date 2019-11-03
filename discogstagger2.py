@@ -107,6 +107,7 @@ def processSourceDirs(source_dirs, tagger_config):
         releaseid = None
         release = None
         connector = None
+
         try:
             done_file = tagger_config.get("details", "done_file")
             done_file_path = os.path.join(source_dir, done_file)
@@ -120,6 +121,8 @@ def processSourceDirs(source_dirs, tagger_config):
             tagger_config = TaggerConfig(options.conffile)
 
             if options.releaseid is not None:
+                releaseid = options.releaseid
+            else:
                 releaseid = file_utils.read_id_file(source_dir, id_file, options)
 
             if not releaseid:

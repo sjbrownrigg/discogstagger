@@ -22,13 +22,14 @@ class FileUtils(object):
 
     def read_id_file(self, dir, file_name, options):
         # read tags from batch file if available
+        releaseid = None
         idfile = os.path.join(dir, file_name)
         if os.path.exists(idfile):
             logger.info("reading id file %s in %s" % (file_name, dir))
-            tagger_config.read(idfile)
-            source_type = tagger_config.get("source", "name")
-            id_name = tagger_config.get("source", source_type)
-            releaseid = tagger_config.get("source", id_name)
+            self.config.read(idfile)
+            source_type = self.config.get("source", "name")
+            id_name = self.config.get("source", source_type)
+            releaseid = self.config.get("source", id_name)
         elif options.releaseid:
             releaseid = options.releaseid
 
