@@ -30,17 +30,34 @@ class StringFormatting(object):
 
     def __init__(self):
         self.functions = {
-            '$num': 2,
-            '$strcmp': 2,
             '$if1': 3,  # cannot use $if
             '$ifequal': 4,
             '$ifgreater': 4,
+            '$inarray': 3,
             '$lower': 2,
+            '$num': 2,
             '$upper': 2,
+            '$strcmp': 2,
+            '$stricmp': 2,
             '$substr': 3,
-            '$inarray': 3
         }
 
+    def if1(self, cond, string1, string2=''):
+        result = str(string1) if cond == True else str(string2)
+        return result
+
+    def ifequal(self, int1, int2, oui, non):
+        int1 = 0 if int1 is None or int1 == '' else int(int1)
+        int2 = 0 if int2 is None or int2 == '' else int(int2)
+        result = oui if int1 == int2 else non
+        return result
+
+    def ifgreater(self, int1, int2, oui, non):
+        # for convenience if int1 or int2 are None make 0
+        int1 = 0 if int1 is None or int1 == '' else int(int1)
+        int2 = 0 if int2 is None or int2 == '' else int(int2)
+        result = oui if int1 > int2 else non
+        return result
 
     def inarray(self, l, i):
         ''' Returns True or False if item is in array. List passed in as
@@ -53,37 +70,10 @@ class StringFormatting(object):
 
         return result
 
-    def substr(self, string, start, finish):
-        string = '' if string is None else string
-        start = None if start == '' else int(start)
-        finish = None if finish == '' else int(finish)
-        s = string[start:finish]
-        return s
-
     def lower(self, string):
         ''' Make string lowercase
         '''
         return str(string).lower()
-
-    def upper(self, string):
-        ''' Make string uppercase
-        '''
-        return str(string).upper()
-
-    def ifgreater(self, int1, int2, oui, non):
-        # for convenience if int1 or int2 are None make 0
-        int1 = 0 if int1 is None or int1 == '' else int(int1)
-        int2 = 0 if int2 is None or int2 == '' else int(int2)
-        result = oui if int1 > int2 else non
-        return result
-
-
-    def ifequal(self, int1, int2, oui, non):
-        int1 = 0 if int1 is None or int1 == '' else int(int1)
-        int2 = 0 if int2 is None or int2 == '' else int(int2)
-        result = oui if int1 == int2 else non
-        return result
-
 
     def num(self, num, places):
         string = '{:0>%%}'
@@ -97,9 +87,23 @@ class StringFormatting(object):
         result = string1 == string2
         return result
 
-    def if1(self, cond, string1, string2=''):
-        result = str(string1) if cond == True else str(string2)
+    def stricmp(self, string1, string2):
+        string1 = '' if string1 == 'None' else str(string1)
+        string2 = '' if string2 == 'None' else str(string2)
+        result = string1.lower() == string2.lower()
         return result
+
+    def substr(self, string, start, finish):
+        string = '' if string is None else string
+        start = None if start == '' else int(start)
+        finish = None if finish == '' else int(finish)
+        s = string[start:finish]
+        return s
+
+    def upper(self, string):
+        ''' Make string uppercase
+        '''
+        return str(string).upper()
 
     def parseString(self, string):
         """ Walk through the input string, collecting functions along the way.
