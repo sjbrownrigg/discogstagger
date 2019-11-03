@@ -1633,10 +1633,10 @@ class MediaFile(object):
         StorageStyle('TITLE'),
         ASFStorageStyle('Title'),
     )
-    artist = MediaField(
-        MP3StorageStyle('TPE1'),
-        MP4StorageStyle('\xa9ART'),
-        StorageStyle('ARTIST'),
+    artist = ListMediaField(
+        MP3ListStorageStyle('TPE1'),
+        MP4ListStorageStyle('\xa9ART'),
+        ListStorageStyle('ARTIST'),
         ASFStorageStyle('Author'),
     )
     album = MediaField(
@@ -1746,11 +1746,11 @@ class MediaFile(object):
         ASFStorageStyle('WM/IsCompilation', as_type=bool),
         out_type=bool,
     )
-    albumartist = MediaField(
-        MP3StorageStyle('TPE2'),
-        MP4StorageStyle('aART'),
-        StorageStyle('ALBUM ARTIST'),
-        StorageStyle('ALBUMARTIST'),
+    albumartist = ListMediaField(
+        MP3ListStorageStyle('TPE2'),
+        MP4ListStorageStyle('aART'),
+        ListStorageStyle('ALBUM ARTIST'),
+        ListStorageStyle('ALBUMARTIST'),
         ASFStorageStyle('WM/AlbumArtist'),
     )
     albumtype = MediaField(
