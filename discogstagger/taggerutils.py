@@ -23,7 +23,7 @@ from discogstagger.discogsalbum import DiscogsAlbum
 from discogstagger.album import Album, Disc, Track
 from discogstagger.stringformatting import StringFormatting
 
-from ext.mediafile import MediaFile
+from ext.mediafile import MediaFile, ListStorageStyle
 
 # commenting these out (python3)
 # reload(sys)
@@ -100,11 +100,10 @@ class TagHandler(object):
         metadata.composer = self.album.artist
 
         # use list of albumartists
-        metadata.albumartists = self.album.artists
-        if self.album.artist == 'Various' and self.album.is_compilation == True:
+        if 'Various' in self.album.artists and self.album.is_compilation == True:
             metadata.albumartist = self.variousartists
         else:
-            metadata.albumartist = self.album.artist
+            metadata.albumartist = self.album.artists
 
 # !TODO really, or should we generate this using a specific method?
         metadata.albumartist_sort = self.album.sort_artist
@@ -503,6 +502,7 @@ class TaggerUtils(object):
         self.disc_folder_name = self.config.get("file-formatting", "discs")
         self.normalize = self.config.get("file-formatting", "normalize")
         self.use_lower = self.config.getboolean("details", "use_lower_filenames")
+        self.join_artists = self.config.get("details", "join_artists")
 
 #        self.first_image_name = "folder.jpg"
         self.copy_other_files = self.config.getboolean("details", "copy_other_files")
@@ -556,8 +556,8 @@ class TaggerUtils(object):
 
         property_map = {
 
-            '%album artist%': self.album.artist,
-            '%albumartist%': self.album.artist,
+            '%album artist%': self.join_artists.join(self.album.artists),
+            '%albumartist%': self.join_artists.join(self.album.artists),
             '%album%': self.album.title,
             '%catno%': ', '.join(self.album.catnumbers),
             "%year%": self.album.year,
@@ -602,21 +602,7 @@ class TaggerUtils(object):
             "%CODEC%": self.album.codec,
         }
 
-        # print(property_map['%format_description%'])
-        # print(property_map['%format%'])
-        # print(property_map['%bitdepth%'])
-        # print(property_map['%encoding%'])
-        # print(property_map['%codec%'])
-        # print(property_map['%samplerate%'])
-        # print(property_map['%channels%'])
-        # print(property_map['%length%'])
-        # print(property_map['%length_seconds%'])
-        # print(property_map['%length_seconds_fp%'])
-        # print(property_map['%length_ex%'])
-
         for hashtag in property_map.keys():
-            # escape the string to prevent wanted characters getting stripped
-            # by string formatting functions
             format = format.replace(hashtag, re.escape(str(property_map[hashtag])))
 
         return format
@@ -864,7 +850,7 @@ class TaggerUtils(object):
         if self.normalize == True:
             a = normalize("NFKD", a)
 
-        cf = re.compile(r"[^-\w.,()\[\]\s#@]")
+        cf = re.compile(r"[^-\w.,()\[\]\s#@&]")
         cf = cf.sub("", str(a))
 
         # Don't force space/underscore replacement. If the user want's this it

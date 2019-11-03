@@ -59,11 +59,13 @@ class DiscogsSearch(object):
         searchParams = {}
         trackcount = 0
         discnumber = 0
+        artist = set()
         for i, file in enumerate(files):
             trackcount = trackcount + 1
             metadata = MediaFile(os.path.join(file))
-            searchParams['artist'] = metadata.artist
-            searchParams['albumartist'] = metadata.albumartist
+            for a in metadata.artist:
+                artist.add(a)
+            searchParams['albumartist'] = ', '.join(set(metadata.albumartist))
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
@@ -88,6 +90,7 @@ class DiscogsSearch(object):
             trackInfo['title'] = metadata.title
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
+        searchParams['artist'] = ', '.join(artist)
         return searchParams
 
     def _getMusicFiles(self, source_dir):
@@ -243,25 +246,24 @@ class DiscogsConnector(object):
         rate_limit_type = 'metadata'
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 1:
-                logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(1)
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 2:
+                logger.warn('Waiting two seconds to allow rate limiting...')
+                time.sleep(2)
 
         rl = RateLimit()
         rl.lastcall = time.time()
 
         self.rate_limit_pool[rate_limit_type] = rl
 
-    def removeStopwords(self, string):
+    def normalize(self, string):
         ''' Remove stopwords and other problem words from search strings
         '''
-        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds']
-        string = re.sub('[\.\,\'\"\-\_\\\\]', '', string)
-        tokens = string.split(' ')
-        print(tokens)
-        token_words = [w for w in tokens if w.isalpha()]
-        print(token_words)
-        return ' '.join([w for w in token_words if not w in stop_words])
+        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none']
+        string = re.sub('[\.\,\'\"\-\_\\\\]', ' ', string)
+        string = re.sub('[\[\]()]', '', string)
+        string = re.sub('(?i)CD\d*', '', string)
+        tokens = set(string.split(' '))
+        return ' '.join([w for w in tokens if not w.lower() in stop_words])
 
     def get_master_release(self, release):
         if hasattr(release, 'master') and release.master is not None:
@@ -274,7 +276,6 @@ class DiscogsConnector(object):
         self._rateLimit()
         master = None
 
-        # remove 'EP' from end of release title - can cause problems
         album = searchParams['album']
         artist = ''
         if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
@@ -287,14 +288,18 @@ class DiscogsConnector(object):
             # can't find artist, cannot continue
             return
 
-        artistTitleSearch = self.removeStopwords(' '.join((artist, album)))
+        artistTitleSearch = self.normalize(' '.join((artist, album)))
 
         logger.info('Searching by artist and title: {}'.format(artistTitleSearch))
 
         results = self.discogs_client.search(artistTitleSearch, type='master')
 
+        print(len(results))
+
         if len(results) == 0:
             results = self.discogs_client.search(artistTitleSearch, type='all')
+        else:
+            master = True
 
         for idx, result in enumerate(results):
             if len(candidates) > 0: # stop if we have already found some candidates
@@ -303,7 +308,7 @@ class DiscogsConnector(object):
             if hasattr(result, '__class__') and 'Artist' in str(result.__class__):
                 continue
 
-            master = self.get_master_release(result)
+            master = self.get_master_release(result) if master == False else result
 
             if hasattr(master, 'versions'):
                 self._siftReleases(searchParams, master.versions, candidates)
@@ -322,7 +327,8 @@ class DiscogsConnector(object):
         if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
             artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
         else:
-            artist = searchParams['artist']
+            artist = searchParams['albumartist']
+        artist = self.normalize(artist)
 
         logger.info('Searching by artist: {}'.format(artist))
 
@@ -369,8 +375,7 @@ class DiscogsConnector(object):
                     self._siftReleases(searchParams, release.versions, candidates)
 
     def search_album_title(self, searchParams, candidates):
-        album = re.sub('\s+EP$', '', searchParams['album'])
-
+        album = self.normalize(searchParams['album'])
         logger.info('Searching by title: {}'.format(album))
 
         results = self.discogs_client.search(album, type='release')
@@ -394,18 +399,16 @@ class DiscogsConnector(object):
         various = ('various', 'various artists', 'va')
         if (searchParams['artist'] is not None and searchParams['artist'].lower() in unknown) \
             or (searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in various):
+                logger.info('Various Artists/Compilation - Searching by album title')
                 self.search_album_title(searchParams, candidates)
 
         if len(candidates) == 0:
-            logger.info('Nothing matched with Various Artists search, trying artist/title only')
             self.search_artist_title(searchParams, candidates)
 
         if len(candidates) == 0:
-            logger.info('Nothing matched with artist/title search, trying artist only')
             self.search_artist(searchParams, candidates)
 
         if len(candidates) == 0:
-            logger.info('Nothing found on Discogs.  Try searching manually')
             return None
 
         elif len(candidates) == 1:
@@ -692,7 +695,6 @@ class DiscogsAlbum(object):
         album.genres = self.release.data["genres"]
         album.sourcemedia = self.sourcemedia
 
-        print(album.sourcemedia)
 
         try:
             album.styles = self.release.data["styles"]
