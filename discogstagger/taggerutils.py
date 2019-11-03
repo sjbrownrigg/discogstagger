@@ -144,7 +144,7 @@ class TagHandler(object):
         # set track metadata
         metadata.title = track.title
         metadata.artists = track.artists
-        metadata.artist = track.artist
+        metadata.artist = track.artists
 
 
 # !TODO take care about sortartist ;-)
@@ -671,7 +671,6 @@ class TaggerUtils(object):
                 self.album.disc(dn).track(tn).length = str(timedelta(seconds = int(length_seconds_fp)))
                 length_ex_str = str(timedelta(seconds = round(length_seconds_fp, 4)))
                 self.album.disc(dn).track(tn).length_ex = length_ex_str[:-2]
-
 
     def _directory_has_audio_files(self, dir):
         codecs = ['.flac', '.ogg', '.mp3']
