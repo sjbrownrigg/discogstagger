@@ -1,0 +1,3 @@
+[submodule "ext/mediafile"]
+	path = ext/mediafile
+	url = git@github.com:sjbrownrigg/mediafile.git
