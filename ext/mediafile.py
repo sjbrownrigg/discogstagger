@@ -1749,7 +1749,7 @@ class MediaFile(object):
     albumartist = ListMediaField(
         MP3ListStorageStyle('TPE2'),
         MP4ListStorageStyle('aART'),
-        ListStorageStyle('ALBUM ARTIST'),
+        # ListStorageStyle('ALBUM ARTIST'),
         ListStorageStyle('ALBUMARTIST'),
         ASFStorageStyle('WM/AlbumArtist'),
     )
