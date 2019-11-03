@@ -50,7 +50,13 @@ With this version I am developing:
   * searching discogs for release data (based on existing metadata)
   * choice of replaygain processors (metaflac & loudgain)
 
-*This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
+* This version uses a modified version of the CUE library from the lolcut project: https://pypi.org/project/lolcut/
+
+Useful links:
+  * http://wiki.hydrogenaud.io/index.php?title=Foobar2000:Title_Formatting_Reference
+  * https://docs.google.com/spreadsheets/d/1afugW3R1FRDN-mwt5SQLY4R7aLAu3RqzjN3pR1497Ok/htmlview
+  * https://wiki.hydrogenaud.io/index.php?title=Tag_Mapping
+
 
 ## Develop on discogstagger
 
@@ -195,7 +201,6 @@ Options:
                         exists?
   -g, --replay-gain     Should replaygain tags be added to the album?
                         (metaflac needs to be installed)
-                        
   -w, --watch           Daemon mode, will watch for changes to the source
                         directory
 ```
