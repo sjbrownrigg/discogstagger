@@ -133,6 +133,8 @@ class TagHandler(object):
             metadata.comp = True
 
         metadata.comments = self.album.notes
+        metadata.media = self.album.media
+
 
         tags = self.config.get_configured_tags
         logger.debug("tags: %s" % tags)
@@ -145,7 +147,6 @@ class TagHandler(object):
         metadata.title = track.title
         metadata.artists = track.artists
         metadata.artist = track.artists
-
 
 # !TODO take care about sortartist ;-)
         metadata.artist_sort = track.sort_artist

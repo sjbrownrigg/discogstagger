@@ -694,7 +694,7 @@ class DiscogsAlbum(object):
         album.format = self.release.data["formats"][0]["name"]
         album.format_description = self.format_description
         album.genres = self.release.data["genres"]
-        album.sourcemedia = self.sourcemedia
+        album.media = self.media
 
 
         try:
@@ -721,17 +721,29 @@ class DiscogsAlbum(object):
         return album
 
     @property
-    def sourcemedia(self):
+    def media(self):
         ''' the recording media the track came from.
             eg, CD, Cassette, Radio Broadcast, LP, CD Single
         '''
-        source = [self.release.data["formats"][0]["name"]]
+        fields = ['qty', 'name', 'descriptions', 'text']
+        source = []
+        print(self.release.data["formats"])
 
         for format in self.release.data["formats"]:
-            if 'descriptions' in format:
-                source.extend(format['descriptions'])
+            f = ''
+            for field in fields:
+                if field in format:
+                    if field == 'descriptions':
+                        f += ' ' + ', '.join(format['descriptions'])
+                    elif field == 'qty':
+                        f += '{} x '.format(format['qty'])
+                    elif field == 'name':
+                        f += format['name']
+                    else:
+                        f += ', {}'.format(format[field])
+            source.append(f)
 
-        return ' '.join(source)
+        return '; '.join(source)
 
 
 
