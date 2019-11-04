@@ -67,7 +67,7 @@ class FileUtils(object):
             for file in files:
                 if file.endswith('.cue'):
                     cue_files.append(file)
-                elif file.endswith(('.flac', '.mp3', '.ape', '.wav')):
+                elif file.endswith(('.flac', '.mp3', '.ape', '.wav', '.wv')):
                     audio_files.append(file)
             for dir in dirs:
                 if re.search('^(?i)(cd|disc)\s*\d+', dir):
@@ -77,7 +77,7 @@ class FileUtils(object):
                     for file in d.iterdir():
                         if str(file).endswith('.cue'):
                             cue_files.append(str(file))
-                        if str(file).endswith(('.flac', '.mp3', '.ape', '.wav')):
+                        if str(file).endswith(('.flac', '.mp3', '.ape', '.wav', '.wv')):
                             audio_files.append(str(file))
             dirs[:] = [d for d in dirs if d not in unwalk]
             if parse_cue_files == True and len(cue_files) > 0 and len(cue_files) == len(audio_files):
