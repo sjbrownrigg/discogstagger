@@ -149,7 +149,10 @@ class TagHandler(object):
 
 # !TODO take care about sortartist ;-)
         metadata.artist_sort = track.sort_artist
-        metadata.track = track.tracknumber
+        if track.real_tracknumber is not None:
+            metadata.track = track.real_tracknumber
+        else:
+            metadata.track = track.tracknumber
 
         metadata.tracktotal = len(self.album.disc(track.discnumber).tracks)
 
@@ -563,7 +566,7 @@ class TaggerUtils(object):
             '%disctitle%': self.album.disc(discno).discsubtitle,
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,
-            '%tracknumber%': "%.2d" % trackno,
+            '%tracknumber%': self.get_real_track_number(format, discno, trackno),
             '%track number%': trackno,
             '%format%': self.album.format,
             '%format_description%': self.album.format_description,
@@ -602,6 +605,12 @@ class TaggerUtils(object):
             format = format.replace(hashtag, re.escape(str(property_map[hashtag])))
 
         return format
+
+    def get_real_track_number(self, format, discno=1, trackno=1):
+        if self.album.disc(discno).track(trackno).real_tracknumber is not None:
+            return self.album.disc(discno).track(trackno).real_tracknumber
+        else:
+            return "%.2d" % trackno
 
     def _value_from_tag(self, format, discno=1, trackno=1, filetype=".mp3"):
         """ Generates the filename tagging map

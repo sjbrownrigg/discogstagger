@@ -550,8 +550,16 @@ class DiscogsAlbum(object):
             track.position = i
 
             pos = self.disc_and_track_no(t.position)
-            try:
+
+            if re.match('^[0-9]+', pos["tracknumber"]) == None:
+                # workaround to store non-numerical track designation
+                # for later, e.g. A1
+                track.real_tracknumber = pos["tracknumber"]
+                track.tracknumber = i + 1
+            else:
                 track.tracknumber = int(pos["tracknumber"])
+
+            try:
                 track.discnumber = int(pos["discnumber"])
             except ValueError as ve:
                 msg = "cannot convert {0} to a valid track-/discnumber".format(t.position)
@@ -570,6 +578,7 @@ class DiscogsAlbum(object):
             disc.tracks.append(track)
             disc.discsubtitle = discsubtitle
             logger.info("discsubtitle: {0}".format(disc.discsubtitle))
+            print(track)
         disc_list.append(disc)
 
         return disc_list
