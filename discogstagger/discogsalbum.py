@@ -680,6 +680,7 @@ class DiscogsSearch(DiscogsConnector):
         discnumber = 0
         artist = set()
         for i, file in enumerate(files):
+            print(i)
             trackcount = trackcount + 1
             metadata = MediaFile(os.path.join(file))
             for a in metadata.artist:
@@ -710,6 +711,8 @@ class DiscogsSearch(DiscogsConnector):
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
         searchParams['artist'] = ', '.join(artist)
+        print(searchParams)
+
         return searchParams
 
     def _getMusicFiles(self, source_dir):
@@ -728,7 +731,7 @@ class DiscogsSearch(DiscogsConnector):
         ''' Remove stopwords and other problem words from search strings
         '''
         stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none']
-        string = re.sub('[\.\,\'\"\-\_\\\\]', ' ', string)
+        string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
