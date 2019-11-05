@@ -711,6 +711,9 @@ class DiscogsSearch(DiscogsConnector):
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
         searchParams['artist'] = ', '.join(artist)
+        if len(artist) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
+            logger.warning('No metadata available in the audio files')
+            return None
         print(searchParams)
 
         return searchParams
@@ -862,9 +865,12 @@ class DiscogsSearch(DiscogsConnector):
                     if self._compareRelease(searchParams, master) == True:
                         candidates[master.id] = master
 
-    def search_discogs(self, searchParams):
+    def search_discogs(self, searchParams=None):
         self._rateLimit()
         logger.info('Searching discogs...')
+
+        if searchParams is None:
+            return None
 
         candidates = {}
 
