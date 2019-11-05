@@ -163,35 +163,36 @@ class DiscogsConnector(object):
             be called, to make sure, that the user is authenticated already. Furthermore, discogs restricts the
             download of images to 1000 per day. This can be very low on huge volume collections ;-(
         """
-        rate_limit_type = 'image'
+        self._rateLimit('image')
+        # rate_limit_type = 'image'
 
         if not self.discogs_auth:
             logger.error('You are not authenticated, cannot download image - skipping')
             return
 
-        if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
-                logger.warn('Waiting one second to allow rate limiting...')
-                time.sleep(5)
-
-        rl = RateLimit()
-        rl.lastcall = time.time()
+        # if rate_limit_type in self.rate_limit_pool:
+        #     if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
+        #         logger.warn('Waiting one second to allow rate limiting...')
+        #         time.sleep(5)
+        #
+        # rl = RateLimit()
+        # rl.lastcall = time.time()
 
         try:
             urllib.request.urlretrieve(image_url,  image_dir)
             # urllib.urlretrieve(image_url,  image_dir)
 
-            self.rate_limit_pool[rate_limit_type] = rl
+            # self.rate_limit_pool[rate_limit_type] = rl
         except Exception as e:
             logger.error("Unable to download image '%s', skipping. (%s)" % (image_url, e))
 
-    def _rateLimit(self):
-        rate_limit_type = 'metadata'
+    def _rateLimit(self, type='metadata'):
+        rate_limit_type = type
 
         if rate_limit_type in self.rate_limit_pool:
-            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 2:
+            if self.rate_limit_pool[rate_limit_type].lastcall >= time.time() - 5:
                 logger.warn('Waiting two seconds to allow rate limiting...')
-                time.sleep(2)
+                time.sleep(5)
 
         rl = RateLimit()
         rl.lastcall = time.time()
