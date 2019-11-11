@@ -127,7 +127,8 @@ def processSourceDirs(source_dirs, tagger_config):
 
             if not releaseid:
                 searchParams = discogsSearch.getSearchParams(source_dir)
-                release = discogsSearch.search_discogs(searchParams)
+                # release = discogsSearch.search_discogs(searchParams)
+                release = discogsSearch.search_discogs()
                 # reuse the Discogs Release class, it saves re-fetching later
                 if release is not None and type(release).__name__ in ('Release', 'Version'):
                     releaseid = release.id
