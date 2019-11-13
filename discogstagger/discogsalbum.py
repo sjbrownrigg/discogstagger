@@ -684,12 +684,12 @@ class DiscogsSearch(DiscogsConnector):
 
         trackcount = 0
         discnumber = 0
-        artist = set()
+        searchParams['artists'] = set()
         for i, file in enumerate(files):
             trackcount = trackcount + 1
             metadata = MediaFile(os.path.join(file))
             for a in metadata.artist:
-                artist.add(a)
+                searchParams['artists'].add(a)
             searchParams['albumartist'] = ', '.join(set(metadata.albumartist))
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
@@ -715,8 +715,8 @@ class DiscogsSearch(DiscogsConnector):
             trackInfo['title'] = metadata.title
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
-        searchParams['artist'] = ', '.join(artist)
-        if len(artist) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
+        searchParams['artist'] = ', '.join(searchParams['artists'])
+        if len(searchParams['artists']) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
             logger.warning('No metadata available in the audio files')
             return None
         print(searchParams)
@@ -741,7 +741,8 @@ class DiscogsSearch(DiscogsConnector):
         string = re.sub('[\[\]()&]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
-        tokens = set(string.split('\s+'))
+        tokens = set(string.split(' '))
+        print(tokens)
         return ' '.join([w for w in tokens if not w.lower() in stop_words])
 
     def get_master_release(self, release):
@@ -750,28 +751,15 @@ class DiscogsSearch(DiscogsConnector):
         else:
             return release
 
-
     def search_artist_title(self, type):
         self._rateLimit()
         searchParams = self.search_params
         candidates = self.candidates
-        album = searchParams['album']
-        artist = ''
-        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
-            artist = searchParams['artist'] # take the first artist from the compiltaion
-        elif searchParams['albumartist'] is not None and searchParams['albumartist'] != '':
-            artist = searchParams['albumartist']
-        elif searchParams['artist'] is not None and searchParams['artist'] != '':
-            artist = searchParams['artist']
-        else:
-            # can't find artist, cannot continue
-            return
+        s = self.search_params['search']
 
-        artistTitleSearch = self.normalize(' '.join((artist, album)))
+        logger.info('Searching by artist and title ({}): {}'.format(type, s['artistRelease']))
 
-        logger.info('Searching by artist and title ({}): {}'.format(type, artistTitleSearch))
-
-        results = self.discogs_client.search(artistTitleSearch, type=type)
+        results = self.discogs_client.search(s['artistRelease'], type=type)
 
         print(len(results))
         print(dir(results))
@@ -804,13 +792,8 @@ class DiscogsSearch(DiscogsConnector):
         searchParams = self.search_params
         candidates = self.candidates
 
+        artist = self.search_params['search']['artist']
         album = searchParams['album']
-        artist = ''
-        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
-            artist = searchParams['tracks'][0]['artist'] # take the first artist from the compiltaion
-        else:
-            artist = searchParams['albumartist']
-        artist = self.normalize(artist)
 
         logger.info('Searching by artist: {}'.format(artist))
 
@@ -850,17 +833,17 @@ class DiscogsSearch(DiscogsConnector):
             s = searchParams['album'].lower()
 
             if s == r or r in s or s in r: # sometimes titles include extra info, e.g. EP
-                if not hasattr(release, 'versions'):
+                if hasattr(release, 'versions'):
+                    self._siftReleases(release.versions)
+                else:
                     if self._compareRelease(release) == True:
                         candidates[release.id] = release
-                else:
-                    self._siftReleases(release.versions)
 
     def search_album_title(self):
         searchParams = self.search_params
         candidates = self.candidates
 
-        album = self.normalize(searchParams['album'])
+        album = self.search_params['search']['album']
         logger.info('Searching by title: {}'.format(album))
 
         results = self.discogs_client.search(album, type='release')
@@ -868,13 +851,15 @@ class DiscogsSearch(DiscogsConnector):
             if len(candidates) == 0:
                 master = self.get_master_release(result)
                 if hasattr(master, 'versions'):
-                    logger.info('sifting through releases')
                     self._siftReleases(master.versions)
                 else:
                     if self._compareRelease(searchParams, master) == True:
                         candidates[master.id] = master
 
     def search_switcher(self, types=None):
+        """ Takes the search parameters and cycles through the various search
+            strategies until we have some matching candidates.
+        """
         if types is None:
             types = ['master', 'all', 'artist', 'title']
         if len(types) > 0:
@@ -895,12 +880,40 @@ class DiscogsSearch(DiscogsConnector):
         else:
             return (len(self.candidates))
 
+    def search_strings(self):
+        """ Compile the search strings to be used from searchParams
+        """
+        searchParams = self.search_params
+        searchParams['search'] = {}
+        s = searchParams['search']
+
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
+            if len(searchParams['artists']) > 1:
+                s['artist'] = ' '.join(searchParams['artists'][0:1]) # take the first couple of artists from the compilation
+            elif len(searchParams['artists']) == 1:
+                s['artist'] = searchParams['artist']
+        elif searchParams['albumartist'] is not None and searchParams['albumartist'] != '':
+            s['artist'] = searchParams['albumartist']
+        elif searchParams['artist'] is not None and searchParams['artist'] != '':
+            s['artist'] = searchParams['artist']
+
+        s['artist'] = self.normalize(s['artist'])
+        s['release'] = self.normalize(searchParams['album'])
+        s['artistRelease'] = self.normalize(' '.join((s['artist'], s['release'])))
+        print(self.search_params)
+
+
     def search_discogs(self):
+        """ Take the search parameters and look for a release, the searching &
+            matching is done by various subroutines.
+        """
         self._rateLimit()
         logger.info('Searching discogs...')
         searchParams = self.search_params
         self.candidates = {}
         candidates = self.candidates
+
+        self.search_strings()
         self.search_switcher()
 
         if len(candidates) == 1:
