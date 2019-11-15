@@ -60,7 +60,7 @@ if options.destdir and os.path.exists(options.destdir):
 
 tagger_config = TaggerConfig(options.conffile)
 # options.replaygain = tagger_config.get("batch", "replaygain")
-
+tagger_config.set('details', 'source_dir', options.sourcedir)
 # initialize logging
 logger_config_file = tagger_config.get("logging", "config_file")
 logging.config.fileConfig(logger_config_file)
