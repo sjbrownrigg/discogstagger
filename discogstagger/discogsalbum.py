@@ -670,7 +670,6 @@ class DiscogsSearch(DiscogsConnector):
             Minimum tags = artist, album title, disc, tracknumber and date is also helpful.
             If track numbers are not present they are guessed by their index.
         """
-
         logger.info('Retrieving original metadata for search purposes')
         # reset candidates & searchParams
         self.search_params = {}
@@ -680,7 +679,6 @@ class DiscogsSearch(DiscogsConnector):
         files.sort()
         subdirectories = self._fetchSubdirectories(source_dir, files)
         searchParams = self.search_params
-        candidates = self.candidates
 
         trackcount = 0
         discnumber = 0
@@ -718,8 +716,47 @@ class DiscogsSearch(DiscogsConnector):
         searchParams['artist'] = ', '.join(searchParams['artists'])
         if len(searchParams['artists']) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
             logger.warning('No metadata available in the audio files')
+            self.metadataFromFileNaming(source_dir, files)
             return None
         print(searchParams)
+
+    def metadataFromFileNaming(self, source_dir, files):
+        """ Fall back method to retrieve release information from directories
+            and filenames
+        """
+        searchParams = self.search_params
+        base_dir = self.config.get('details', 'source_dir')
+        print(base_dir)
+        print(source_dir)
+        release_dir = re.sub(base_dir, '', source_dir)
+        print(release_dir)
+        print(searchParams)
+        dirs = release_dir.split(os.sep)
+        dirs = [self.u2s(d) for d in dirs if d != '' and d.lower() not in ('albums', 'singles')]
+        if len(dirs) == 2: # assume artist / album
+            # is artist name repeated in the release directory name?
+            dirs[1] = re.sub(dirs[0].lower(), '', dirs[1].lower())
+        elif len(dirs) == 1:
+            # is artist / release in the same directory name?
+            dirs = re.split(r'\s*[-]\s*', dirs[0])
+        if len(dirs) == 2:
+            searchParams['artist'] = dirs[0]
+            searchParams['album'] = dirs[1]
+        else:
+            searchParams['album'] = dirs[0]
+        for idx, track in enumerate(searchParams['tracks']):
+            print(track)
+            filename = os.path.basename(files[idx])
+            name, ext = os.path.splitext(self.u2s(filename))
+            namesplit = name.split(' ', 1)
+            track['real_tracknumber'] = namesplit[0]
+            track['title'] = namesplit[1]
+            track['artist'] = searchParams['artist'] # overkill?
+            print(track)
+        print(dirs)
+
+    def u2s(self, string):
+        return re.sub(r'[_]',' ' , string)
 
     def _getMusicFiles(self, source_dir):
         """ Get album data
