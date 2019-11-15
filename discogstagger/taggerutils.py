@@ -854,7 +854,7 @@ class TaggerUtils(object):
         if self.normalize == True:
             a = normalize("NFKD", a)
 
-        cf = re.compile(r"[^-\w.,()\[\]\s#@&]")
+        cf = re.compile(r"[^-\w.,()\[\]\s#@&?]")
         cf = cf.sub("", str(a))
 
         # Don't force space/underscore replacement. If the user want's this it
