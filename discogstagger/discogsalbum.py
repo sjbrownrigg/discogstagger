@@ -708,6 +708,8 @@ class DiscogsSearch(DiscogsConnector):
                 tracknumber += str(trackcount)
 
             trackInfo = {}
+            if re.search(r'^(?i)[a-z]', str(metadata.track)):
+                trackInfo['real_tracknumber'] = metadata.track
             trackInfo['position'] = tracknumber
             trackInfo['duration'] = str(timedelta(seconds = round(metadata.length, 0)))
             trackInfo['title'] = metadata.title
@@ -724,15 +726,22 @@ class DiscogsSearch(DiscogsConnector):
         """ Fall back method to retrieve release information from directories
             and filenames
         """
+        print('metadataFromFileNaming')
         searchParams = self.search_params
         base_dir = self.config.get('details', 'source_dir')
-        print(base_dir)
-        print(source_dir)
+        if re.search(r'(?i)(vinyl)', source_dir):
+            searchParams['media'] = 'vinyl'
         release_dir = re.sub(base_dir, '', source_dir)
-        print(release_dir)
-        print(searchParams)
+        year = re.search(r'(\d{4})', release_dir)
+        if year is not None:
+            searchParams['year'] = year.group(0)
+            release_dir = re.sub(year.group(0), '', release_dir)
         dirs = release_dir.split(os.sep)
+        print(dirs)
         dirs = [self.u2s(d) for d in dirs if d != '' and d.lower() not in ('albums', 'singles')]
+        print(dirs)
+        if len(dirs) == 3:
+            dirs.pop(1) # assume first artist, last release
         if len(dirs) == 2: # assume artist / album
             # is artist name repeated in the release directory name?
             dirs[1] = re.sub(dirs[0].lower(), '', dirs[1].lower())
@@ -740,20 +749,17 @@ class DiscogsSearch(DiscogsConnector):
             # is artist / release in the same directory name?
             dirs = re.split(r'\s*[-]\s*', dirs[0])
         if len(dirs) == 2:
-            searchParams['artist'] = dirs[0]
-            searchParams['album'] = dirs[1]
+            searchParams['artist'] = dirs[0].strip()
+            searchParams['album'] = dirs[1].strip()
         else:
             searchParams['album'] = dirs[0]
         for idx, track in enumerate(searchParams['tracks']):
-            print(track)
             filename = os.path.basename(files[idx])
             name, ext = os.path.splitext(self.u2s(filename))
             namesplit = name.split(' ', 1)
             track['real_tracknumber'] = namesplit[0]
             track['title'] = namesplit[1]
             track['artist'] = searchParams['artist'] # overkill?
-            print(track)
-        print(dirs)
 
     def u2s(self, string):
         return re.sub(r'[_]',' ' , string)
@@ -773,7 +779,7 @@ class DiscogsSearch(DiscogsConnector):
     def normalize(self, string):
         ''' Remove stopwords and other problem words from search strings
         '''
-        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs']
+        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs', 'inch']
         string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()&]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
@@ -970,7 +976,21 @@ class DiscogsSearch(DiscogsConnector):
                 QUESTION: How do we prioritrise vinyl or other formats?
             '''
             for k in qual.keys():
-                if searchParams['year'] == qual[k]['year'] and qual[k]['format'] in ('CD'):
+                if (searchParams['year'] == qual[k]['year']) and \
+                (qual[k]['format'].lower() in ('lp', 'vinyl') and \
+                (('media' in searchParams and searchParams['media'] == 'vinyl' ) or \
+                'real_tracknumber' in searchParams['tracks'][0])):
+                    return candidates[k]
+
+            for k in qual.keys():
+                if (qual[k]['format'].lower() in ('lp', 'vinyl') and \
+                (('media' in searchParams and searchParams['media'] == 'vinyl' ) or \
+                'real_tracknumber' in searchParams['tracks'][0])):
+                    return candidates[k]
+
+            for k in qual.keys():
+                if searchParams['year'] == qual[k]['year'] and \
+                qual[k]['format'] in ('CD'):
                     return candidates[k]
 
             for k in qual.keys():
@@ -978,7 +998,7 @@ class DiscogsSearch(DiscogsConnector):
                     return candidates[k]
 
             for k in qual.keys():
-                if qual[k]['format'] in ('CD'):
+                if qual[k]['format'].lower() in ('cd'):
                     return candidates[k]
 
             # last resort, return the first one
@@ -989,10 +1009,18 @@ class DiscogsSearch(DiscogsConnector):
 
 
     def _siftReleases(self, releases):
+        """ Return candidates in a dict, keys are the quality match value.  Because
+            we cannot have duplicate keys for those that match equally well, we will
+            give the quality value a slight increase to keep them grouped together.
+        """
         candidates = self.candidates
+        temp = {}
         for release in releases:
-            if self._compareRelease(release) == True:
-                candidates[release.id] = release
+            difference = self._compareRelease(release)
+            if difference is not None and difference is not False:
+                while difference in candidates.keys():
+                    difference = difference + 0.001
+                candidates[difference] = release
 
     def _compareRelease(self, release):
         ''' Compare the current track with a single release from Discogs.
@@ -1000,11 +1028,15 @@ class DiscogsSearch(DiscogsConnector):
         '''
         searchParams = self.search_params
         trackInfo = self._getTrackInfo(release)
-        if len(searchParams['tracks']) == len(trackInfo):
+        if len(trackInfo) == 0:
+            logger.info('Release rejected because there is no track duration information')
+            return False
+        elif len(searchParams['tracks']) == len(trackInfo):
             logger.info('Same number of tracks between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
-            if self._compareTrackLengths(searchParams['tracks'], trackInfo) < self.tracklength_tolerance:
+            difference = self._compareTrackLengths(searchParams['tracks'], trackInfo)
+            if difference < self.tracklength_tolerance:
                 logger.info('adding relid to the list of candidates: {}'.format(release.id))
-                return True
+                return difference
         else:
             logger.info('Number of tracks does not match between source {} and release {}'.format(len(searchParams['tracks']), len(trackInfo)))
             return False
@@ -1062,8 +1094,7 @@ class DiscogsSearch(DiscogsConnector):
                 b = self._paddedHMS(imported)
                 timea = datetime.strptime(a, '%H:%M:%S')
                 timeb = datetime.strptime(b, '%H:%M:%S')
-                difference = timea - timeb
-                return difference
+                return timea - timeb if timea > timeb else timeb - timea
             except Exception as e:
                 print(e)
         else:
@@ -1080,6 +1111,9 @@ class DiscogsSearch(DiscogsConnector):
         discogs_tracks = version.tracklist
 
         for track in discogs_tracks:
+            # reject the tracklisting if track duration is missing
+            if track.duration is None or track.duration == '':
+                return trackinfo
             logger.debug('Discogs track position: {}'.format(track.position))
             if str(track.position) == '':
                 logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
