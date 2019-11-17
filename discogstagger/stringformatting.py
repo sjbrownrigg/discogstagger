@@ -37,6 +37,7 @@ class StringFormatting(object):
             '$lower': 2,
             '$num': 2,
             '$upper': 2,
+            '$strchr': 2,
             '$strcmp': 2,
             '$stricmp': 2,
             '$substr': 3,
@@ -80,6 +81,12 @@ class StringFormatting(object):
         string = re.sub(r'\%\%', str(places), string)
         string = string.format(str(num))
         return string
+
+    def strchr(self, string, char):
+        "Returns position of first occurrence of character char(s) in string str."
+        string = '' if string == 'None' else str(string)
+        char = '' if char == 'None' else str(char)
+        return string.find(char)
 
     def strcmp(self, string1, string2):
         string1 = '' if string1 == 'None' else str(string1)
