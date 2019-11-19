@@ -825,10 +825,8 @@ class DiscogsSearch(DiscogsConnector):
                 print(len(master.versions))
                 self._siftReleases(master.versions)
             else:
-                if self._compareRelease(master) == True:
-                    # print(result)
+                if self._compareRelease(master) is not False:
                     candidates[master.id] = master
-                    # print(candidates)
 
 
     def search_artist(self):
@@ -887,10 +885,10 @@ class DiscogsSearch(DiscogsConnector):
         searchParams = self.search_params
         candidates = self.candidates
 
-        album = self.search_params['search']['album']
-        logger.info('Searching by title: {}'.format(album))
+        release = self.search_params['search']['release']
+        logger.info('Searching by title: {}'.format(release))
 
-        results = self.discogs_client.search(album, type='release')
+        results = self.discogs_client.search(release, type='release')
         for result in results:
             if len(candidates) == 0:
                 master = self.get_master_release(result)
@@ -900,7 +898,7 @@ class DiscogsSearch(DiscogsConnector):
                     if self._compareRelease(searchParams, master) == True:
                         candidates[master.id] = master
 
-    def search_switcher(self, types=None):
+    def search_switcher(self, types=None, count=0):
         """ Takes the search parameters and cycles through the various search
             strategies until we have some matching candidates.
         """
@@ -908,19 +906,22 @@ class DiscogsSearch(DiscogsConnector):
             types = ['master', 'all', 'artist', 'title']
         if len(types) > 0:
             type = types.pop(0)
+            count = count + 1
             switcher = {
                 'master': lambda: self.search_artist_title(type),
                 'all': lambda: self.search_artist_title(type),
                 'artist': lambda: self.search_artist(),
-                'title': lambda: self.search_title(),
+                'title': lambda: self.search_album_title(),
             }
             func = switcher.get(type, lambda: 'Invalid')
             try:
                 print(func())
             except Exception as e:
-                print(e)
+                logger.warning('Exception: {}'.format(e))
             if len(self.candidates) == 0:
-                self.search_switcher(types)
+                self.search_switcher(types, count)
+            else:
+                return
         else:
             return (len(self.candidates))
 
@@ -1017,11 +1018,15 @@ class DiscogsSearch(DiscogsConnector):
         candidates = self.candidates
         temp = {}
         for release in releases:
+            print(vars(release))
             difference = self._compareRelease(release)
+            print(difference)
             if difference is not None and difference is not False:
+                print(candidates)
                 while difference in candidates.keys():
                     difference = difference + 0.001
                 candidates[difference] = release
+                print(candidates)
 
     def _compareRelease(self, release):
         ''' Compare the current track with a single release from Discogs.
