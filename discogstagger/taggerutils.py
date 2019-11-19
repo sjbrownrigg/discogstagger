@@ -854,11 +854,11 @@ class TaggerUtils(object):
         if self.normalize == True:
             a = normalize("NFKD", a)
 
-        cf = re.compile(r"[^-\w.,()\[\]\s#@&?]")
+        cf = re.compile(r"[^-\w.,()\[\]\s#@&?']")
         cf = cf.sub("", str(a))
 
-        # Don't force space/underscore replacement. If the user want's this it
-        # can be done via config. The user may want spaces.
+        # Don't force space/underscore replacement. If the user wants this it
+        # can be done via config. The user may _want_ spaces.
         # cf = cf.replace(" ", "_")
         # cf = cf.replace("__", "_")
         # cf = cf.replace("_-_", "-")
