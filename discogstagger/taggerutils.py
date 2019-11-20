@@ -847,6 +847,7 @@ class TaggerUtils(object):
             fileext = ""
 
         a = str(filename)
+        a = a.sub(r'\.$', '', a) # windows doesn't like folders ending with '.'
 
         for k, v in self.char_exceptions.items():
             a = a.replace(k, v)
@@ -856,6 +857,7 @@ class TaggerUtils(object):
 
         cf = re.compile(r"[^-\w.,()\[\]\s#@&?']")
         cf = cf.sub("", str(a))
+
 
         # Don't force space/underscore replacement. If the user wants this it
         # can be done via config. The user may _want_ spaces.
