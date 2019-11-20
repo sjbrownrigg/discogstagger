@@ -275,7 +275,7 @@ class DirectoryWatcher():
     def watch(self, root_dir):
         while self.total_size != self.dir_size(root_dir):
             self.total_size = self.dir_size(root_dir)
-            time.sleep(5)
+            time.sleep(60)
         # return 'Finished function'
 
 
