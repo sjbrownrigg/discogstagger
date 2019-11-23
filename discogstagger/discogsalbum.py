@@ -499,15 +499,20 @@ class DiscogsAlbum(object):
     def disc_and_track_no(self, position):
         """ obtain the disc and tracknumber from given position
             problem right now, discogs uses - and/or . as a separator, furthermore discogs uses
-            A1 for vinyl based releases, we should implement this as well
+            A1 for vinyl based releases, we should implement this as well.
+
+            Further complications. Hidden tracks can have a . separator where the rest
+            of the release doesn't, e.g. 1, 2, 3, 4, 5, 6, 7, 8, 9.1, 9.2, 9.3
+            If we treat these as
         """
-        if position.find("-") > -1 or position.find(".") > -1:
+        # if position.find("-") > -1 or position.find(".") > -1:
+        if position.find("-") > -1:
             # some variance in how discogs releases spanning multiple discs
             # or formats are kept, add regexs here as failures are encountered
             NUMBERING_SCHEMES = (
                 "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
                 "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
-                "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05 (this is not multi-disc but multi-tracks for one track)....
+                # "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05 (this is not multi-disc but multi-tracks for one track)....
             )
 
             for scheme in NUMBERING_SCHEMES:
@@ -544,8 +549,11 @@ class DiscogsAlbum(object):
         track_list = []
         discsubtitle = None
         disc = Disc(1)
+        running_num = 0
 
         for i, t in enumerate(x for x in self.release.tracklist):
+
+            running_num = running_num + 1
 
             if t.position is None:
                 logging.error("position is null, shouldn't be...")
@@ -580,11 +588,13 @@ class DiscogsAlbum(object):
 
             pos = self.disc_and_track_no(t.position)
 
-            if re.match('^[0-9]+', pos["tracknumber"]) == None:
-                # workaround to store non-numerical track designation
-                # for later, e.g. A1
-                track.real_tracknumber = pos["tracknumber"]
-                track.tracknumber = i + 1
+            # workaround to store non-integer track designation for later,
+            # for vinyl, cassette, or multi-piece tracks
+            #  e.g. A1, 9.1,
+            track.real_tracknumber = pos["tracknumber"]
+            if re.match('^[0-9]+', pos["tracknumber"]) == None or \
+            re.match(r'\d+\.\d+', pos["tracknumber"]):
+                track.tracknumber = running_num
             else:
                 track.tracknumber = int(pos["tracknumber"])
 
@@ -603,11 +613,11 @@ class DiscogsAlbum(object):
             if track.discnumber != disc.discnumber:
                 disc_list.append(disc)
                 disc = Disc(track.discnumber)
+                running_num = 0
 
             disc.tracks.append(track)
             disc.discsubtitle = discsubtitle
             logger.info("discsubtitle: {0}".format(disc.discsubtitle))
-            print(track)
         disc_list.append(disc)
 
         return disc_list
@@ -683,12 +693,12 @@ class DiscogsSearch(DiscogsConnector):
 
         trackcount = 0
         discnumber = 0
-        searchParams['artists'] = set()
+        searchParams['artists'] = []
         for i, file in enumerate(files):
             trackcount = trackcount + 1
             metadata = MediaFile(os.path.join(file))
             for a in metadata.artist:
-                searchParams['artists'].add(a)
+                searchParams['artists'].append(a)
             searchParams['albumartist'] = ', '.join(set(metadata.albumartist))
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
@@ -717,6 +727,7 @@ class DiscogsSearch(DiscogsConnector):
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
         searchParams['artist'] = ', '.join(searchParams['artists'])
+        searchParams['artists'] = list(dict.fromkeys(searchParams['artists']))
         if len(searchParams['artists']) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
             logger.warning('No metadata available in the audio files')
             self.metadataFromFileNaming(source_dir, files)
@@ -738,9 +749,7 @@ class DiscogsSearch(DiscogsConnector):
             searchParams['year'] = year.group(0)
             release_dir = re.sub(year.group(0), '', release_dir)
         dirs = release_dir.split(os.sep)
-        print(dirs)
         dirs = [self.u2s(d) for d in dirs if d != '' and d.lower() not in ('albums', 'singles')]
-        print(dirs)
         if len(dirs) == 3:
             dirs.pop(1) # assume first artist, last release
         if len(dirs) == 2: # assume artist / album
@@ -759,8 +768,18 @@ class DiscogsSearch(DiscogsConnector):
             name, ext = os.path.splitext(self.u2s(filename))
             namesplit = name.split(' ', 1)
             track['real_tracknumber'] = namesplit[0]
-            track['title'] = namesplit[1]
-            track['artist'] = searchParams['artist'] # overkill?
+            rest = namesplit[1].split(' - ')
+            if len(rest) > 1:
+                track['artist'] = rest[0]
+                searchParams['artists'].append(rest[0])
+                track['title'] = rest[1]
+            else: # assume only title
+                track['title'] = rest[0]
+                track['artist'] = searchParams['artist'] # overkill?
+        searchParams['artists'] = list(dict.fromkeys(searchParams['artists']))
+        if searchParams['artist'] == '':
+            searchParams['artist'] = ' '.join(searchParams['artists'])
+        print(searchParams)
 
     def u2s(self, string):
         return re.sub(r'[_]',' ' , string)
@@ -780,12 +799,12 @@ class DiscogsSearch(DiscogsConnector):
     def normalize(self, string):
         ''' Remove stopwords and other problem words from search strings
         '''
-        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs', 'inch']
+        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs', 'inch', 'various', 'artists']
         string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()&]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
-        tokens = set(string.split(' '))
+        tokens = list(dict.fromkeys(string.split(' ')))
         print(tokens)
         return ' '.join([w for w in tokens if not w.lower() in stop_words])
 
@@ -931,8 +950,9 @@ class DiscogsSearch(DiscogsConnector):
         searchParams = self.search_params
         searchParams['search'] = {}
         s = searchParams['search']
+        va = ('various', 'various artists', 'va')
 
-        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in ('various', 'various artists', 'va'):
+        if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in va:
             if len(searchParams['artists']) > 1:
                 s['artist'] = ' '.join(searchParams['artists'][0:1]) # take the first couple of artists from the compilation
             elif len(searchParams['artists']) == 1:
@@ -944,7 +964,12 @@ class DiscogsSearch(DiscogsConnector):
 
         s['artist'] = self.normalize(s['artist'])
         s['release'] = self.normalize(searchParams['album'])
-        s['artistRelease'] = self.normalize(' '.join((s['artist'], s['release'])))
+        if s['artist'] in va:
+            s['title'] = searchParams['tracks'][0]['title']
+            s['artistRelease'] = self.normalize(' '.join((s['title'], s['release'])))
+        else:
+            s['artistRelease'] = self.normalize(' '.join((s['artist'], s['release'])))
+
         print(self.search_params)
 
 
