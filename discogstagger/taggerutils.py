@@ -768,7 +768,7 @@ class TaggerUtils(object):
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
-                pp.pprint(target_list)
+                # pp.pprint(target_list)
 
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)
@@ -847,7 +847,7 @@ class TaggerUtils(object):
             fileext = ""
 
         a = str(filename)
-        a = a.sub(r'\.$', '', a) # windows doesn't like folders ending with '.'
+        a = re.sub(r'\.$', '', a) # windows doesn't like folders ending with '.'
 
         for k, v in self.char_exceptions.items():
             a = a.replace(k, v)
