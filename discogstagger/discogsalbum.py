@@ -617,7 +617,7 @@ class DiscogsAlbum(object):
 
             disc.tracks.append(track)
             disc.discsubtitle = discsubtitle
-            logger.info("discsubtitle: {0}".format(disc.discsubtitle))
+            logger.debug("discsubtitle: {0}".format(disc.discsubtitle))
         disc_list.append(disc)
 
         return disc_list
