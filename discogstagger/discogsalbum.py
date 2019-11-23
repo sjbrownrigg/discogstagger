@@ -738,7 +738,7 @@ class DiscogsSearch(DiscogsConnector):
         """ Fall back method to retrieve release information from directories
             and filenames
         """
-        print('metadataFromFileNaming')
+        logger.info('Fetching metadata from file & directory naming')
         searchParams = self.search_params
         base_dir = self.config.get('details', 'source_dir')
         if re.search(r'(?i)(vinyl)', source_dir):
@@ -878,8 +878,11 @@ class DiscogsSearch(DiscogsConnector):
             if releases is None:
                 continue
 
+            iter = 0
             for release in releases:
-                if len(candidates) > 0:
+                # give up after given number of attempts (25).
+                iter = iter + 1
+                if len(candidates) > 0 or iter > 25:
                     return
                 self._rateLimit()
                 r = release.title.lower()
@@ -1133,7 +1136,7 @@ class DiscogsSearch(DiscogsConnector):
             if track.duration is None or track.duration == '':
                 return trackinfo
             logger.debug('Discogs track position: {}'.format(track.position))
-            if str(track.position) == '':
+            if str(track.position) == '' or track.position.lower() == 'video':
                 logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
             discogs_info = {}
