@@ -726,8 +726,8 @@ class DiscogsSearch(DiscogsConnector):
             trackInfo['title'] = metadata.title
             trackInfo['artist'] = metadata.artist # useful for compilations
             searchParams['tracks'].append(trackInfo)
-        searchParams['artist'] = ', '.join(searchParams['artists'])
         searchParams['artists'] = list(dict.fromkeys(searchParams['artists']))
+        searchParams['artist'] = ', '.join(searchParams['artists'])
         if len(searchParams['artists']) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
             logger.warning('No metadata available in the audio files')
             self.metadataFromFileNaming(source_dir, files)
@@ -859,46 +859,37 @@ class DiscogsSearch(DiscogsConnector):
         logger.info('Searching by artist: {}'.format(artist))
 
         releases = None
-        # reuse release data for this artist previously cached in this session
-        if artist in self.release_cache:
-            releases = self.release_cache[artist]
-            logger.debug('Reusing cached artist data')
-        else:
-            results = self.discogs_client.search(artist, type='artist')
+        results = self.discogs_client.search(artist, type='artist')
 
-            if results.count == 0:
-                return None
-
-            for result in results:
-                if len(candidates) > 0: # stop if we have found some candidates
-                    continue
-
-                found = []
-                a = artist.lower()
-                # workaround for many artists with the same name, e.g. Deimos (3)
-                n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
-                if a == n:
-                # session based cache to reuse artist release data
-                    self.release_cache['artist'] = result.releases
-                    releases = result.releases
-
-        if releases is None:
+        if results.count == 0:
             return None
 
-        for release in releases:
-            if len(candidates) > 0:
+        for result in results:
+            if len(candidates) > 0: # stop if we have found some candidates
                 continue
 
-            self._rateLimit()
-            r = release.title.lower()
-            s = searchParams['album'].lower()
+            found = []
+            a = artist.lower()
+            # workaround for many artists with the same name, e.g. Deimos (3)
+            n = re.sub('\s+\(\d+\)$', '', result.name.lower()).strip()
+            if a == n:
+                releases = result.releases
 
-            if s == r or r in s or s in r: # sometimes titles include extra info, e.g. EP
-                if hasattr(release, 'versions'):
-                    self._siftReleases(release.versions)
-                else:
-                    if self._compareRelease(release) == True:
-                        candidates[release.id] = release
+            if releases is None:
+                continue
+
+            for release in releases:
+                if len(candidates) > 0:
+                    return
+                self._rateLimit()
+                r = release.title.lower()
+                s = searchParams['album'].lower()
+
+                if s == r or r in s or s in r: # sometimes titles include extra info, e.g. EP
+                    if hasattr(release, 'versions'):
+                        self._siftReleases(release.versions)
+                    else:
+                        self._siftReleases([release])
 
     def search_album_title(self):
         searchParams = self.search_params
@@ -1043,15 +1034,11 @@ class DiscogsSearch(DiscogsConnector):
         candidates = self.candidates
         temp = {}
         for release in releases:
-            print(vars(release))
             difference = self._compareRelease(release)
-            print(difference)
             if difference is not None and difference is not False:
-                print(candidates)
                 while difference in candidates.keys():
                     difference = difference + 0.001
                 candidates[difference] = release
-                print(candidates)
 
     def _compareRelease(self, release):
         ''' Compare the current track with a single release from Discogs.
