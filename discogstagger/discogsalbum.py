@@ -590,7 +590,7 @@ class DiscogsAlbum(object):
 
             # Store the actual track number. Used for non-standard numbering
             track.real_tracknumber = pos["tracknumber"]
-            # Tracknumber is a running number 
+            # Tracknumber is a running number
             track.tracknumber = running_num
 
             try:
@@ -796,7 +796,7 @@ class DiscogsSearch(DiscogsConnector):
         '''
         stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs', 'inch', 'various', 'artists']
         string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
-        string = re.sub('[\[\]()&|]', '', string)
+        string = re.sub('[\[\]()&|:;]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
         tokens = list(dict.fromkeys(string.split(' ')))
