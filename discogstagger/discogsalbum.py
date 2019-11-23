@@ -801,7 +801,7 @@ class DiscogsSearch(DiscogsConnector):
         '''
         stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs', 'inch', 'various', 'artists']
         string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
-        string = re.sub('[\[\]()&]', '', string)
+        string = re.sub('[\[\]()&|]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
         tokens = list(dict.fromkeys(string.split(' ')))
@@ -941,11 +941,11 @@ class DiscogsSearch(DiscogsConnector):
     def search_strings(self):
         """ Compile the search strings to be used from searchParams
         """
+        print("Enhance search strings")
         searchParams = self.search_params
         searchParams['search'] = {}
         s = searchParams['search']
         va = ('various', 'various artists', 'va')
-
         if searchParams['albumartist'] is not None and searchParams['albumartist'].lower() in va:
             if len(searchParams['artists']) > 1:
                 s['artist'] = ' '.join(searchParams['artists'][0:1]) # take the first couple of artists from the compilation
@@ -964,6 +964,7 @@ class DiscogsSearch(DiscogsConnector):
         else:
             s['artistRelease'] = self.normalize(' '.join((s['artist'], s['release'])))
 
+        print(s)
         print(self.search_params)
 
 
@@ -1132,13 +1133,16 @@ class DiscogsSearch(DiscogsConnector):
         discogs_tracks = version.tracklist
 
         for track in discogs_tracks:
-            # reject the tracklisting if track duration is missing
-            if track.duration is None or track.duration == '':
-                return trackinfo
-            logger.debug('Discogs track position: {}'.format(track.position))
-            if str(track.position) == '' or track.position.lower() == 'video':
+            if track.data['type_'] == 'heading':
                 logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
+            if track.position.lower() == 'video':
+                logger.debug('ignoring video track: {}'.format(getattr(track, 'title')))
+                continue
+            if track.duration == None or str(track.duration) == '':
+                logger.debug('ignoring tracks without duration: {}'.format(getattr(track, 'title')))
+                continue
+            logger.debug('Discogs track position: {}'.format(track.position))
             discogs_info = {}
             for key in ['position', 'duration', 'title']:
                 discogs_info[key] = getattr(track, key)
