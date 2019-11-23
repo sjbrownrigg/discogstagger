@@ -588,15 +588,10 @@ class DiscogsAlbum(object):
 
             pos = self.disc_and_track_no(t.position)
 
-            # workaround to store non-integer track designation for later,
-            # for vinyl, cassette, or multi-piece tracks
-            #  e.g. A1, 9.1,
+            # Store the actual track number. Used for non-standard numbering
             track.real_tracknumber = pos["tracknumber"]
-            if re.match('^[0-9]+', pos["tracknumber"]) == None or \
-            re.match(r'\d+\.\d+', pos["tracknumber"]):
-                track.tracknumber = running_num
-            else:
-                track.tracknumber = int(pos["tracknumber"])
+            # Tracknumber is a running number 
+            track.tracknumber = running_num
 
             try:
                 track.discnumber = int(pos["discnumber"])
@@ -908,8 +903,7 @@ class DiscogsSearch(DiscogsConnector):
                 if hasattr(master, 'versions'):
                     self._siftReleases(master.versions)
                 else:
-                    if self._compareRelease(searchParams, master) == True:
-                        candidates[master.id] = master
+                    self._siftReleases([master])
 
     def search_switcher(self, types=None, count=0):
         """ Takes the search parameters and cycles through the various search
