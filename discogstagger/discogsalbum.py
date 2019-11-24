@@ -564,7 +564,8 @@ class DiscogsAlbum(object):
             # handle it anyway.
             # Headings could also be a chapter title.
             if (t.title and not t.position and not t.duration) or \
-            (hasattr(t, 'type_') and t.type_ == 'heading'):
+            (hasattr(t, 'type_') and t.type_ == 'heading') or \
+            ('type_' in t.data and t.data['type_'] == 'heading'):
                 discsubtitle.append(t.title)
                 continue
 
@@ -579,12 +580,19 @@ class DiscogsAlbum(object):
 
             track = Track(i + 1, t.title, artists)
 
+            subtracks = []
+            if 'sub_tracks' in t.data:
+                for subtrack in t.data['sub_tracks']:
+                    if subtrack['type_'] == 'track':
+                        subtracks.append(subtrack['position'] + '. ' + subtrack['title'])
+                setattr(track, 'title', t.title + ' (' + '; '.join(subtracks) + (')'))
+
             track.position = i
 
             pos = self.disc_and_track_no(t.position)
 
             # Store the actual track number. Used for non-standard numbering
-            track.real_tracknumber = pos["tracknumber"]
+            track.real_tracknumber = pos["tracknumber"] if pos["tracknumber"] != '' else str(running_num)
             # Tracknumber is a running number
             track.tracknumber = running_num
 
