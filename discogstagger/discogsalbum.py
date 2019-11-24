@@ -547,33 +547,28 @@ class DiscogsAlbum(object):
 
         disc_list = []
         track_list = []
-        discsubtitle = None
+        discsubtitle = []
         disc = Disc(1)
         running_num = 0
 
         for i, t in enumerate(x for x in self.release.tracklist):
 
-            running_num = running_num + 1
-
             if t.position is None:
                 logging.error("position is null, shouldn't be...")
 
-            if t.position.startswith("Video") or t.position.startswith("video") or t.position.startswith("DVD"):
+            if t.position.startswith(("Video", "video", "DVD")):
                 continue
 
             # on multiple discs there do appears a subtitle as the first "track"
             # on the cd in discogs, this seems to be wrong, but we would like to
-            # handle it anyway
-            if t.title and not t.position and not t.duration:
-                discsubtitle = t.title
+            # handle it anyway.
+            # Headings could also be a chapter title.
+            if (t.title and not t.position and not t.duration) or \
+            (hasattr(t, 'type_') and t.type_ == 'heading'):
+                discsubtitle.append(t.title)
                 continue
 
-            # this seems to be an index track, set the discsubtitle
-            if hasattr(t, 'type_') and t.type_ != "Track":
-                # we are not storing the subtitle on the disc, since it can happen,
-                # that the discsubtitleis just for the following tracks
-                discsubtitle = t["title"]
-                continue
+            running_num = running_num + 1
 
             if t.artists:
                 artists = self.artists(t.artists)
@@ -600,8 +595,8 @@ class DiscogsAlbum(object):
                 logger.error(msg)
                 raise AlbumError(msg)
 
-            if discsubtitle:
-                track.discsubtitle = discsubtitle
+            if len(discsubtitle) > 0:
+                track.discsubtitle = discsubtitle[-1]
 
             track.sort_artist = sort_artist
 
