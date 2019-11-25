@@ -412,7 +412,7 @@ class DiscogsAlbum(object):
             discno = 1
         else:
             for format in self.release.data["formats"]:
-                if format['name'] in ['CD']:
+                if format['name'] in ['CD', 'CDr', 'Vinyl', 'LP']:
                     discno += int(format['qty'])
 
         logger.info("determined %d no of discs total" % discno)
@@ -543,8 +543,8 @@ class DiscogsAlbum(object):
         return False
 
     def discs_and_tracks(self, album):
-        """ provides the tracklist of the given release id """
-
+        """ provides the tracklist of the given release id
+        """
         disc_list = []
         track_list = []
         discsubtitle = []
@@ -590,12 +590,6 @@ class DiscogsAlbum(object):
             track.position = i
 
             pos = self.disc_and_track_no(t.position)
-
-            # Store the actual track number. Used for non-standard numbering
-            track.real_tracknumber = pos["tracknumber"] if pos["tracknumber"] != '' else str(running_num)
-            # Tracknumber is a running number
-            track.tracknumber = running_num
-
             try:
                 track.discnumber = int(pos["discnumber"])
             except ValueError as ve:
@@ -603,21 +597,24 @@ class DiscogsAlbum(object):
                 logger.error(msg)
                 raise AlbumError(msg)
 
+            if track.discnumber != disc.discnumber:
+                disc_list.append(disc)
+                disc = Disc(track.discnumber)
+                running_num = 1
+
+            # Store the actual track number. Used for non-standard numbering
+            track.real_tracknumber = pos["tracknumber"] if pos["tracknumber"] != '' else str(running_num)
+            # Tracknumber is a running number
+            track.tracknumber = running_num
+
             if len(discsubtitle) > 0:
                 track.discsubtitle = discsubtitle[-1]
 
             track.sort_artist = sort_artist
-
-            if track.discnumber != disc.discnumber:
-                disc_list.append(disc)
-                disc = Disc(track.discnumber)
-                running_num = 0
-
             disc.tracks.append(track)
             disc.discsubtitle = discsubtitle
             logger.debug("discsubtitle: {0}".format(disc.discsubtitle))
         disc_list.append(disc)
-
         return disc_list
 
     def remove_duplicate_items(self, duplicates_list):
@@ -797,7 +794,8 @@ class DiscogsSearch(DiscogsConnector):
     def normalize(self, string):
         ''' Remove stopwords and other problem words from search strings
         '''
-        stop_words = ['ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none', 'vs.', 'vs', 'inch', 'various', 'artists']
+        stop_words = ['lp', 'ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none',
+        'vs.', 'vs', 'inch', 'various', 'artists']
         string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()&|:;]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
