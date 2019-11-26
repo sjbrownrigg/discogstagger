@@ -665,7 +665,7 @@ class DiscogsSearch(DiscogsConnector):
             path, file = os.path.split(filepath)
             paths.append(path)
         if len(set(paths)) > 1:
-            subdirs = [dir.replace(source_dir, '') for dir in set(paths)]
+            subdirs = [dir.replace(source_dir, '') for dir in paths]
             subdirs.sort()
             return subdirs
         else:
@@ -698,9 +698,11 @@ class DiscogsSearch(DiscogsConnector):
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
+            print(file)
+            print(subdirectories)
             if metadata.disc is not None and int(metadata.disc) > 1:
                 searchParams['disc'] = metadata.disc
-            elif metadata.disc is None and len(subdirectories) > 1:
+            elif metadata.disc is None and len(set(subdirectories)) > 1:
                 trackdisc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
                 searchParams['disc'] = int(trackdisc[2])
             print(searchParams)
@@ -714,6 +716,7 @@ class DiscogsSearch(DiscogsConnector):
             else:
                 tracknumber += str(trackcount)
 
+            print(searchParams)
             trackInfo = {}
             if re.search(r'^(?i)[a-z]', str(metadata.track)):
                 trackInfo['real_tracknumber'] = metadata.track
