@@ -796,7 +796,7 @@ class DiscogsSearch(DiscogsConnector):
         '''
         stop_words = ['lp', 'ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none',
         'vs.', 'vs', 'inch', 'various', 'artists']
-        string = re.sub('[\,\'\"\-\_\\\\]', ' ', string)
+        string = re.sub('[\,\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()&|:;]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
