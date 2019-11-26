@@ -563,7 +563,7 @@ class TaggerUtils(object):
             '%artist%': self.album.disc(discno).track(trackno).artist,
             '%totaldiscs%': self.album.disctotal,
             '%discnumber%': discno,
-            '%disctitle%': '; '.join(self.album.disc(discno).discsubtitle),
+            '%disctitle%': self.album.disc(discno).discsubtitle,
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,
             '%tracknumber%': self.get_real_track_number(format, discno, trackno),
