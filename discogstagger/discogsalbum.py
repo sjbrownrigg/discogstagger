@@ -558,7 +558,8 @@ class DiscogsAlbum(object):
             if t.position is None:
                 logging.error("position is null, shouldn't be...")
 
-            if t.position.startswith(("Video", "video", "DVD")):
+            exclude = ("Video", "video", "DVD")
+            if t.position.startswith(exclude) or t.position.endswith(exclude):
                 continue
 
             # on multiple discs there do appears a subtitle as the first "track"
