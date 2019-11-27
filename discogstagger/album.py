@@ -34,6 +34,7 @@ class Disc(BaseObject):
         self.discsubtitle = None
         self.mediatype = None
         self.tracks = []
+        self.filetype = None
 
     def track(self, trackno):
         return self.tracks[trackno - 1]

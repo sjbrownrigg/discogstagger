@@ -420,37 +420,40 @@ class FileHandler(object):
         root_dir, subdirs, files = next(os.walk(albumdir))
         multidisc = 0
         singledisc = 0
-        codec = ''
+        matched = set()
         files.sort()
 
         for f in files:
             if list(filter(f.endswith, codecs)) != []:
                 singledisc += 1
-                codec = list(filter(f.endswith, codecs))[0]
+                matched.add(list(filter(f.endswith, codecs))[0])
         for dir in subdirs:
             subfiles = next(os.walk(os.path.join(albumdir, dir)))[2]
             for f in subfiles:
                 if list(filter(f.endswith, codecs)) != []:
                     multidisc += 1
-                    codec = list(filter(f.endswith, codecs))[0]
+                    matched.add(list(filter(f.endswith, codecs))[0])
 
-        pattern = os.path.join(albumdir, '**', '*' + codec) if multidisc > 0 else os.path.join(albumdir, '*' + codec)
-        return_code = None
-        logger.debug('Adding replaygain to files: {}'.format(pattern))
-        if self.rg_application == 'metafalc':
-            cmd = 'metaflac --add-replay-gain {}'.format( \
-                self._escape_string(pattern))
-            return_code = os.system(cmd)
-        elif self.rg_application == 'loudgain':
-            options = lg_options[codec] if codec in lg_options.keys() else ''
-            cmd = 'loudgain {} {}'.format( \
-                options, self._escape_string(pattern))
-            print(cmd)
-            return_code = os.system(cmd)
-        else:
-            return_code = -1
+        for match in list(matched):
+            pattern = os.path.join(albumdir, '**', '*' + match) if multidisc > 0 else os.path.join(albumdir, '*' + match)
+            return_code = None
 
-        logging.debug("Replaygain return code %s" % str(return_code))
+            logger.debug('Adding replaygain to files: {}'.format(pattern))
+
+            if self.rg_application == 'metaflac':
+                cmd = 'metaflac --add-replay-gain {}'.format( \
+                    self._escape_string(pattern))
+                return_code = os.system(cmd)
+            elif self.rg_application == 'loudgain':
+                options = lg_options[match] if match in lg_options.keys() else ''
+                cmd = 'loudgain {} {}'.format( \
+                    options, self._escape_string(pattern))
+                print(cmd)
+                return_code = os.system(cmd)
+            else:
+                return_code = -1
+
+            logging.debug("Replaygain return code %s" % str(return_code))
 
     def _escape_string(self, string):
         return '%s' % (
@@ -571,7 +574,7 @@ class TaggerUtils(object):
             '%track number%': trackno,
             '%format%': self.album.format,
             '%format_description%': self.album.format_description,
-            '%fileext%': filetype,
+            '%fileext%': self.album.disc(discno).filetype,
             '%bitdepth%': self.album.disc(discno).track(trackno).bitdepth,
             '%bitrate%': self.album.disc(discno).track(trackno).bitrate,
             '%channels%': self.album.disc(discno).track(trackno).channels,
@@ -787,6 +790,7 @@ class TaggerUtils(object):
                     track.orig_file = os.path.basename(filename)
                     track.full_path = os.path.join(self.album.sourcedir, filename)
                     filetype = os.path.splitext(filename)[1]
+                    disc.filetype = filetype
 
             self._set_target_discs_and_tracks(filetype)
 
