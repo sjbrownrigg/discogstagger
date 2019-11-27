@@ -563,6 +563,7 @@ class TaggerUtils(object):
             '%artist%': self.album.disc(discno).track(trackno).artist,
             '%totaldiscs%': self.album.disctotal,
             '%discnumber%': discno,
+            '%mediatype%': self.album.disc(discno).mediatype,
             '%disctitle%': self.album.disc(discno).discsubtitle,
             '%track artist%': self.album.disc(discno).track(trackno).artist,
             '%title%': self.album.disc(discno).track(trackno).title,

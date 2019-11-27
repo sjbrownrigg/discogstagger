@@ -512,6 +512,7 @@ class DiscogsAlbum(object):
             NUMBERING_SCHEMES = (
                 "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
                 "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
+                "^(?P<discnumber>USB-Stick)-(?P<tracknumber>\d+)$",   # USB-Stick-1-12
                 # "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05 (this is not multi-disc but multi-tracks for one track)....
             )
 
@@ -548,6 +549,7 @@ class DiscogsAlbum(object):
         disc_list = []
         track_list = []
         discsubtitle = []
+        discnumber = 1
         disc = Disc(1)
         running_num = 0
 
@@ -590,8 +592,22 @@ class DiscogsAlbum(object):
             track.position = i
 
             pos = self.disc_and_track_no(t.position)
+
+
+            # box sets can have a mixture of CDs and other media, e.g. USB-Stick
+            # with, or without numbering.  Where numerical disc number follows the
+            # disc number, but we may have to add ourselves.  Store the media type
+            # so that we can use that later.
             try:
-                track.discnumber = int(pos["discnumber"])
+                # track.discnumber = int(pos["discnumber"])
+                if re.match('^\d+$', pos["discnumber"]):
+                    track.discnumber = int(pos["discnumber"])
+                elif disc.mediatype != pos["discnumber"]:
+                    track.discnumber = discnumber + 1
+                    track.mediatype = pos["discnumber"]
+                else:
+                    track.discnumber = discnumber
+                    track.mediatype = disc.mediatype
             except ValueError as ve:
                 msg = "cannot convert {0} to a valid track-/discnumber".format(t.position)
                 logger.error(msg)
@@ -601,6 +617,9 @@ class DiscogsAlbum(object):
                 disc_list.append(disc)
                 disc = Disc(track.discnumber)
                 running_num = 1
+                discnumber += 1
+                if track.mediatype is not None:
+                    disc.mediatype = track.mediatype
 
             # Store the actual track number. Used for non-standard numbering
             track.real_tracknumber = pos["tracknumber"] if pos["tracknumber"] != '' else str(running_num)
@@ -612,7 +631,8 @@ class DiscogsAlbum(object):
 
             track.sort_artist = sort_artist
             disc.tracks.append(track)
-            disc.discsubtitle = discsubtitle
+            if disc.discnumber == len(discsubtitle):
+                disc.discsubtitle = discsubtitle[-1]
             logger.debug("discsubtitle: {0}".format(disc.discsubtitle))
         disc_list.append(disc)
         return disc_list
@@ -698,14 +718,14 @@ class DiscogsSearch(DiscogsConnector):
             searchParams['album'] = metadata.album
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
-            print(file)
-            print(subdirectories)
+            # print(file)
+            # print(subdirectories)
             if metadata.disc is not None and int(metadata.disc) > 1:
                 searchParams['disc'] = metadata.disc
             elif metadata.disc is None and len(set(subdirectories)) > 1:
                 trackdisc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
                 searchParams['disc'] = int(trackdisc[2])
-            print(searchParams)
+            # print(searchParams)
             if 'disc' in searchParams.keys() and searchParams['disc'] != discnumber:
                 trackcount = 1
             if 'tracks' not in searchParams:
@@ -716,7 +736,7 @@ class DiscogsSearch(DiscogsConnector):
             else:
                 tracknumber += str(trackcount)
 
-            print(searchParams)
+            # print(searchParams)
             trackInfo = {}
             if re.search(r'^(?i)[a-z]', str(metadata.track)):
                 trackInfo['real_tracknumber'] = metadata.track

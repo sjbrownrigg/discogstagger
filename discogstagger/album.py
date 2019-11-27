@@ -15,6 +15,7 @@ class Track(BaseObject):
         self.title = title
         self.artists = artists
         self.discsubtitle = None
+        self.mediatype = None
 
     @property
     def artist(self):
@@ -31,6 +32,7 @@ class Disc(BaseObject):
     def __init__(self, discnumber):
         self.discnumber = discnumber
         self.discsubtitle = None
+        self.mediatype = None
         self.tracks = []
 
     def track(self, trackno):
