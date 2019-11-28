@@ -822,11 +822,11 @@ class DiscogsSearch(DiscogsConnector):
     def normalize(self, string):
         ''' Remove stopwords and other problem words from search strings
         '''
-        stop_words = ['lp', 'ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none',
-        'vs.', 'vs', 'inch', 'various', 'artists', 'boxset', 'limited', 'the']
+        stop_words = ['lp', 'ep', 'bonus', 'tracks', 'mcd', 'cd', 'cdm', 'cds', 'none',
+        'vs.', 'vs', 'inch', 'various', 'artists', 'boxset', 'limited', 'edition', 'the']
         string = re.sub('[\,\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()|:;]', '', string)
-        string = re.sub('(?i)CD\d*', '', string)
+        # string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
         tokens = list(dict.fromkeys(string.split(' ')))
         print(tokens)
