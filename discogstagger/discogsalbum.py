@@ -708,6 +708,7 @@ class DiscogsSearch(DiscogsConnector):
         files.sort()
         subdirectories = self._fetchSubdirectories(source_dir, files)
         searchParams = self.search_params
+        searchParams['sourcedir'] = source_dir
 
         trackcount = 0
         discnumber = 0
@@ -727,7 +728,7 @@ class DiscogsSearch(DiscogsConnector):
                 searchParams['disc'] = metadata.disc
             elif metadata.disc is None and len(set(subdirectories)) > 1:
                 trackdisc = re.search(r'^(?i)(cd|disc)\s?(?P<discnumber>[0-9]{1,2})', subdirectories[i])
-                searchParams['disc'] = int(trackdisc.group("discnumber"))
+                searchParams['disc'] = int(trackdisc.group('discnumber'))
             # print(searchParams)
             if 'disc' in searchParams.keys() and searchParams['disc'] != discnumber:
                 trackcount = 1
@@ -1012,7 +1013,8 @@ class DiscogsSearch(DiscogsConnector):
             for id in candidates.keys():
                 qual[id] = {}
                 qual[id] = {
-                    'format': candidates[id].data["formats"][0]["name"],
+                    'format': candidates[id].data['formats'][0]['name'],
+                    'quantity': candidates[id].data['format_quantity'],
                     'year': candidates[id].year
                     }
 
@@ -1027,9 +1029,22 @@ class DiscogsSearch(DiscogsConnector):
                     return candidates[k]
 
             for k in qual.keys():
+                if (searchParams['year'] == qual[k]['year']) and \
+                (qual[k]['format'].lower() in ('lp', 'vinyl') and \
+                (('media' in searchParams and searchParams['media'] == 'vinyl' ) or \
+                'real_tracknumber' in searchParams['tracks'][0])):
+                    return candidates[k]
+
+            for k in qual.keys():
                 if (qual[k]['format'].lower() in ('lp', 'vinyl') and \
                 (('media' in searchParams and searchParams['media'] == 'vinyl' ) or \
                 'real_tracknumber' in searchParams['tracks'][0])):
+                    return candidates[k]
+
+            for k in qual.keys():
+                if 'disc' in searchParams.keys() and \
+                searchParams['disc'] == qual[k]['quantity'] and \
+                searchParams['year'] == qual[k]['year']:
                     return candidates[k]
 
             for k in qual.keys():
