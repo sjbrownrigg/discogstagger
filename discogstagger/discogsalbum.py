@@ -1151,12 +1151,13 @@ class DiscogsSearch(DiscogsConnector):
         self._rateLimit()
         trackinfo = []
         discogs_tracks = version.tracklist
+        exclude = ("Video", "video", "DVD")
 
         for track in discogs_tracks:
             if track.data['type_'] == 'heading':
                 logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
-            if track.position.lower() == 'video':
+            if track.position.startswith(exclude) or track.position.endswith(exclude):
                 logger.debug('ignoring video track: {}'.format(getattr(track, 'title')))
                 continue
             if track.duration == None or str(track.duration) == '':
