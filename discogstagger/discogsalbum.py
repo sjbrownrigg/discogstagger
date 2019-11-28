@@ -290,7 +290,7 @@ class DiscogsAlbum(object):
     def map(self):
         """ map the retrieved information to the tagger specific objects """
 
-        album = Album(self.release.id, self.release.title, self.album_artists(self.release.artists))
+        album = Album(self.release.id, self.release.title.strip(), self.album_artists(self.release.artists))
 
         album.sort_artist = self.sort_artist(self.release.artists)
         album.url = self.url
@@ -570,7 +570,7 @@ class DiscogsAlbum(object):
             if (t.title and not t.position and not t.duration) or \
             (hasattr(t, 'type_') and t.type_ == 'heading') or \
             ('type_' in t.data and t.data['type_'] == 'heading'):
-                discsubtitle.append(t.title)
+                discsubtitle.append(t.title.strip())
                 continue
 
             running_num = running_num + 1
@@ -582,14 +582,14 @@ class DiscogsAlbum(object):
                 artists = album.artists
                 sort_artist = album.sort_artist
 
-            track = Track(i + 1, t.title, artists)
+            track = Track(i + 1, t.title.strip(), artists)
 
             subtracks = []
             if 'sub_tracks' in t.data:
                 for subtrack in t.data['sub_tracks']:
                     if subtrack['type_'] == 'track':
                         subtracks.append(subtrack['position'] + '. ' + subtrack['title'])
-                setattr(track, 'title', t.title + ' (' + '; '.join(subtracks) + (')'))
+                setattr(track, 'title', t.title.strip() + ' (' + '; '.join(subtracks) + (')'))
 
             track.position = i
 
