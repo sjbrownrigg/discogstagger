@@ -512,6 +512,7 @@ class DiscogsAlbum(object):
             NUMBERING_SCHEMES = (
                 "^CD(?P<discnumber>\d+)-(?P<tracknumber>\d+)$", # CD01-12
                 "^(?P<discnumber>\d+)-(?P<tracknumber>\d+)$",   # 1-02
+                "^(?P<discnumber>CD)-(?P<tracknumber>\d+)$", # CD-12
                 "^(?P<discnumber>USB-Stick)-(?P<tracknumber>\d+)$",   # USB-Stick-1-12
                 # "^(?P<discnumber>\d+).(?P<tracknumber>\d+)$",   # 1.05 (this is not multi-disc but multi-tracks for one track)....
             )
@@ -539,8 +540,10 @@ class DiscogsAlbum(object):
             if "descriptions" in format:
                 for description in format["descriptions"]:
                     if description == "Compilation":
+                        logger.debug('Is a compilation')
                         return True
 
+        logger.debug('Not a compilation')
         return False
 
     def discs_and_tracks(self, album):
@@ -549,7 +552,7 @@ class DiscogsAlbum(object):
         disc_list = []
         track_list = []
         discsubtitle = []
-        discnumber = 1
+        disccount= 1
         disc = Disc(1)
         running_num = 0
 
@@ -594,20 +597,20 @@ class DiscogsAlbum(object):
 
             pos = self.disc_and_track_no(t.position)
 
-
             # box sets can have a mixture of CDs and other media, e.g. USB-Stick
             # with, or without numbering.  Where numerical disc number follows the
             # disc number, but we may have to add ourselves.  Store the media type
             # so that we can use that later.
             try:
                 # track.discnumber = int(pos["discnumber"])
-                if re.match('^\d+$', pos["discnumber"]):
+                if re.match('^\d+$', str(pos["discnumber"])):
                     track.discnumber = int(pos["discnumber"])
                 elif disc.mediatype != pos["discnumber"]:
-                    track.discnumber = discnumber + 1
+                    # if this is the first thing encountered don't increase disc count
+                    track.discnumber = disccount if len(disc_list) == 0 else disccount + 1
                     track.mediatype = pos["discnumber"]
                 else:
-                    track.discnumber = discnumber
+                    track.discnumber = disccount
                     track.mediatype = disc.mediatype
             except ValueError as ve:
                 msg = "cannot convert {0} to a valid track-/discnumber".format(t.position)
@@ -618,7 +621,7 @@ class DiscogsAlbum(object):
                 disc_list.append(disc)
                 disc = Disc(track.discnumber)
                 running_num = 1
-                discnumber += 1
+                disccount += 1
                 if track.mediatype is not None:
                     disc.mediatype = track.mediatype
 
@@ -631,6 +634,7 @@ class DiscogsAlbum(object):
                 track.discsubtitle = discsubtitle[-1]
 
             track.sort_artist = sort_artist
+
             disc.tracks.append(track)
             if disc.discnumber == len(discsubtitle):
                 disc.discsubtitle = discsubtitle[-1]
