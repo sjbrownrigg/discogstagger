@@ -848,9 +848,9 @@ class DiscogsSearch(DiscogsConnector):
 
         results = self.discogs_client.search(s['artistRelease'], type=type)
 
-        print(len(results))
-        print(dir(results))
-        print(results[0].id)
+        # print(len(results))
+        # print(dir(results))
+        # print(results[0].id)
 
         for idx, result in enumerate(results):
             if len(candidates) > 0: # stop if we have already found some candidates
@@ -861,11 +861,11 @@ class DiscogsSearch(DiscogsConnector):
 
             master = self.get_master_release(result)
 
-            print(dir(master))
+            # print(dir(master))
 
             if hasattr(master, 'versions'):
-                print(vars(master))
-                print(len(master.versions))
+                # print(vars(master))
+                # print(len(master.versions))
                 self._siftReleases(master.versions)
             else:
                 if self._compareRelease(master) is not False:
