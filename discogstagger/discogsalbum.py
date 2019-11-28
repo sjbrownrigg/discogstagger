@@ -726,8 +726,8 @@ class DiscogsSearch(DiscogsConnector):
             if metadata.disc is not None and int(metadata.disc) > 1:
                 searchParams['disc'] = metadata.disc
             elif metadata.disc is None and len(set(subdirectories)) > 1:
-                trackdisc = re.search(r'^(?i)(cd|disc)([0-9]{1,2})', subdirectories[i])
-                searchParams['disc'] = int(trackdisc[2])
+                trackdisc = re.search(r'^(?i)(cd|disc)\s?(?P<discnumber>[0-9]{1,2})', subdirectories[i])
+                searchParams['disc'] = int(trackdisc.group("discnumber"))
             # print(searchParams)
             if 'disc' in searchParams.keys() and searchParams['disc'] != discnumber:
                 trackcount = 1
