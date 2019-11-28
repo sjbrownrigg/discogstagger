@@ -686,7 +686,7 @@ class TaggerUtils(object):
                 self.album.disc(dn).track(tn).length_ex = length_ex_str[:-2]
 
     def _directory_has_audio_files(self, dir):
-        codecs = ['.flac', '.ogg', '.mp3']
+        codecs = ('.flac', '.ogg', '.mp3')
         files = next(os.walk(dir))[2]
         found = 0
         for f in files:
@@ -695,10 +695,28 @@ class TaggerUtils(object):
         return False if found == 0 else True
 
     def _directory_prune_unwanted(self, dir_list):
-        # Remove directories without audio files / in ignore list
+        """ Remove directories without audio files / in ignore list
+        """
         extf = (self.cue_done_dir)
         dir_list[:] = [d for d in dir_list if d not in extf]
         # return dir_list
+
+    def _audio_files_in_subdirs(self, dir_list):
+        """ Are files in subdirectories rather than root dirs?
+        """
+        codecs = ('.flac', '.ogg', '.mp3')
+        sourcedir = self.album.sourcedir
+        for x in dir_list:
+            print(x)
+            print(os.path.join(sourcedir, x))
+            if x.endswith(codecs):
+                print('audio file')
+                return False
+            elif os.path.isdir(os.path.join(sourcedir, x)) and \
+            self._directory_has_audio_files(os.path.join(sourcedir, x)):
+                print('Directory and has audio files')
+                return True
+        return False
 
     def _get_target_list(self):
         """
@@ -719,11 +737,12 @@ class TaggerUtils(object):
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
             self._directory_prune_unwanted(dir_list)
-
+            print('self._audio_files_in_subdirs(dir_list)')
+            print(self._audio_files_in_subdirs(dir_list))
             filetype = ""
             self.album.copy_files = []
 
-            if self.album.has_multi_disc:
+            if self.album.has_multi_disc or self._audio_files_in_subdirs(dir_list) is True:
                 logger.debug("is multi disc album, looping discs")
 
                 logger.debug("dir_list: %s" % dir_list)
@@ -772,7 +791,7 @@ class TaggerUtils(object):
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
 
-                # pp.pprint(target_list)
+                pp.pprint(target_list)
 
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)
