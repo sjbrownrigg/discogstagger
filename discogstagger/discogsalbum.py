@@ -540,10 +540,8 @@ class DiscogsAlbum(object):
             if "descriptions" in format:
                 for description in format["descriptions"]:
                     if description == "Compilation":
-                        logger.debug('Is a compilation')
                         return True
 
-        logger.debug('Not a compilation')
         return False
 
     def discs_and_tracks(self, album):
