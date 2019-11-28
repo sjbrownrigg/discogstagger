@@ -823,7 +823,7 @@ class DiscogsSearch(DiscogsConnector):
         ''' Remove stopwords and other problem words from search strings
         '''
         stop_words = ['lp', 'ep', 'bonus', 'tracks', 'cd', 'cdm', 'cds', 'none',
-        'vs.', 'vs', 'inch', 'various', 'artists', 'boxset', 'limited']
+        'vs.', 'vs', 'inch', 'various', 'artists', 'boxset', 'limited', 'the']
         string = re.sub('[\,\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()|:;]', '', string)
         string = re.sub('(?i)CD\d*', '', string)
