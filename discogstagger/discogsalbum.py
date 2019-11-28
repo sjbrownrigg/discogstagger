@@ -939,7 +939,7 @@ class DiscogsSearch(DiscogsConnector):
             strategies until we have some matching candidates.
         """
         if types is None:
-            types = ['master', 'all', 'artist', 'title']
+            types = ['all', 'master', 'artist', 'title']
         if len(types) > 0:
             type = types.pop(0)
             count = count + 1
