@@ -1153,7 +1153,7 @@ class DiscogsSearch(DiscogsConnector):
         exclude = ("Video", "video", "DVD")
 
         for track in discogs_tracks:
-            if track.data['type_'] == 'heading':
+            if track.data['type_'] in ('heading'):
                 logger.debug('ignoring non-track info: {}'.format(getattr(track, 'title')))
                 continue
             if track.position.startswith(exclude) or track.position.endswith(exclude):
@@ -1162,7 +1162,6 @@ class DiscogsSearch(DiscogsConnector):
             if track.duration == None or str(track.duration) == '':
                 logger.debug('ignoring tracks without duration: {}'.format(getattr(track, 'title')))
                 continue
-            logger.debug('Discogs track position: {}'.format(track.position))
             discogs_info = {}
             for key in ['position', 'duration', 'title']:
                 discogs_info[key] = getattr(track, key)
