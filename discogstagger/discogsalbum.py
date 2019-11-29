@@ -719,6 +719,7 @@ class DiscogsSearch(DiscogsConnector):
                 searchParams['artists'].append(a)
             searchParams['albumartist'] = ', '.join(set(metadata.albumartist))
             searchParams['album'] = metadata.album
+            searchParams['album'] = re.sub('\[.*?\]', '', searchParams['album'])
             searchParams['year'] = metadata.year
             searchParams['date'] = metadata.date
             # print(file)
@@ -892,7 +893,7 @@ class DiscogsSearch(DiscogsConnector):
             if releases is None:
                 continue
 
-            for i, release in iteritems(releases):
+            for i, release in enumerate(releases):
                 if len(candidates) > 0 or i > 25: # give up after 25 iterations
                     return
                 self._rateLimit()
@@ -913,7 +914,7 @@ class DiscogsSearch(DiscogsConnector):
         logger.info('Searching by title: {}'.format(release))
 
         results = self.discogs_client.search(release, type='release')
-        for i, result in iteritems(results):
+        for i, result in enumerate(results):
             if len(candidates) == 0 or i > 25: # give up after 25 iterations
                 master = self.get_master_release(result)
                 if hasattr(master, 'versions'):
