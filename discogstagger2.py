@@ -82,10 +82,10 @@ def getSourceDirs():
     elif options.searchDiscogs:
         logger.debug("looking for audio files")
         source_dirs = file_utils.get_audio_dirs(options.sourcedir)
-        pp.pprint(source_dirs)
     else:
         logger.debug("using sourcedir: %s" % options.sourcedir)
         source_dirs = [options.sourcedir]
+    logger.info('Found {} audio source directories to process'.format(len(source_dirs)))
     return source_dirs
 
 
@@ -100,8 +100,6 @@ def processSourceDirs(source_dirs, tagger_config):
     discs_with_errors = []
 
     converted_discs = 0
-
-    pp.pprint(source_dirs)
 
     for source_dir in source_dirs:
         releaseid = None
@@ -141,7 +139,7 @@ def processSourceDirs(source_dirs, tagger_config):
             # if not releaseid:
             #     p.error("Please specify the discogs.com releaseid ('-r')")
 
-            print('Found release ID: {} for source dir: {}'.format(releaseid, source_dir))
+            logger.info('Found release ID: {} for source dir: {}'.format(releaseid, source_dir))
 
             # read destination directory
             # !TODO if both are the same, we are not copying anything,
@@ -153,7 +151,6 @@ def processSourceDirs(source_dirs, tagger_config):
                 logger.debug('destdir set to {}'.format(options.destdir))
 
             logger.info('Using destination directory: {}'.format(destdir))
-
             logger.debug("starting tagging...")
 
 
@@ -205,7 +202,7 @@ def processSourceDirs(source_dirs, tagger_config):
             # Do replaygain analysis before copying other files, the directory
             #  contents are cleaner, less prone to mistakes
             if options.replaygain:
-                logger.debug("Add ReplayGain tags (if necessary)")
+                logger.debug("Add ReplayGain tags (if requested)")
                 fileHandler.add_replay_gain_tags()
 
             logger.debug("Copy other interesting files (on request)")
@@ -290,7 +287,7 @@ class MyHandler(FileSystemEventHandler):
 
 if __name__ == "__main__":
     if options.watch == True:
-        print('Daemon mode')
+        logger.info('Daemon mode')
         event_handler = MyHandler()
         observer = Observer()
         observer.schedule(event_handler, path=options.sourcedir, recursive=False)

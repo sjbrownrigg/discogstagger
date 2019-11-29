@@ -451,7 +451,6 @@ class FileHandler(object):
                 options = lg_options[match] if match in lg_options.keys() else ''
                 cmd = 'loudgain {} {}'.format( \
                     options, self._escape_string(pattern))
-                print(cmd)
                 return_code = os.system(cmd)
             else:
                 return_code = -1
@@ -522,8 +521,6 @@ class TaggerUtils(object):
             raise RuntimeException('Cannot tag, no album given')
 
         self.map_format_description()
-        # self.format_mapping = None
-        pp.pprint(self.format_mapping)
 
         self.album.sourcedir = sourcedir
         # the album is stored in a directory beneath the destination directory
@@ -710,14 +707,10 @@ class TaggerUtils(object):
         codecs = ('.flac', '.ogg', '.mp3')
         sourcedir = self.album.sourcedir
         for x in dir_list:
-            print(x)
-            print(os.path.join(sourcedir, x))
             if x.endswith(codecs):
-                print('audio file')
                 return False
             elif os.path.isdir(os.path.join(sourcedir, x)) and \
             self._directory_has_audio_files(os.path.join(sourcedir, x)):
-                print('Directory and has audio files')
                 return True
         return False
 
@@ -740,8 +733,6 @@ class TaggerUtils(object):
             dir_list = os.listdir(sourcedir)
             dir_list.sort()
             self._directory_prune_unwanted(dir_list)
-            print('self._audio_files_in_subdirs(dir_list)')
-            print(self._audio_files_in_subdirs(dir_list))
             filetype = ""
             self.album.copy_files = []
 
@@ -793,8 +784,6 @@ class TaggerUtils(object):
 
                 target_list = [os.path.join(disc_source_dir, x) for x in disc_list
                                  if x.lower().endswith(TaggerUtils.FILE_TYPE)]
-
-                pp.pprint(target_list)
 
                 if not len(target_list) == len(disc.tracks):
                     logger.debug("target_list: %s" % target_list)

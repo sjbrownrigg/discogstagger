@@ -122,16 +122,7 @@ class StringFormatting(object):
         """
         output = ''
 
-        print('parseString, input: {}'.format(string))
-
-        # TODO: substitutions will happen later on when script embedded
-        # subs = set(re.findall(r'(%.*?%)', string))
-        #
-        # for sub in subs:
-        #     if sub in data:
-        #         string = re.sub(sub, data[sub], string)
-        #     else:
-        #         string = re.sub(sub, '', string)
+        # print('parseString, input: {}'.format(string))
 
         command = ''
         """hierarchy used to track & collect nested functions
@@ -158,7 +149,7 @@ class StringFormatting(object):
                 output += c
             lastchar = c
 
-        print('parseString, output: {}'.format(output))
+        # print('parseString, output: {}'.format(output))
 
         return output
 

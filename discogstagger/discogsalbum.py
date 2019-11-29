@@ -593,13 +593,6 @@ class DiscogsAlbum(object):
                         comments.append(comment)
                 setattr(track, 'notes', '\r\n'.join(comments))
 
-
-
-
-
-
-
-
             track.position = i
 
             pos = self.disc_and_track_no(t.position)
@@ -761,7 +754,6 @@ class DiscogsSearch(DiscogsConnector):
             logger.warning('No metadata available in the audio files')
             self.metadataFromFileNaming(source_dir, files)
             return None
-        print(searchParams)
 
     def metadataFromFileNaming(self, source_dir, files):
         """ Fall back method to retrieve release information from directories
@@ -808,7 +800,6 @@ class DiscogsSearch(DiscogsConnector):
         searchParams['artists'] = list(dict.fromkeys(searchParams['artists']))
         if searchParams['artist'] == '':
             searchParams['artist'] = ' '.join(searchParams['artists'])
-        print(searchParams)
 
     def u2s(self, string):
         return re.sub(r'[_]',' ' , string)
@@ -832,10 +823,8 @@ class DiscogsSearch(DiscogsConnector):
         'vs.', 'vs', 'inch', 'various', 'artists', 'boxset', 'limited', 'edition', 'the']
         string = re.sub('[\,\"\-\_\\\\]', ' ', string)
         string = re.sub('[\[\]()|:;]', '', string)
-        # string = re.sub('(?i)CD\d*', '', string)
         string = re.sub('\s\d{1}\s', ' ', string)
         tokens = list(dict.fromkeys(string.split(' ')))
-        print(tokens)
         return ' '.join([w for w in tokens if not w.lower() in stop_words])
 
     def get_master_release(self, release):
@@ -866,12 +855,7 @@ class DiscogsSearch(DiscogsConnector):
                 continue
 
             master = self.get_master_release(result)
-
-            # print(dir(master))
-
             if hasattr(master, 'versions'):
-                # print(vars(master))
-                # print(len(master.versions))
                 self._siftReleases(master.versions)
             else:
                 if self._compareRelease(master) is not False:
@@ -908,11 +892,8 @@ class DiscogsSearch(DiscogsConnector):
             if releases is None:
                 continue
 
-            iter = 0
-            for release in releases:
-                # give up after given number of attempts (25).
-                iter = iter + 1
-                if len(candidates) > 0 or iter > 25:
+            for i, release in iteritems(releases):
+                if len(candidates) > 0 or i > 25: # give up after 25 iterations
                     return
                 self._rateLimit()
                 r = release.title.lower()
@@ -932,8 +913,8 @@ class DiscogsSearch(DiscogsConnector):
         logger.info('Searching by title: {}'.format(release))
 
         results = self.discogs_client.search(release, type='release')
-        for result in results:
-            if len(candidates) == 0:
+        for i, result in iteritems(results):
+            if len(candidates) == 0 or i > 25: # give up after 25 iterations
                 master = self.get_master_release(result)
                 if hasattr(master, 'versions'):
                     self._siftReleases(master.versions)
@@ -970,7 +951,6 @@ class DiscogsSearch(DiscogsConnector):
     def search_strings(self):
         """ Compile the search strings to be used from searchParams
         """
-        print("Enhance search strings")
         searchParams = self.search_params
         searchParams['search'] = {}
         s = searchParams['search']
@@ -992,10 +972,6 @@ class DiscogsSearch(DiscogsConnector):
             s['artistRelease'] = self.normalize(' '.join((s['title'], s['release'])))
         else:
             s['artistRelease'] = self.normalize(' '.join((s['artist'], s['release'])))
-
-        print(s)
-        print(self.search_params)
-
 
     def search_discogs(self):
         """ Take the search parameters and look for a release, the searching &
