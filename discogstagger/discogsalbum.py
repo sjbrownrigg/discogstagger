@@ -583,12 +583,22 @@ class DiscogsAlbum(object):
 
             track = Track(i + 1, t.title.strip(), artists)
 
-            subtracks = []
             if 'sub_tracks' in t.data:
+                comments = []
                 for subtrack in t.data['sub_tracks']:
                     if subtrack['type_'] == 'track':
-                        subtracks.append(subtrack['position'] + '. ' + subtrack['title'])
-                setattr(track, 'title', t.title.strip() + ' (' + '; '.join(subtracks) + (')'))
+                        comment = subtrack['position'].strip() + '. ' + subtrack['title'].strip()
+                        if 'duration' in subtrack and subtrack['duration'] != '':
+                            comment += ' (' + subtrack['duration'].strip() + ')'
+                        comments.append(comment)
+                setattr(track, 'notes', '\r\n'.join(comments))
+
+
+
+
+
+
+
 
             track.position = i
 

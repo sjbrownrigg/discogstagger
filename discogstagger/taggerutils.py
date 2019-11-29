@@ -128,12 +128,15 @@ class TagHandler(object):
         metadata.disctitle = track.discsubtitle
         metadata.disc = track.discnumber
         metadata.disctotal = len(self.album.discs)
+        metadata.media = self.album.media
 
         if self.album.is_compilation:
             metadata.comp = True
 
-        metadata.comments = self.album.notes
-        metadata.media = self.album.media
+        if track.notes:
+            metadata.comments = '\r\n'.join((track.notes, self.album.notes))
+        else:
+            metadata.comments = self.album.notes
 
         tags = self.config.get_configured_tags
         logger.debug("tags: %s" % tags)
