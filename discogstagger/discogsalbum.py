@@ -574,7 +574,6 @@ class DiscogsAlbum(object):
                 continue
 
             running_num = running_num + 1
-
             if t.artists:
                 artists = self.artists(t.artists)
                 sort_artist = self.sort_artist(t.artists)
@@ -594,7 +593,6 @@ class DiscogsAlbum(object):
             track.position = i
 
             pos = self.disc_and_track_no(t.position)
-
             # box sets can have a mixture of CDs and other media, e.g. USB-Stick
             # with, or without numbering.  Where numerical disc number follows the
             # disc number, but we may have to add ourselves.  Store the media type
@@ -622,7 +620,6 @@ class DiscogsAlbum(object):
                 disccount += 1
                 if track.mediatype is not None:
                     disc.mediatype = track.mediatype
-
             # Store the actual track number. Used for non-standard numbering
             track.real_tracknumber = pos["tracknumber"] if pos["tracknumber"] != '' else str(running_num)
             # Tracknumber is a running number
@@ -630,13 +627,12 @@ class DiscogsAlbum(object):
 
             if len(discsubtitle) > 0:
                 track.discsubtitle = discsubtitle[-1]
+                # if disc.discnumber == len(discsubtitle):
+                disc.discsubtitle = discsubtitle[-1]
+                logger.debug("discsubtitle: {0}".format(disc.discsubtitle))
 
             track.sort_artist = sort_artist
-
             disc.tracks.append(track)
-            if disc.discnumber == len(discsubtitle):
-                disc.discsubtitle = discsubtitle[-1]
-            logger.debug("discsubtitle: {0}".format(disc.discsubtitle))
         disc_list.append(disc)
         return disc_list
 
