@@ -751,9 +751,13 @@ class DiscogsSearch(DiscogsConnector):
             searchParams['tracks'].append(trackInfo)
         searchParams['artists'] = list(dict.fromkeys(searchParams['artists']))
         searchParams['artist'] = ', '.join(searchParams['artists'])
-        if len(searchParams['artists']) == 0 and searchParams['albumartist'] == '' and searchParams['album'] is None:
+
+        if len(searchParams['artists']) == 0 \
+        and ('albumartist' not in searchParams or searchParams['albumartist'] == '') \
+        and ('album' not in searchParams or searchParams['album'] == ''):
             logger.warning('No metadata available in the audio files')
             self.metadataFromFileNaming(source_dir, files)
+            searchParams = None
             return None
 
     def metadataFromFileNaming(self, source_dir, files):
@@ -801,6 +805,7 @@ class DiscogsSearch(DiscogsConnector):
         searchParams['artists'] = list(dict.fromkeys(searchParams['artists']))
         if searchParams['artist'] == '':
             searchParams['artist'] = ' '.join(searchParams['artists'])
+            searchParams['albumartist'] = searchParams['artists'][0]
 
     def u2s(self, string):
         return re.sub(r'[_]',' ' , string)
@@ -927,7 +932,8 @@ class DiscogsSearch(DiscogsConnector):
             strategies until we have some matching candidates.
         """
         if types is None:
-            types = ['all', 'master', 'artist', 'title']
+            # types = ['all', 'master', 'artist', 'title']
+            types = ['all', 'master']
         if len(types) > 0:
             type = types.pop(0)
             count = count + 1
@@ -980,7 +986,9 @@ class DiscogsSearch(DiscogsConnector):
         """
         self._rateLimit()
         logger.info('Searching discogs...')
+
         searchParams = self.search_params
+
         self.candidates = {}
         candidates = self.candidates
 
