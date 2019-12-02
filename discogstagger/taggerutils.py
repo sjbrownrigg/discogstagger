@@ -864,6 +864,7 @@ class TaggerUtils(object):
 
         a = str(filename)
         a = re.sub(r'\.$', '', a) # windows doesn't like folders ending with '.'
+        a = re.sub(r'\$', 'S', a) # Replace $ with S
 
         for k, v in self.char_exceptions.items():
             a = a.replace(k, v)
@@ -871,7 +872,7 @@ class TaggerUtils(object):
         if self.normalize == True:
             a = normalize("NFKD", a)
 
-        cf = re.compile(r"[^-\w.,()\[\]\s#@&']")
+        cf = re.compile(r"[^-\w.,()\[\]\s#@&!']") # allowed characters
         cf = cf.sub("", str(a))
 
 
