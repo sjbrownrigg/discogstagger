@@ -255,7 +255,7 @@ class LocalDiscogsConnector(object):
         """ This is an exact copy of a method in _common_test, please refactor
         """
         if isinstance(input, dict):
-            return {self.convert(key): self.convert(value) for key, value in input.iteritems()}
+            return {self.convert(key): self.convert(value) for key, value in input.items()}
         elif isinstance(input, list):
             return [self.convert(element) for element in input]
         # elif isinstance(input, unicode):
