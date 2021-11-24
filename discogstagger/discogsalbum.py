@@ -1,8 +1,7 @@
 import logging
 import re
 import os
-import urllib
-import urllib.request
+from urllib.request import urlopen, Request
 import string
 
 import pprint
@@ -179,7 +178,12 @@ class DiscogsConnector(object):
         # rl.lastcall = time.time()
 
         try:
-            urllib.request.urlretrieve(image_url,  image_dir)
+            req = Request(image_url, headers={'User-Agent': self.user_agent})
+            response = urlopen(req)
+            image = response.read()
+
+            with open(image_dir, "wb") as file:
+                file.write(image)
             # urllib.urlretrieve(image_url,  image_dir)
 
             # self.rate_limit_pool[rate_limit_type] = rl
