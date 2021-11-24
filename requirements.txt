@@ -7,3 +7,4 @@ coverage>=3.6
 invoke==0.7.0
 rauth>=0.6.2
 watchdog
+chardet
